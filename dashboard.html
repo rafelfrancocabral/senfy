@@ -6,65 +6,71 @@
   <title>Dashboard — Senfy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar" id="sidebar" aria-label="Menu principal">
-      <div class="sidebar-brand">
+    <header class="dash-header">
+      <div class="dash-header-top">
         <a class="brand" href="index.html" aria-label="Senfy início">
           <img src="assets/logo.png" alt="" class="brand-logo" onerror="this.style.display='none'">
           <span class="brand-mark">S</span>
           <span>Senfy</span>
         </a>
-      </div>
-      <nav class="sidebar-nav" aria-label="Seções do dashboard">
-        <button class="nav-item active" type="button" data-target="visao-geral">Visão Geral</button>
-        <button class="nav-item" type="button" data-target="clientes">Clientes</button>
-        <button class="nav-item" type="button" data-target="regras">Regras</button>
-        <button class="nav-item" type="button" data-target="premios">Prêmios</button>
-        <button class="nav-item" type="button" data-target="acao">Ação</button>
-      </nav>
-      <div class="sidebar-footer">
-        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;">
-          <span class="avatar" aria-hidden="true">RC</span>
-          <div>
-            <div style="color:var(--text);font-weight:600;font-size:0.92rem;">Minha Loja</div>
-            <div class="small">Plano MVP</div>
-          </div>
+        <div class="dash-header-actions">
+          <a href="index.html" class="btn btn-ghost btn-small">Site</a>
+          <a href="login.html" class="btn btn-secondary btn-small">Sair</a>
+          <button class="btn btn-secondary btn-small menu-btn-mobile" id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false">Menu</button>
         </div>
-        <a href="login.html" class="btn btn-secondary btn-small btn-block">Sair</a>
       </div>
-    </aside>
-
-    <div class="app-main">
-      <header class="topbar">
-        <div class="topbar-row">
-          <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;">
-            <button class="btn btn-secondary btn-small menu-btn-mobile" id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false">Menu</button>
-            <div class="topbar-title">
-              <h1 id="page-title" style="font-size:1.25rem;margin:0;">Visão Geral</h1>
-              <p id="page-subtitle">Acompanhe vendas e a performance de resgates</p>
+      <aside class="sidebar" id="sidebar" aria-label="Menu principal">
+        <nav class="sidebar-nav" aria-label="Seções do dashboard">
+          <button class="nav-item active" type="button" data-target="visao-geral">Visão Geral</button>
+          <button class="nav-item" type="button" data-target="clientes">Clientes</button>
+          <button class="nav-item" type="button" data-target="regras">Regras</button>
+          <button class="nav-item" type="button" data-target="premios">Prêmios</button>
+          <button class="nav-item" type="button" data-target="acao">Ação</button>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <span class="avatar" aria-hidden="true">RC</span>
+            <div>
+              <div class="sidebar-user-name">Minha Loja</div>
+              <div class="small muted">Plano MVP</div>
             </div>
           </div>
-          <div class="topbar-actions">
-            <a href="index.html" class="btn btn-ghost btn-small">Site</a>
-            <span class="avatar" aria-label="Usuário">RC</span>
+        </div>
+      </aside>
+    </header>
+
+    <div class="app-main">
+      <div class="topbar">
+        <div class="topbar-row">
+          <div class="topbar-title">
+            <p class="topbar-kicker">Painel</p>
+            <h1 id="page-title" style="margin:0;">Visão Geral</h1>
+            <p id="page-subtitle">Acompanhe vendas e a performance de resgates</p>
           </div>
         </div>
-        <div class="period-tabs" role="tablist" aria-label="Período">
-          <button class="period-tab active" type="button" role="tab" aria-selected="true" data-period="hoje">Hoje</button>
-          <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="7d">7 dias</button>
-          <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="15d">15 dias</button>
-          <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="30d">30 dias</button>
-          <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="90d">90 dias</button>
-          <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="365d">365 dias</button>
-        </div>
-      </header>
+      </div>
 
       <main class="content">
         <section id="visao-geral" class="section-panel active" aria-labelledby="page-title">
+          <div class="overview-toolbar">
+            <div>
+              <h2 style="margin:0;font-size:1rem;">Período</h2>
+              <p class="muted small" style="margin:0;">Selecione o intervalo para atualizar os indicadores</p>
+            </div>
+            <div class="period-tabs" role="tablist" aria-label="Período">
+              <button class="period-tab active" type="button" role="tab" aria-selected="true" data-period="hoje">Hoje</button>
+              <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="7d">7 dias</button>
+              <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="15d">15 dias</button>
+              <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="30d">30 dias</button>
+              <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="90d">90 dias</button>
+              <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="365d">365 dias</button>
+            </div>
+          </div>
           <div class="stats-grid two">
             <article class="stat-card">
               <p class="stat-label">Total em vendas</p>
