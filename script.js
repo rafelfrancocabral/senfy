@@ -112,6 +112,114 @@
 
   const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 
+  // Visão geral: métricas e gráfico por período
+  const periodLabels = {
+    hoje: 'Hoje',
+    '7d': '7 dias',
+    '15d': '15 dias',
+    '30d': '30 dias',
+    '90d': '90 dias',
+    '365d': '365 dias'
+  };
+
+  const overviewByPeriod = {
+    hoje: {
+      salesTotal: 1280,
+      salesCount: 14,
+      redemptions: [
+        { name: 'Desconto R$ 20,00', redemptions: 2 },
+        { name: 'Brinde especial', redemptions: 1 },
+        { name: 'Frete grátis (serviço)', redemptions: 1 },
+        { name: 'Café cortesia', redemptions: 3 },
+        { name: 'Voucher R$ 50,00', redemptions: 0 }
+      ]
+    },
+    '7d': {
+      salesTotal: 8640,
+      salesCount: 96,
+      redemptions: [
+        { name: 'Desconto R$ 20,00', redemptions: 8 },
+        { name: 'Brinde especial', redemptions: 4 },
+        { name: 'Frete grátis (serviço)', redemptions: 3 },
+        { name: 'Café cortesia', redemptions: 9 },
+        { name: 'Voucher R$ 50,00', redemptions: 2 }
+      ]
+    },
+    '15d': {
+      salesTotal: 17290,
+      salesCount: 188,
+      redemptions: [
+        { name: 'Desconto R$ 20,00', redemptions: 14 },
+        { name: 'Brinde especial', redemptions: 7 },
+        { name: 'Frete grátis (serviço)', redemptions: 5 },
+        { name: 'Café cortesia', redemptions: 12 },
+        { name: 'Voucher R$ 50,00', redemptions: 3 }
+      ]
+    },
+    '30d': {
+      salesTotal: 35480,
+      salesCount: 392,
+      redemptions: [
+        { name: 'Desconto R$ 20,00', redemptions: 24 },
+        { name: 'Brinde especial', redemptions: 15 },
+        { name: 'Frete grátis (serviço)', redemptions: 9 },
+        { name: 'Café cortesia', redemptions: 18 },
+        { name: 'Voucher R$ 50,00', redemptions: 6 }
+      ]
+    },
+    '90d': {
+      salesTotal: 102340,
+      salesCount: 1128,
+      redemptions: [
+        { name: 'Desconto R$ 20,00', redemptions: 61 },
+        { name: 'Brinde especial', redemptions: 38 },
+        { name: 'Frete grátis (serviço)', redemptions: 22 },
+        { name: 'Café cortesia', redemptions: 47 },
+        { name: 'Voucher R$ 50,00', redemptions: 19 }
+      ]
+    },
+    '365d': {
+      salesTotal: 486920,
+      salesCount: 5340,
+      redemptions: [
+        { name: 'Desconto R$ 20,00', redemptions: 214 },
+        { name: 'Brinde especial', redemptions: 132 },
+        { name: 'Frete grátis (serviço)', redemptions: 88 },
+        { name: 'Café cortesia', redemptions: 175 },
+        { name: 'Voucher R$ 50,00', redemptions: 64 }
+      ]
+    }
+  };
+
+  const chartEl = document.getElementById('redemptions-chart');
+  const salesTotalEl = document.getElementById('stat-sales-total');
+  const salesCountEl = document.getElementById('stat-sales-count');
+  const salesTotalNoteEl = document.getElementById('stat-sales-total-note');
+  const salesCountNoteEl = document.getElementById('stat-sales-count-note');
+
+  const renderOverview = (period) => {
+    const data = overviewByPeriod[period] || overviewByPeriod['30d'];
+    const label = periodLabels[period] || period;
+
+    if (salesTotalEl) salesTotalEl.textContent = formatCurrency(data.salesTotal);
+    if (salesCountEl) salesCountEl.textContent = Number(data.salesCount).toLocaleString('pt-BR');
+    if (salesTotalNoteEl) salesTotalNoteEl.textContent = `Acumulado no período selecionado (${label})`;
+    if (salesCountNoteEl) salesCountNoteEl.textContent = `Compras registradas no período (${label})`;
+
+    if (chartEl) {
+      const max = Math.max(1, ...data.redemptions.map((d) => d.redemptions));
+      chartEl.innerHTML = data.redemptions.map((d) => {
+        const width = Math.round((d.redemptions / max) * 100);
+        return `
+          <div class="bar-row">
+            <div class="bar-label">${d.name}</div>
+            <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:${width}%"></div></div>
+            <div class="bar-value">${d.redemptions} resgates</div>
+          </div>`;
+      }).join('');
+    }
+  };
+
   // Tabs de período (menu superior)
   const periodTabs = Array.from(document.querySelectorAll('.period-tab[data-period]'));
   if (periodTabs.length) {
@@ -122,32 +230,13 @@
           item.classList.toggle('active', active);
           item.setAttribute('aria-selected', String(active));
         });
-        // Ponto de extensão: atualizar métricas/gráficos conforme o período selecionado (tab.dataset.period)
+        renderOverview(tab.dataset.period);
       });
     });
   }
 
-  // Visão geral: gráfico de performance de resgates
-  const chartEl = document.getElementById('redemptions-chart');
-  if (chartEl) {
-    const redemptionData = [
-      { name: 'Desconto R$ 20,00', redemptions: 24 },
-      { name: 'Brinde especial', redemptions: 15 },
-      { name: 'Frete grátis (serviço)', redemptions: 9 },
-      { name: 'Café cortesia', redemptions: 18 },
-      { name: 'Voucher R$ 50,00', redemptions: 6 }
-    ];
-    const max = Math.max(1, ...redemptionData.map((d) => d.redemptions));
-    chartEl.innerHTML = redemptionData.map((d) => {
-      const width = Math.round((d.redemptions / max) * 100);
-      return `
-        <div class="bar-row">
-          <div class="bar-label">${d.name}</div>
-          <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:${width}%"></div></div>
-          <div class="bar-value">${d.redemptions} resgates</div>
-        </div>`;
-    }).join('');
-  }
+  const initialPeriod = (periodTabs.find((t) => t.classList.contains('active')) || periodTabs[0] || {}).dataset?.period || 'hoje';
+  renderOverview(initialPeriod);
 
   // Regras: CRUD
   const rulesTableBody = document.getElementById('rules-table-body');
