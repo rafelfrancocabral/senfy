@@ -40,16 +40,26 @@
 
     <div class="app-main">
       <header class="topbar">
-        <div style="display:flex;align-items:center;gap:0.75rem;">
-          <button class="btn btn-secondary btn-small menu-btn-mobile" id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false">Menu</button>
-          <div class="topbar-title">
-            <h1 id="page-title" style="font-size:1.25rem;margin:0;">Visão Geral</h1>
-            <p id="page-subtitle">Acompanhe vendas e a performance de resgates</p>
+        <div class="topbar-row">
+          <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;">
+            <button class="btn btn-secondary btn-small menu-btn-mobile" id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false">Menu</button>
+            <div class="topbar-title">
+              <h1 id="page-title" style="font-size:1.25rem;margin:0;">Visão Geral</h1>
+              <p id="page-subtitle">Acompanhe vendas e a performance de resgates</p>
+            </div>
+          </div>
+          <div class="topbar-actions">
+            <a href="index.html" class="btn btn-ghost btn-small">Site</a>
+            <span class="avatar" aria-label="Usuário">RC</span>
           </div>
         </div>
-        <div class="topbar-actions">
-          <a href="index.html" class="btn btn-ghost btn-small">Site</a>
-          <span class="avatar" aria-label="Usuário">RC</span>
+        <div class="period-tabs" role="tablist" aria-label="Período">
+          <button class="period-tab active" type="button" role="tab" aria-selected="true" data-period="hoje">Hoje</button>
+          <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="7d">7 dias</button>
+          <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="15d">15 dias</button>
+          <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="30d">30 dias</button>
+          <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="90d">90 dias</button>
+          <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="365d">365 dias</button>
         </div>
       </header>
 

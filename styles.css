@@ -304,14 +304,18 @@ label { display: grid; gap: 0.35rem; font-weight: 500; color: var(--muted); font
   position: sticky;
   top: 0;
   z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  gap: 0.85rem;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border);
   background: rgba(16, 14, 12, 0.82);
   backdrop-filter: blur(10px);
+}
+.topbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 .topbar-title p { margin: 0; color: var(--muted); font-size: 0.92rem; }
 .topbar-actions { display: flex; align-items: center; gap: 0.6rem; }
@@ -322,6 +326,32 @@ label { display: grid; gap: 0.35rem; font-weight: 500; color: var(--muted); font
   font-weight: 700; font-size: 0.9rem; border: 1px solid var(--border);
 }
 .menu-btn-mobile { display: none; }
+
+.period-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.period-tab {
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #14110e;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.period-tab:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.period-tab.active {
+  color: #1a0d05;
+  background: var(--primary);
+  border-color: var(--primary);
+}
 
 .content {
   padding: 1.5rem;

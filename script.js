@@ -112,6 +112,21 @@
 
   const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 
+  // Tabs de período (menu superior)
+  const periodTabs = Array.from(document.querySelectorAll('.period-tab[data-period]'));
+  if (periodTabs.length) {
+    periodTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        periodTabs.forEach((item) => {
+          const active = item === tab;
+          item.classList.toggle('active', active);
+          item.setAttribute('aria-selected', String(active));
+        });
+        // Ponto de extensão: atualizar métricas/gráficos conforme o período selecionado (tab.dataset.period)
+      });
+    });
+  }
+
   // Visão geral: gráfico de performance de resgates
   const chartEl = document.getElementById('redemptions-chart');
   if (chartEl) {
