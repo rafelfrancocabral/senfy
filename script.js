@@ -238,7 +238,7 @@
   const initialPeriod = (periodTabs.find((t) => t.classList.contains('active')) || periodTabs[0] || {}).dataset?.period || 'hoje';
   renderOverview(initialPeriod);
 
-  // Regras: CRUD
+  // Regras: CRUD + promoção
   const rulesTableBody = document.getElementById('rules-table-body');
   const ruleForm = document.getElementById('rule-form');
   const ruleIdInput = document.getElementById('rule-id');
@@ -248,6 +248,8 @@
   const ruleFormTitle = document.getElementById('rule-form-title');
   const ruleSubmit = document.getElementById('rule-submit');
   const ruleCancel = document.getElementById('rule-cancel');
+  const promoButtons = Array.from(document.querySelectorAll('.promo-btn[data-multiplier]'));
+  const promoStatus = document.getElementById('promo-status');
 
   let rules = [
     { id: uid(), maxValue: 50, points: 2, description: 'Compras até R$ 50,00' },
@@ -258,6 +260,7 @@
     { id: uid(), maxValue: 750, points: 55, description: 'Compras até R$ 750,00' },
     { id: uid(), maxValue: 1000, points: 80, description: 'Compras até R$ 1.000,00' }
   ];
+  let promoMultiplier = 1;
 
   const resetRuleForm = () => {
     if (!ruleForm) return;
@@ -268,6 +271,15 @@
     ruleCancel.classList.add('hidden');
   };
 
+  const updatePromoStatus = () => {
+    if (!promoStatus) return;
+    if (promoMultiplier === 1) {
+      promoStatus.textContent = 'Sem promoção ativa. A pontuação está no valor base das regras.';
+    } else {
+      promoStatus.textContent = `Promoção ativa: pontuação x${String(promoMultiplier).replace('.', ',')} aplicada às regras (valor base multiplicado).`;
+    }
+  };
+
   const renderRules = () => {
     if (!rulesTableBody) return;
     const sorted = [...rules].sort((a, b) => Number(a.maxValue) - Number(b.maxValue));
@@ -275,10 +287,15 @@
       rulesTableBody.innerHTML = '<tr><td colspan="4" class="muted">Nenhuma regra cadastrada.</td></tr>';
       return;
     }
-    rulesTableBody.innerHTML = sorted.map((rule) => `
+    rulesTableBody.innerHTML = sorted.map((rule) => {
+      const effective = Math.round(Number(rule.points) * promoMultiplier);
+      const promoNote = promoMultiplier !== 1
+        ? `<div class="small muted">Base: ${rule.points} pts · Promo: x${String(promoMultiplier).replace('.', ',')}</div>`
+        : '';
+      return `
       <tr>
         <td>Até ${formatCurrency(rule.maxValue)}</td>
-        <td><strong>${rule.points}</strong> pontos</td>
+        <td><strong>${effective}</strong> pontos${promoNote}</td>
         <td>${rule.description || '-'}</td>
         <td>
           <div class="row-actions">
@@ -286,8 +303,22 @@
             <button class="btn btn-danger btn-icon" type="button" data-action="delete-rule" data-id="${rule.id}">Excluir</button>
           </div>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
   };
+
+  if (promoButtons.length) {
+    promoButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        promoMultiplier = parseFloat(btn.dataset.multiplier || '1');
+        promoButtons.forEach((item) => item.classList.toggle('active', item === btn));
+        updatePromoStatus();
+        renderRules();
+      });
+    });
+  }
+
+  updatePromoStatus();
 
   if (ruleForm && rulesTableBody) {
     renderRules();

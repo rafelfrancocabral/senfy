@@ -167,7 +167,7 @@
                   </label>
                 </div>
                 <div class="field">
-                  <label for="rule-points">Pontos concedidos
+                  <label for="rule-points">Pontos concedidos (base)
                     <input class="input" id="rule-points" name="rule-points" type="number" min="0" step="1" placeholder="Ex.: 2" required>
                   </label>
                 </div>
@@ -189,6 +189,17 @@
               <div>
                 <h2>Regras cadastradas</h2>
                 <p>Escala de pontuação por valor de compra</p>
+              </div>
+            </div>
+            <div class="promo-box" aria-label="Promoção de pontuação">
+              <div>
+                <h3 style="margin:0 0 0.2rem;font-size:1rem;">Aplicar promoção</h3>
+                <p class="muted small" id="promo-status" style="margin:0;">Multiplique a pontuação em dias de menor movimento para incentivar compras.</p>
+              </div>
+              <div class="promo-actions">
+                <button class="btn btn-secondary btn-small promo-btn active" type="button" data-multiplier="1">Sem promoção</button>
+                <button class="btn btn-secondary btn-small promo-btn" type="button" data-multiplier="1.5">Pontuação x1.5</button>
+                <button class="btn btn-secondary btn-small promo-btn" type="button" data-multiplier="2">Pontuação x2.0</button>
               </div>
             </div>
             <div class="table-wrap">
