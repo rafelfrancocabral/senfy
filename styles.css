@@ -299,7 +299,7 @@ label { display: grid; gap: 0.35rem; font-weight: 500; color: var(--muted); font
 }
 .sidebar-footer { margin-top: auto; padding: 0.5rem; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--border); }
 
-.app-main { min-width: 0; }
+.app-main { min-width: 0; width: 100%; }
 .topbar {
   position: sticky;
   top: 0;
@@ -323,7 +323,14 @@ label { display: grid; gap: 0.35rem; font-weight: 500; color: var(--muted); font
 }
 .menu-btn-mobile { display: none; }
 
-.content { padding: 1.5rem; display: grid; gap: 1.25rem; }
+.content {
+  padding: 1.5rem;
+  display: grid;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 .panel { padding: 1.25rem; box-shadow: none; }
 .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 .panel-head p { margin: 0; color: var(--muted); }
@@ -421,10 +428,18 @@ tr:last-child td { border-bottom: none; }
   }
   .sidebar.open { transform: translateX(0); }
   .menu-btn-mobile { display: inline-flex; }
-  .backdrop {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 35;
-  }
-  .backdrop.show { display: block; }
+}
+
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 35;
+}
+.backdrop.show { display: block; }
+
+@media (max-width: 900px) {
 }
 @media (max-width: 560px) {
   .stats-grid, .stats-grid.two { grid-template-columns: 1fr; }
