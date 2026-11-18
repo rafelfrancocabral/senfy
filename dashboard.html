@@ -46,7 +46,7 @@
           <button class="btn btn-secondary btn-small menu-btn-mobile" id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false">Menu</button>
           <div class="topbar-title">
             <h1 id="page-title" style="font-size:1.25rem;margin:0;">Visão Geral</h1>
-            <p id="page-subtitle">Acompanhe o desempenho do seu programa de fidelidade</p>
+            <p id="page-subtitle">Acompanhe vendas e a performance de resgates</p>
           </div>
         </div>
         <div class="topbar-actions">
@@ -57,62 +57,28 @@
 
       <main class="content">
         <section id="visao-geral" class="section-panel active" aria-labelledby="page-title">
-          <div class="stats-grid">
+          <div class="stats-grid two">
             <article class="stat-card">
-              <p class="stat-label">Clientes ativos</p>
-              <p class="stat-value">248</p>
-              <p class="stat-delta">+18 este mês</p>
+              <p class="stat-label">Total em vendas</p>
+              <p class="stat-value">R$ 48.730,00</p>
+              <p class="stat-delta">Acumulado no período selecionado</p>
             </article>
             <article class="stat-card">
-              <p class="stat-label">Pontos distribuídos</p>
-              <p class="stat-value">34.920</p>
-              <p class="stat-delta">+12% vs. mês anterior</p>
-            </article>
-            <article class="stat-card">
-              <p class="stat-label">Resgates realizados</p>
-              <p class="stat-value">63</p>
-              <p class="stat-delta">Taxa de resgate: 25%</p>
-            </article>
-            <article class="stat-card">
-              <p class="stat-label">Ticket médio (estimado)</p>
-              <p class="stat-value">R$ 86</p>
-              <p class="stat-delta">Baseado nas compras registradas</p>
+              <p class="stat-label">Total de vendas (Quantidade)</p>
+              <p class="stat-value">562</p>
+              <p class="stat-delta">Compras registradas no período</p>
             </article>
           </div>
 
-          <div class="grid-2">
-            <article class="panel">
-              <div class="panel-head">
-                <div>
-                  <h2>Atividade recente</h2>
-                  <p>Últimos registros e interações do programa</p>
-                </div>
-                <span class="badge ok">Atualizado</span>
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Performance de resgate por prêmio</h2>
+                <p>Comparativo de resgates realizados para cada prêmio cadastrado</p>
               </div>
-              <ul class="list">
-                <li><span><strong>Maria S.</strong> registrou compra de R$ 120</span><span class="badge ok">+120 pts</span></li>
-                <li><span><strong>João P.</strong> resgatou "Desconto R$ 20"</span><span class="badge">Resgate</span></li>
-                <li><span><strong>Ana L.</strong> atingiu 1.000 pontos</span><span class="badge warn">Meta</span></li>
-                <li><span><strong>Carlos M.</strong> primeira compra registrada via QR Code</span><span class="badge ok">Novo</span></li>
-              </ul>
-            </article>
-
-            <article class="panel">
-              <div class="panel-head">
-                <div>
-                  <h2>Mapa de calor (prévia)</h2>
-                  <p>Movimento por dia da semana e período</p>
-                </div>
-              </div>
-              <div class="heatmap" aria-label="Mapa de calor ilustrativo">
-                <div class="heat h1" title="Baixo"></div><div class="heat h2"></div><div class="heat h1"></div><div class="heat h3"></div><div class="heat h4"></div><div class="heat h3"></div><div class="heat h2"></div>
-                <div class="heat h1"></div><div class="heat h1"></div><div class="heat h2"></div><div class="heat h3"></div><div class="heat h4"></div><div class="heat h2"></div><div class="heat h1"></div>
-                <div class="heat h1"></div><div class="heat h2"></div><div class="heat h2"></div><div class="heat h3"></div><div class="heat h3"></div><div class="heat h2"></div><div class="heat h1"></div>
-                <div class="heat h1"></div><div class="heat h1"></div><div class="heat h2"></div><div class="heat h2"></div><div class="heat h3"></div><div class="heat h2"></div><div class="heat h1"></div>
-              </div>
-              <p class="muted small" style="margin-top:0.9rem;">Use este insight para planejar campanhas, como pontos em dobro nos dias de menor movimento.</p>
-            </article>
-          </div>
+            </div>
+            <div id="redemptions-chart" class="chart" aria-label="Gráfico de performance de resgates"></div>
+          </article>
         </section>
 
         <section id="clientes" class="section-panel" aria-label="Clientes">
@@ -120,20 +86,17 @@
             <div class="panel-head">
               <div>
                 <h2>Clientes</h2>
-                <p>Base de clientes com saldo de pontos e histórico de resgates</p>
+                <p>Lista de clientes com pontos disponíveis e número de resgates</p>
               </div>
-              <button class="btn btn-small" type="button">Novo cliente</button>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Cliente</th>
+                    <th>Nome</th>
                     <th>Telefone</th>
-                    <th>Pontos</th>
-                    <th>Resgates</th>
-                    <th>Última compra</th>
-                    <th>Status</th>
+                    <th>Total de pontos disponíveis</th>
+                    <th>Número de resgates</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -142,32 +105,36 @@
                     <td>(11) 98888-1020</td>
                     <td>1.240</td>
                     <td>3</td>
-                    <td>18/11/2026</td>
-                    <td><span class="badge ok">Ativo</span></td>
                   </tr>
                   <tr>
                     <td>João Pereira</td>
                     <td>(11) 97777-3344</td>
                     <td>860</td>
                     <td>2</td>
-                    <td>16/11/2026</td>
-                    <td><span class="badge ok">Ativo</span></td>
                   </tr>
                   <tr>
                     <td>Ana Lima</td>
                     <td>(11) 96666-7788</td>
                     <td>1.020</td>
                     <td>4</td>
-                    <td>10/11/2026</td>
-                    <td><span class="badge warn">Em risco</span></td>
                   </tr>
                   <tr>
                     <td>Carlos Mendes</td>
                     <td>(11) 95555-2211</td>
                     <td>120</td>
                     <td>0</td>
-                    <td>18/11/2026</td>
-                    <td><span class="badge ok">Novo</span></td>
+                  </tr>
+                  <tr>
+                    <td>Fernanda Costa</td>
+                    <td>(11) 94444-8899</td>
+                    <td>2.150</td>
+                    <td>5</td>
+                  </tr>
+                  <tr>
+                    <td>Ricardo Alves</td>
+                    <td>(11) 93333-4578</td>
+                    <td>540</td>
+                    <td>1</td>
                   </tr>
                 </tbody>
               </table>
@@ -176,130 +143,146 @@
         </section>
 
         <section id="regras" class="section-panel" aria-label="Regras">
-          <div class="grid-2-equal">
-            <article class="panel">
-              <div class="panel-head">
-                <div>
-                  <h2>Regras de acúmulo</h2>
-                  <p>Defina como as compras se convertem em benefícios</p>
+          <article class="form-card" id="rule-form-card">
+            <div class="panel-head">
+              <div>
+                <h2 id="rule-form-title">Cadastrar regra</h2>
+                <p>Defina a faixa de compra e os pontos concedidos (exemplo em escala até R$ 1.000,00)</p>
+              </div>
+            </div>
+            <form id="rule-form">
+              <input type="hidden" id="rule-id" value="">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="rule-max">Valor da compra (até R$)
+                    <input class="input" id="rule-max" name="rule-max" type="number" min="0" step="0.01" placeholder="Ex.: 50,00" required>
+                  </label>
+                </div>
+                <div class="field">
+                  <label for="rule-points">Pontos concedidos
+                    <input class="input" id="rule-points" name="rule-points" type="number" min="0" step="1" placeholder="Ex.: 2" required>
+                  </label>
+                </div>
+                <div class="field span-2">
+                  <label for="rule-description">Descrição da regra
+                    <input class="input" id="rule-description" name="rule-description" type="text" placeholder="Ex.: Compras até R$ 50,00">
+                  </label>
                 </div>
               </div>
-              <ul class="list">
-                <li><span><strong>Conversão padrão</strong><br><span class="muted small">R$ 1,00 = 1 ponto</span></span><span class="badge ok">Ativa</span></li>
-                <li><span><strong>Pontos em dobro</strong><br><span class="muted small">Quartas-feiras (dias de menor movimento)</span></span><span class="badge">Agendada</span></li>
-                <li><span><strong>Bônus de primeira compra</strong><br><span class="muted small">+50 pontos no primeiro registro</span></span><span class="badge ok">Ativa</span></li>
-              </ul>
-            </article>
-            <article class="panel">
-              <div class="panel-head">
-                <div>
-                  <h2>Estratégia do programa</h2>
-                  <p>Escolha o modelo principal de fidelidade</p>
-                </div>
+              <div class="form-actions">
+                <button class="btn btn-small" type="submit" id="rule-submit">Cadastrar regra</button>
+                <button class="btn btn-secondary btn-small hidden" type="button" id="rule-cancel">Cancelar edição</button>
               </div>
-              <div class="field">
-                <label for="estrategia">Modelo ativo
-                  <select id="estrategia" class="select">
-                    <option selected>Pontos</option>
-                    <option>Voucher</option>
-                    <option>Selos (Stamps)</option>
-                  </select>
-                </label>
-              </div>
-              <div class="field">
-                <label for="validade-pontos">Validade padrão dos pontos
-                  <select id="validade-pontos" class="select">
-                    <option>Sem expiração</option>
-                    <option selected>12 meses</option>
-                    <option>6 meses</option>
-                    <option>90 dias</option>
-                  </select>
-                </label>
-              </div>
-              <div class="empty">Ajustes avançados de regras, validade e métodos de resgate serão configuráveis nesta área.</div>
-            </article>
-          </div>
-        </section>
+            </form>
+          </article>
 
-        <section id="premios" class="section-panel" aria-label="Prêmios">
           <article class="panel">
             <div class="panel-head">
               <div>
-                <h2>Prêmios</h2>
-                <p>Cadastre recompensas, custos e condições de resgate</p>
+                <h2>Regras cadastradas</h2>
+                <p>Escala de pontuação por valor de compra</p>
               </div>
-              <button class="btn btn-small" type="button">Criar prêmio</button>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Prêmio</th>
-                    <th>Custo</th>
-                    <th>Validade</th>
-                    <th>Método</th>
-                    <th>Status</th>
+                    <th>Faixa de compra</th>
+                    <th>Pontos</th>
+                    <th>Descrição</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="rules-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section id="premios" class="section-panel" aria-label="Prêmios">
+          <article class="form-card" id="prize-form-card">
+            <div class="panel-head">
+              <div>
+                <h2 id="prize-form-title">Cadastrar prêmio</h2>
+                <p>Informe os detalhes do prêmio e os pontos necessários para resgate</p>
+              </div>
+            </div>
+            <form id="prize-form">
+              <input type="hidden" id="prize-id" value="">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="prize-description">Descrição
+                    <input class="input" id="prize-description" name="prize-description" type="text" placeholder="Ex.: Desconto de R$ 20,00" required>
+                  </label>
+                </div>
+                <div class="field">
+                  <label for="prize-points">Pontos necessários
+                    <input class="input" id="prize-points" name="prize-points" type="number" min="0" step="1" placeholder="Ex.: 800" required>
+                  </label>
+                </div>
+                <div class="field span-2">
+                  <label for="prize-comment">Comentário
+                    <textarea class="input" id="prize-comment" name="prize-comment" placeholder="Observações, condições ou instruções de resgate"></textarea>
+                  </label>
+                </div>
+                <div class="field">
+                  <label for="prize-start">Data de início
+                    <input class="input" id="prize-start" name="prize-start" type="date" required>
+                  </label>
+                </div>
+                <div class="field">
+                  <label for="prize-end">Data de término
+                    <input class="input" id="prize-end" name="prize-end" type="date" required>
+                  </label>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-small" type="submit" id="prize-submit">Cadastrar prêmio</button>
+                <button class="btn btn-secondary btn-small hidden" type="button" id="prize-cancel">Cancelar edição</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Prêmios cadastrados</h2>
+                <p>Gerencie descrições, períodos e pontos necessários</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
                   <tr>
-                    <td>Desconto R$ 20</td>
-                    <td>800 pontos</td>
-                    <td>30 dias após resgate</td>
-                    <td>Código no caixa</td>
-                    <td><span class="badge ok">Ativo</span></td>
+                    <th>Descrição</th>
+                    <th>Comentário</th>
+                    <th>Início</th>
+                    <th>Término</th>
+                    <th>Pontos necessários</th>
+                    <th>Ações</th>
                   </tr>
-                  <tr>
-                    <td>Brinde especial</td>
-                    <td>1.200 pontos</td>
-                    <td>60 dias após resgate</td>
-                    <td>Retirada na loja</td>
-                    <td><span class="badge ok">Ativo</span></td>
-                  </tr>
-                  <tr>
-                    <td>Frete grátis (serviço)</td>
-                    <td>500 pontos</td>
-                    <td>15 dias após resgate</td>
-                    <td>Voucher</td>
-                    <td><span class="badge">Rascunho</span></td>
-                  </tr>
-                </tbody>
+                </thead>
+                <tbody id="prizes-table-body"></tbody>
               </table>
             </div>
           </article>
         </section>
 
         <section id="acao" class="section-panel" aria-label="Ação">
-          <div class="grid-2-equal">
-            <article class="panel">
-              <div class="panel-head">
-                <div>
-                  <h2>Ações e campanhas</h2>
-                  <p>Crie campanhas para aumentar recorrência e engajamento</p>
-                </div>
-                <button class="btn btn-small" type="button">Nova ação</button>
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Ações e campanhas</h2>
+                <p>Área reservada para planejamento de campanhas e ações de retenção</p>
               </div>
-              <ul class="list">
-                <li><span><strong>Dobro de pontos em dias frios</strong><br><span class="muted small">Estimula movimento em períodos de menor fluxo</span></span><span class="badge ok">Ativa</span></li>
-                <li><span><strong>Reativação de clientes ausentes</strong><br><span class="muted small">Oferta para quem passou da média de retorno</span></span><span class="badge warn">Sugestão</span></li>
-                <li><span><strong>Upgrade de frequência</strong><br><span class="muted small">Campanha personalizada por padrão de compra</span></span><span class="badge">Planejada</span></li>
-              </ul>
-            </article>
-            <article class="panel">
-              <div class="panel-head">
-                <div>
-                  <h2>Próximos passos do MVP</h2>
-                  <p>Itens prioritários para evoluir a operação</p>
-                </div>
-              </div>
-              <ul class="list">
-                <li><span>Validar ajuste manual de valor de compra pelo lojista</span><span class="badge">Backlog</span></li>
-                <li><span>Registrar resgates com validade e método por prêmio</span><span class="badge">Backlog</span></li>
-                <li><span>Conectar QR Code/NFC ao fluxo de cadastro e pontos</span><span class="badge">Backlog</span></li>
-                <li><span>Gerar insights de frequência média por cliente</span><span class="badge">Backlog</span></li>
-              </ul>
-            </article>
-          </div>
+              <button class="btn btn-small" type="button">Nova ação</button>
+            </div>
+            <ul class="list">
+              <li><span><strong>Dobro de pontos em dias frios</strong><br><span class="muted small">Estimula movimento em períodos de menor fluxo</span></span><span class="badge ok">Ativa</span></li>
+              <li><span><strong>Reativação de clientes ausentes</strong><br><span class="muted small">Oferta para quem passou da média de retorno</span></span><span class="badge warn">Sugestão</span></li>
+              <li><span><strong>Upgrade de frequência</strong><br><span class="muted small">Campanha personalizada por padrão de compra</span></span><span class="badge">Planejada</span></li>
+            </ul>
+          </article>
         </section>
       </main>
     </div>
