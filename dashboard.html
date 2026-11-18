@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Senfy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Menu principal">
+      <div class="sidebar-brand">
+        <a class="brand" href="index.html" aria-label="Senfy início">
+          <img src="assets/logo.png" alt="" class="brand-logo" onerror="this.style.display='none'">
+          <span class="brand-mark">S</span>
+          <span>Senfy</span>
+        </a>
+      </div>
+      <nav class="sidebar-nav" aria-label="Seções do dashboard">
+        <button class="nav-item active" type="button" data-target="visao-geral">Visão Geral</button>
+        <button class="nav-item" type="button" data-target="clientes">Clientes</button>
+        <button class="nav-item" type="button" data-target="regras">Regras</button>
+        <button class="nav-item" type="button" data-target="premios">Prêmios</button>
+        <button class="nav-item" type="button" data-target="acao">Ação</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;">
+          <span class="avatar" aria-hidden="true">RC</span>
+          <div>
+            <div style="color:var(--text);font-weight:600;font-size:0.92rem;">Minha Loja</div>
+            <div class="small">Plano MVP</div>
+          </div>
+        </div>
+        <a href="login.html" class="btn btn-secondary btn-small btn-block">Sair</a>
+      </div>
+    </aside>
+
+    <div class="backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+
+    <div class="app-main">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <button class="btn btn-secondary btn-small menu-btn-mobile" id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false">Menu</button>
+          <div class="topbar-title">
+            <h1 id="page-title" style="font-size:1.25rem;margin:0;">Visão Geral</h1>
+            <p id="page-subtitle">Acompanhe o desempenho do seu programa de fidelidade</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <a href="index.html" class="btn btn-ghost btn-small">Site</a>
+          <span class="avatar" aria-label="Usuário">RC</span>
+        </div>
+      </header>
+
+      <main class="content">
+        <section id="visao-geral" class="section-panel active" aria-labelledby="page-title">
+          <div class="stats-grid">
+            <article class="stat-card">
+              <p class="stat-label">Clientes ativos</p>
+              <p class="stat-value">248</p>
+              <p class="stat-delta">+18 este mês</p>
+            </article>
+            <article class="stat-card">
+              <p class="stat-label">Pontos distribuídos</p>
+              <p class="stat-value">34.920</p>
+              <p class="stat-delta">+12% vs. mês anterior</p>
+            </article>
+            <article class="stat-card">
+              <p class="stat-label">Resgates realizados</p>
+              <p class="stat-value">63</p>
+              <p class="stat-delta">Taxa de resgate: 25%</p>
+            </article>
+            <article class="stat-card">
+              <p class="stat-label">Ticket médio (estimado)</p>
+              <p class="stat-value">R$ 86</p>
+              <p class="stat-delta">Baseado nas compras registradas</p>
+            </article>
+          </div>
+
+          <div class="grid-2">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Atividade recente</h2>
+                  <p>Últimos registros e interações do programa</p>
+                </div>
+                <span class="badge ok">Atualizado</span>
+              </div>
+              <ul class="list">
+                <li><span><strong>Maria S.</strong> registrou compra de R$ 120</span><span class="badge ok">+120 pts</span></li>
+                <li><span><strong>João P.</strong> resgatou "Desconto R$ 20"</span><span class="badge">Resgate</span></li>
+                <li><span><strong>Ana L.</strong> atingiu 1.000 pontos</span><span class="badge warn">Meta</span></li>
+                <li><span><strong>Carlos M.</strong> primeira compra registrada via QR Code</span><span class="badge ok">Novo</span></li>
+              </ul>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Mapa de calor (prévia)</h2>
+                  <p>Movimento por dia da semana e período</p>
+                </div>
+              </div>
+              <div class="heatmap" aria-label="Mapa de calor ilustrativo">
+                <div class="heat h1" title="Baixo"></div><div class="heat h2"></div><div class="heat h1"></div><div class="heat h3"></div><div class="heat h4"></div><div class="heat h3"></div><div class="heat h2"></div>
+                <div class="heat h1"></div><div class="heat h1"></div><div class="heat h2"></div><div class="heat h3"></div><div class="heat h4"></div><div class="heat h2"></div><div class="heat h1"></div>
+                <div class="heat h1"></div><div class="heat h2"></div><div class="heat h2"></div><div class="heat h3"></div><div class="heat h3"></div><div class="heat h2"></div><div class="heat h1"></div>
+                <div class="heat h1"></div><div class="heat h1"></div><div class="heat h2"></div><div class="heat h2"></div><div class="heat h3"></div><div class="heat h2"></div><div class="heat h1"></div>
+              </div>
+              <p class="muted small" style="margin-top:0.9rem;">Use este insight para planejar campanhas, como pontos em dobro nos dias de menor movimento.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="clientes" class="section-panel" aria-label="Clientes">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Clientes</h2>
+                <p>Base de clientes com saldo de pontos e histórico de resgates</p>
+              </div>
+              <button class="btn btn-small" type="button">Novo cliente</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Telefone</th>
+                    <th>Pontos</th>
+                    <th>Resgates</th>
+                    <th>Última compra</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Maria Silva</td>
+                    <td>(11) 98888-1020</td>
+                    <td>1.240</td>
+                    <td>3</td>
+                    <td>18/11/2026</td>
+                    <td><span class="badge ok">Ativo</span></td>
+                  </tr>
+                  <tr>
+                    <td>João Pereira</td>
+                    <td>(11) 97777-3344</td>
+                    <td>860</td>
+                    <td>2</td>
+                    <td>16/11/2026</td>
+                    <td><span class="badge ok">Ativo</span></td>
+                  </tr>
+                  <tr>
+                    <td>Ana Lima</td>
+                    <td>(11) 96666-7788</td>
+                    <td>1.020</td>
+                    <td>4</td>
+                    <td>10/11/2026</td>
+                    <td><span class="badge warn">Em risco</span></td>
+                  </tr>
+                  <tr>
+                    <td>Carlos Mendes</td>
+                    <td>(11) 95555-2211</td>
+                    <td>120</td>
+                    <td>0</td>
+                    <td>18/11/2026</td>
+                    <td><span class="badge ok">Novo</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section id="regras" class="section-panel" aria-label="Regras">
+          <div class="grid-2-equal">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Regras de acúmulo</h2>
+                  <p>Defina como as compras se convertem em benefícios</p>
+                </div>
+              </div>
+              <ul class="list">
+                <li><span><strong>Conversão padrão</strong><br><span class="muted small">R$ 1,00 = 1 ponto</span></span><span class="badge ok">Ativa</span></li>
+                <li><span><strong>Pontos em dobro</strong><br><span class="muted small">Quartas-feiras (dias de menor movimento)</span></span><span class="badge">Agendada</span></li>
+                <li><span><strong>Bônus de primeira compra</strong><br><span class="muted small">+50 pontos no primeiro registro</span></span><span class="badge ok">Ativa</span></li>
+              </ul>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Estratégia do programa</h2>
+                  <p>Escolha o modelo principal de fidelidade</p>
+                </div>
+              </div>
+              <div class="field">
+                <label for="estrategia">Modelo ativo
+                  <select id="estrategia" class="select">
+                    <option selected>Pontos</option>
+                    <option>Voucher</option>
+                    <option>Selos (Stamps)</option>
+                  </select>
+                </label>
+              </div>
+              <div class="field">
+                <label for="validade-pontos">Validade padrão dos pontos
+                  <select id="validade-pontos" class="select">
+                    <option>Sem expiração</option>
+                    <option selected>12 meses</option>
+                    <option>6 meses</option>
+                    <option>90 dias</option>
+                  </select>
+                </label>
+              </div>
+              <div class="empty">Ajustes avançados de regras, validade e métodos de resgate serão configuráveis nesta área.</div>
+            </article>
+          </div>
+        </section>
+
+        <section id="premios" class="section-panel" aria-label="Prêmios">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Prêmios</h2>
+                <p>Cadastre recompensas, custos e condições de resgate</p>
+              </div>
+              <button class="btn btn-small" type="button">Criar prêmio</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Prêmio</th>
+                    <th>Custo</th>
+                    <th>Validade</th>
+                    <th>Método</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Desconto R$ 20</td>
+                    <td>800 pontos</td>
+                    <td>30 dias após resgate</td>
+                    <td>Código no caixa</td>
+                    <td><span class="badge ok">Ativo</span></td>
+                  </tr>
+                  <tr>
+                    <td>Brinde especial</td>
+                    <td>1.200 pontos</td>
+                    <td>60 dias após resgate</td>
+                    <td>Retirada na loja</td>
+                    <td><span class="badge ok">Ativo</span></td>
+                  </tr>
+                  <tr>
+                    <td>Frete grátis (serviço)</td>
+                    <td>500 pontos</td>
+                    <td>15 dias após resgate</td>
+                    <td>Voucher</td>
+                    <td><span class="badge">Rascunho</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section id="acao" class="section-panel" aria-label="Ação">
+          <div class="grid-2-equal">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Ações e campanhas</h2>
+                  <p>Crie campanhas para aumentar recorrência e engajamento</p>
+                </div>
+                <button class="btn btn-small" type="button">Nova ação</button>
+              </div>
+              <ul class="list">
+                <li><span><strong>Dobro de pontos em dias frios</strong><br><span class="muted small">Estimula movimento em períodos de menor fluxo</span></span><span class="badge ok">Ativa</span></li>
+                <li><span><strong>Reativação de clientes ausentes</strong><br><span class="muted small">Oferta para quem passou da média de retorno</span></span><span class="badge warn">Sugestão</span></li>
+                <li><span><strong>Upgrade de frequência</strong><br><span class="muted small">Campanha personalizada por padrão de compra</span></span><span class="badge">Planejada</span></li>
+              </ul>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Próximos passos do MVP</h2>
+                  <p>Itens prioritários para evoluir a operação</p>
+                </div>
+              </div>
+              <ul class="list">
+                <li><span>Validar ajuste manual de valor de compra pelo lojista</span><span class="badge">Backlog</span></li>
+                <li><span>Registrar resgates com validade e método por prêmio</span><span class="badge">Backlog</span></li>
+                <li><span>Conectar QR Code/NFC ao fluxo de cadastro e pontos</span><span class="badge">Backlog</span></li>
+                <li><span>Gerar insights de frequência média por cliente</span><span class="badge">Backlog</span></li>
+              </ul>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
