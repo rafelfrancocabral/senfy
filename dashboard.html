@@ -6,61 +6,1266 @@
   <title>Dashboard — Senfy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hammersmith+One&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style id="dashboard-extras">
+    /* Recursos extras (escopo desta página) */
+    :root { --gold: #A87A1E; --gold-soft: #F8EFD8; }
+    html { color-scheme: light; scroll-behavior: smooth; }
+    body.app-body { font-variant-numeric: tabular-nums; }
+    h1, h2 { text-wrap: balance; }
+    p { text-wrap: pretty; }
+
+    /* Formulário de venda dentro do modal compartilhado */
+    .modal-sale-form { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+
+    /* Topbar translúcida */
+    .topbar {
+      backdrop-filter: blur(14px) saturate(1.5);
+      -webkit-backdrop-filter: blur(14px) saturate(1.5);
+      background: color-mix(in oklab, var(--bg) 78%, transparent);
+    }
+
+    /* Textura técnica de pontos */
+    .app-main { position: relative; }
+    .dots {
+      position: absolute; inset: 0 0 auto 0; height: 18rem;
+      pointer-events: none; z-index: 0;
+      background-image: radial-gradient(color-mix(in oklab, var(--ink) 14%, transparent) 1px, transparent 1px);
+      background-size: 18px 18px;
+      -webkit-mask-image: linear-gradient(#000, transparent 260px);
+      mask-image: linear-gradient(#000, transparent 260px);
+    }
+    .app-main > .topbar, .app-main > .content { position: relative; z-index: 1; }
+    .app-main > .content { padding-top: 1.5rem; }
+
+    /* Controle de período segmentado com pill deslizante */
+    .period-tabs { position: relative; }
+    .period-pill {
+      position: absolute; top: 0; bottom: 0; left: 0; width: 0;
+      border-radius: 7px; background: var(--primary); z-index: 0;
+      transition: left .3s cubic-bezier(.3,.8,.2,1), width .3s cubic-bezier(.3,.8,.2,1);
+    }
+    .period-tabs { gap: .35rem; }
+    .period-tab {
+      position: relative; z-index: 1;
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .38rem .55rem;
+      border: 1px solid transparent;
+      border-bottom-color: transparent !important; border-radius: 7px;
+      transition: color .18s ease, background .18s ease, border-color .18s ease,
+                  box-shadow .18s ease, transform .18s ease;
+    }
+    .period-tab::before {
+      content: ""; width: 6px; height: 6px; flex: 0 0 auto;
+      border-radius: 50%;
+      background: color-mix(in oklab, var(--muted) 60%, transparent);
+      transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    .period-tab:hover {
+      background: color-mix(in oklab, var(--primary) 10%, transparent);
+      border-color: color-mix(in oklab, var(--primary) 35%, transparent);
+      box-shadow: 0 0 10px color-mix(in oklab, var(--primary) 18%, transparent),
+                  inset 0 0 0 1px color-mix(in oklab, var(--primary) 8%, transparent);
+      transform: translateY(-1px);
+    }
+    .period-tab:hover::before {
+      background: var(--primary);
+      transform: scale(1.25);
+      animation: period-pulse .9s ease-out infinite;
+    }
+    @keyframes period-pulse {
+      0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 55%, transparent); }
+      70%, 100% { box-shadow: 0 0 0 6px transparent; }
+    }
+    .period-tab.active { color: #fff !important; }
+    .period-tab.active::before { background: #fff; box-shadow: 0 0 6px rgba(255,255,255,.5); }
+    .period-tab.active:hover {
+      background: transparent; border-color: transparent; box-shadow: none; transform: none;
+    }
+    .period-tab:not(.active):hover { color: var(--text) !important; }
+    .period-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+    /* Botão de tema */
+    .theme-btn {
+      width: 2.25rem; height: 2.25rem; display: grid; place-items: center;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      transition: color .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .theme-btn:hover { color: var(--text); border-color: var(--primary); }
+    .theme-btn svg { width: 1rem; height: 1rem; }
+
+    /* KPIs com leve elevação */
+    .stat-card { transition: transform .25s ease, box-shadow .25s ease; }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .stats-grid .stat-card:first-child { background: var(--green-900); border-color: var(--green-900); }
+    .stats-grid .stat-card:first-child .stat-value { color: #fff; }
+    .stats-grid .stat-card:first-child .stat-label,
+    .stats-grid .stat-card:first-child .stat-delta { color: rgba(255,255,255,.72); }
+
+    /* Mapa de calor interativo */
+    .heatmap-scroll { overflow-x: auto; padding-bottom: .4rem; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+    #heatmap { min-width: 620px; }
+    .heatmap-cell { position: relative; animation: heat-in .45s var(--d, 0s) cubic-bezier(.2,.8,.2,1) backwards; }
+    @keyframes heat-in { from { opacity: 0; transform: scale(.88); } }
+    .heatmap-cell:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .heatmap-cell.is-min { outline: 1.5px solid var(--gold); outline-offset: 2px; }
+    .heatmap-note {
+      display: inline-flex; align-items: center; gap: .45rem;
+      margin-top: .75rem; padding: .4rem .7rem;
+      background: var(--gold-soft); color: var(--gold);
+      border-radius: 6px; font-size: .82rem; font-weight: 700;
+    }
+    .heatmap-note::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+    .heatmap-readout { margin: .6rem 0 0; min-height: 1.2em; color: var(--muted); font-size: .82rem; }
+    .heatmap-readout strong { color: var(--text); }
+    .heatmap-scale {
+      border-radius: 99px; overflow: hidden; border: 1px solid var(--border);
+      background: linear-gradient(90deg, #eef1ec, #dcebe0, #b3d8bf, #7bb794, var(--green-700));
+    }
+    .heatmap-scale i { width: 14px; height: 10px; border: 0; background: transparent !important; }
+
+    /* ===== Resumo: recursos adaptados de resumo.html ===== */
+    #resumo .resumo-panel { padding: 1.5rem; }
+    #resumo .resumo-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem;
+    }
+    #resumo .resumo-title {
+      display: inline-flex; align-items: center; gap: .85rem; margin: 0;
+      font-size: clamp(1.6rem, 2.6vw, 2.2rem); letter-spacing: -.04em;
+    }
+    #resumo .resumo-title-icon {
+      flex: 0 0 auto; width: 2.8rem; height: 2.8rem; border-radius: 14px;
+      display: grid; place-items: center; color: #06130C;
+      background: linear-gradient(135deg, var(--green-500), #9BE564);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--green-500) 18%, transparent),
+                  0 8px 22px -6px var(--green-500);
+    }
+    #resumo .resumo-title-icon svg { width: 1.4rem; height: 1.4rem; }
+    #resumo .resumo-head p { margin: .55rem 0 0; color: var(--muted); font-size: .92rem; }
+    #resumo .resumo-live {
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .4rem .75rem; border: 1px solid var(--border); border-radius: 99px;
+      background: var(--surface-alt); color: var(--muted);
+      font-size: .75rem; font-weight: 700;
+    }
+    #resumo .resumo-live i {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green-500); box-shadow: 0 0 8px var(--green-500);
+    }
+    #resumo .stats-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+    #resumo .stat-card { position: relative; overflow: hidden; }
+    #resumo .stat-card::after {
+      content: ""; position: absolute; right: -28px; top: -28px;
+      width: 90px; height: 90px; border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle, color-mix(in oklab, var(--green-500) 18%, transparent), transparent 70%);
+    }
+    #resumo .stat-value { font-size: clamp(1.8rem, 3vw, 2.35rem); }
+    #resumo .stat-trend {
+      display: inline-flex; align-items: center; gap: .25rem;
+      margin-top: .55rem; padding: .22rem .55rem; border-radius: 99px;
+      font-size: .72rem; font-weight: 800;
+      background: color-mix(in oklab, var(--green-500) 12%, var(--surface));
+      color: var(--green-700);
+    }
+    #resumo .stat-trend.dn {
+      background: color-mix(in oklab, #b42318 10%, var(--surface)); color: #b42318;
+    }
+    #resumo .stat-trend svg { width: .8rem; height: .8rem; }
+    #resumo .stats-grid .stat-card:first-child .stat-trend {
+      background: rgba(255,255,255,.14); color: #fff;
+    }
+    html[data-theme="dark"] #resumo .stat-trend { color: var(--primary); }
+    html[data-theme="dark"] #resumo .stat-trend.dn { color: #F08A6E; }
+
+    #resumo .resumo-grid { display: grid; grid-template-columns: 1.7fr 1fr; gap: 1rem; }
+    #resumo .resumo-card { padding: 1.25rem; }
+    #resumo .resumo-card .panel-head { align-items: flex-start; margin-bottom: .9rem; }
+    #resumo .resumo-card .panel-head h2 { font-size: 1.05rem; }
+    #resumo .resumo-card .panel-head p { font-size: .82rem; }
+    @media (max-width: 1000px) { #resumo .resumo-grid { grid-template-columns: 1fr; } }
+
+    #resumo .resumo-chart-wrap { position: relative; margin-top: .5rem; }
+    #resumo .resumo-chart { width: 100%; height: 240px; display: block; overflow: visible; }
+    #resumo .resumo-chart .grid line { stroke: var(--border); stroke-dasharray: 3 5; }
+    #resumo .resumo-chart text { fill: var(--muted); font-size: 11px; font-weight: 700; }
+    #resumo .resumo-chart .line {
+      fill: none; stroke: url(#resumo-line); stroke-width: 3;
+      stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: var(--len); stroke-dashoffset: var(--len);
+      animation: resumo-draw 1.1s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    @keyframes resumo-draw { to { stroke-dashoffset: 0; } }
+    #resumo .resumo-chart .area {
+      fill: url(#resumo-area); opacity: 0;
+      animation: resumo-fade .8s .35s forwards;
+    }
+    @keyframes resumo-fade { to { opacity: 1; } }
+    #resumo .resumo-chart .dot {
+      fill: var(--surface); stroke: var(--green-500); stroke-width: 3;
+      opacity: 0; transition: opacity .15s ease;
+    }
+    #resumo .resumo-chart .cursor {
+      stroke: var(--green-500); stroke-width: 1;
+      opacity: 0; transition: opacity .15s ease;
+    }
+    #resumo .resumo-tip {
+      position: absolute; top: 0; left: 0; pointer-events: none;
+      padding: .5rem .7rem; border-radius: 10px;
+      background: #101A15; color: #fff; font-size: .75rem; font-weight: 700;
+      white-space: nowrap; opacity: 0; transform: translate(-50%, -110%);
+      transition: opacity .15s ease; z-index: 3;
+    }
+    #resumo .resumo-tip b { display: block; color: #9BE564; font-size: .9rem; }
+
+    #resumo .resumo-segs { display: grid; gap: .6rem; }
+    #resumo .resumo-seg {
+      all: unset; box-sizing: border-box; cursor: pointer;
+      display: grid; grid-template-columns: auto 1fr auto; gap: .75rem; align-items: center;
+      padding: .75rem .85rem; border: 1px solid var(--border); border-radius: 14px;
+      background: var(--surface-alt);
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    #resumo .resumo-seg:hover { border-color: var(--green-500); transform: translateX(3px); }
+    #resumo .resumo-seg:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    #resumo .resumo-seg.active {
+      border-color: var(--green-500);
+      background: color-mix(in oklab, var(--green-500) 10%, var(--surface));
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--green-500) 14%, transparent);
+    }
+    #resumo .resumo-seg-dot {
+      width: 2.1rem; height: 2.1rem; border-radius: 11px;
+      display: grid; place-items: center; font-size: 1rem;
+    }
+    #resumo .resumo-seg-dot.warn { background: var(--gold-soft); color: var(--gold); }
+    #resumo .resumo-seg-dot.red {
+      background: color-mix(in oklab, #b42318 10%, var(--surface)); color: #b42318;
+    }
+    #resumo .resumo-seg-dot.ok {
+      background: color-mix(in oklab, var(--green-500) 14%, var(--surface)); color: var(--green-700);
+    }
+    #resumo .resumo-seg-dot.vip {
+      background: color-mix(in oklab, #4b5fb8 12%, var(--surface)); color: #4b5fb8;
+    }
+    /* Neon na cor original de cada ícone de "Saúde da base" no modo noturno */
+    html[data-theme="dark"] #resumo .resumo-seg-dot {
+      transition: color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+    html[data-theme="dark"] #resumo .resumo-seg-dot.warn {
+      color: #E2B552;
+      box-shadow: 0 0 0 1px color-mix(in oklab, #E2B552 38%, transparent),
+                  0 0 16px -4px color-mix(in oklab, #E2B552 75%, transparent),
+                  inset 0 0 12px -8px color-mix(in oklab, #E2B552 90%, transparent);
+    }
+    html[data-theme="dark"] #resumo .resumo-seg-dot.red {
+      color: #F08A6E;
+      box-shadow: 0 0 0 1px color-mix(in oklab, #F08A6E 38%, transparent),
+                  0 0 16px -4px color-mix(in oklab, #F08A6E 75%, transparent),
+                  inset 0 0 12px -8px color-mix(in oklab, #F08A6E 90%, transparent);
+    }
+    html[data-theme="dark"] #resumo .resumo-seg-dot.ok {
+      color: #5FD08A;
+      box-shadow: 0 0 0 1px color-mix(in oklab, #5FD08A 38%, transparent),
+                  0 0 16px -4px color-mix(in oklab, #5FD08A 75%, transparent),
+                  inset 0 0 12px -8px color-mix(in oklab, #5FD08A 90%, transparent);
+    }
+    html[data-theme="dark"] #resumo .resumo-seg-dot.vip {
+      color: #9AAAF2;
+      box-shadow: 0 0 0 1px color-mix(in oklab, #9AAAF2 38%, transparent),
+                  0 0 16px -4px color-mix(in oklab, #9AAAF2 75%, transparent),
+                  inset 0 0 12px -8px color-mix(in oklab, #9AAAF2 90%, transparent);
+    }
+    html[data-theme="dark"] #resumo .resumo-seg-dot svg {
+      filter: drop-shadow(0 0 5px color-mix(in oklab, currentColor 85%, transparent));
+    }
+    html[data-theme="dark"] #resumo .resumo-seg:hover .resumo-seg-dot {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 1px color-mix(in oklab, currentColor 70%, transparent),
+                  0 0 24px -4px color-mix(in oklab, currentColor 90%, transparent),
+                  inset 0 0 14px -6px color-mix(in oklab, currentColor 100%, transparent);
+    }
+    html[data-theme="dark"] #resumo .resumo-seg.active .resumo-seg-dot {
+      box-shadow: 0 0 0 2px color-mix(in oklab, currentColor 60%, transparent),
+                  0 0 26px -4px color-mix(in oklab, currentColor 95%, transparent);
+    }
+    #resumo .resumo-seg strong { display: block; font-size: .85rem; }
+    #resumo .resumo-seg small { display: block; color: var(--muted); font-size: .72rem; margin-top: .1rem; }
+    #resumo .resumo-seg em { font-style: normal; font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em; }
+
+    #resumo .resumo-insights { display: grid; gap: .6rem; }
+    #resumo .resumo-insight {
+      all: unset; box-sizing: border-box; cursor: pointer;
+      display: flex; align-items: center; gap: .75rem;
+      padding: .7rem .8rem; border: 1px solid var(--border); border-radius: 14px;
+      background: var(--surface-alt); text-align: left;
+      transition: transform .2s ease, border-color .2s ease;
+    }
+    #resumo .resumo-insight:hover { transform: translateX(3px); border-color: var(--green-500); }
+    #resumo .resumo-insight:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    #resumo .resumo-insight .dot-s {
+      flex: 0 0 auto; width: 2.35rem; height: 2.35rem; border-radius: 11px;
+      display: grid; place-items: center;
+      background: color-mix(in oklab, var(--green-500) 14%, var(--surface));
+      color: var(--green-700);
+    }
+    #resumo .resumo-insight small { display: block; color: var(--muted); font-size: .72rem; font-weight: 700; }
+    #resumo .resumo-insight b { display: block; font-size: .95rem; letter-spacing: -.02em; }
+    #resumo .resumo-insight-note { margin: .8rem 0 0; color: var(--muted); font-size: .8rem; line-height: 1.5; }
+
+    /* Neon verde em "O que o mapa sugere" no modo noturno */
+    html[data-theme="dark"] #resumo .resumo-insight {
+      border-color: color-mix(in oklab, var(--green-500) 45%, var(--border));
+      background: color-mix(in oklab, var(--green-500) 8%, var(--surface-alt));
+      box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--green-500) 12%, transparent),
+                  0 0 12px -4px color-mix(in oklab, var(--green-500) 45%, transparent);
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    html[data-theme="dark"] #resumo .resumo-insight:hover {
+      border-color: var(--green-500);
+      background: color-mix(in oklab, var(--green-500) 14%, var(--surface-alt));
+      box-shadow: 0 0 0 1px color-mix(in oklab, var(--green-500) 55%, transparent),
+                  0 0 22px -4px color-mix(in oklab, var(--green-500) 75%, transparent),
+                  inset 0 0 14px -8px color-mix(in oklab, var(--green-500) 80%, transparent);
+    }
+    html[data-theme="dark"] #resumo .resumo-insight:focus-visible {
+      outline-color: var(--green-500);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--green-500) 25%, transparent),
+                  0 0 24px -4px color-mix(in oklab, var(--green-500) 70%, transparent);
+    }
+    html[data-theme="dark"] #resumo .resumo-insight .dot-s {
+      background: color-mix(in oklab, var(--green-500) 20%, var(--surface));
+      color: var(--green-500);
+      box-shadow: 0 0 14px -4px color-mix(in oklab, var(--green-500) 80%, transparent);
+    }
+    html[data-theme="dark"] #resumo .resumo-insight small { color: var(--primary); }
+
+    #resumo .heatmap-cell.is-hot {
+      outline: 2px solid var(--primary); outline-offset: 2px; z-index: 2;
+      transform: scale(1.08); box-shadow: 0 8px 18px -8px rgba(0,0,0,.5);
+    }
+    #resumo .resumo-heat-tip {
+      position: fixed; pointer-events: none;
+      padding: .5rem .7rem; border-radius: 10px;
+      background: #101A15; color: #fff; font-size: .75rem; font-weight: 700;
+      white-space: nowrap; opacity: 0; transform: translate(-50%, -120%);
+      transition: opacity .12s ease; z-index: 70;
+    }
+    #resumo .resumo-heat-tip b { display: block; color: #9BE564; font-size: .9rem; }
+
+    #resumo .resumo-action { display: grid; grid-template-columns: 1fr 1.3fr; gap: 1.2rem; }
+    @media (max-width: 900px) { #resumo .resumo-action { grid-template-columns: 1fr; } }
+    #resumo .resumo-label {
+      display: block; font-size: .72rem; font-weight: 800;
+      letter-spacing: .05em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: .5rem;
+    }
+    #resumo .resumo-msg {
+      width: 100%; min-height: 128px; resize: vertical;
+      padding: .85rem; border-radius: 14px; border: 1px solid var(--border);
+      background: var(--surface-alt); outline: 0; line-height: 1.5;
+      font-family: inherit; font-size: .9rem;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    #resumo .resumo-msg:focus {
+      background: var(--surface); border-color: var(--green-500);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--green-500) 16%, transparent);
+    }
+    #resumo .resumo-vars {
+      display: flex; gap: .4rem; flex-wrap: wrap; align-items: center;
+      margin-top: .6rem; font-size: .75rem; color: var(--muted);
+    }
+    #resumo .resumo-vars button {
+      border: 1px dashed var(--border); background: transparent; border-radius: 8px;
+      padding: .2rem .5rem; font-size: .75rem; font-weight: 800;
+      color: var(--green-700); cursor: pointer;
+    }
+    #resumo .resumo-vars button:hover { border-color: var(--green-500); background: var(--surface-alt); }
+    html[data-theme="dark"] #resumo .resumo-vars button { color: var(--primary); }
+    #resumo .resumo-client-list { display: grid; gap: .6rem; align-content: start; }
+    #resumo .resumo-client {
+      display: grid; grid-template-columns: auto 1fr auto; gap: .8rem; align-items: center;
+      padding: .75rem .85rem; border: 1px solid var(--border); border-radius: 16px;
+      background: var(--surface); animation: resumo-rise .4s both; animation-delay: var(--d, 0ms);
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    @keyframes resumo-rise { from { opacity: 0; transform: translateY(8px); } }
+    #resumo .resumo-client:hover { transform: translateY(-2px); border-color: var(--green-500); box-shadow: var(--shadow); }
+    #resumo .resumo-avatar {
+      width: 2.6rem; height: 2.6rem; border-radius: 12px;
+      display: grid; place-items: center; color: #fff; font-size: .8rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--a), var(--b));
+    }
+    #resumo .resumo-client b { font-size: .9rem; }
+    #resumo .resumo-chips { display: flex; gap: .35rem; flex-wrap: wrap; margin-top: .3rem; }
+    #resumo .resumo-chip {
+      font-size: .7rem; font-weight: 700; padding: .15rem .5rem; border-radius: 99px;
+      background: var(--surface-alt); border: 1px solid var(--border); color: var(--muted);
+    }
+    #resumo .resumo-chip.warn { background: var(--gold-soft); border-color: transparent; color: var(--gold); }
+    #resumo .resumo-chip.red {
+      background: color-mix(in oklab, #b42318 10%, var(--surface));
+      border-color: transparent; color: #b42318;
+    }
+    #resumo .resumo-chip.vip {
+      background: color-mix(in oklab, #4b5fb8 12%, var(--surface));
+      border-color: transparent; color: #4b5fb8;
+    }
+    html[data-theme="dark"] #resumo .resumo-chip.red { color: #F08A6E; }
+    html[data-theme="dark"] #resumo .resumo-chip.vip { color: #9AAAF2; }
+    #resumo .resumo-actions { display: flex; gap: .4rem; }
+    #resumo .resumo-wa {
+      color: #fff; border-color: transparent;
+      background: linear-gradient(135deg, #1faa59, #16c26a);
+      box-shadow: 0 8px 16px -8px #1faa59;
+    }
+    #resumo .resumo-empty {
+      padding: 1.8rem; text-align: center; color: var(--muted);
+      border: 1px dashed var(--border); border-radius: 16px;
+    }
+    @media (max-width: 640px) {
+      #resumo .resumo-client { grid-template-columns: auto 1fr; }
+      #resumo .resumo-actions { grid-column: 1 / -1; }
+      #resumo .resumo-actions .btn { flex: 1; justify-content: center; }
+      #resumo .resumo-card { padding: 1rem; }
+    }
+
+    /* Ícones do menu lateral (efeito lime apenas aqui) */
+    .nav-item { gap: .55rem; }
+    .nav-item svg {
+      width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--sand);
+      transition: color .25s ease, filter .25s ease;
+    }
+    .nav-item:hover svg, .nav-item.active svg {
+      color: var(--lime); filter: drop-shadow(0 0 6px rgba(169, 242, 58, .55));
+    }
+
+    /* Pack visual tech — aplicado a todas as seções */
+    .section-panel.active { animation: section-in .42s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes section-in { from { opacity: 0; transform: translateY(10px); } }
+
+    .section-panel .panel {
+      position: relative;
+      overflow: hidden;
+      border-color: color-mix(in oklab, var(--green-500) 22%, var(--border));
+      box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.35);
+    }
+    .section-panel .panel::before {
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--green-900), var(--green-500) 55%, transparent);
+    }
+    .section-panel .panel::after {
+      content: "";
+      position: absolute; inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(color-mix(in oklab, var(--green-500) 5%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in oklab, var(--green-500) 5%, transparent) 1px, transparent 1px);
+      background-size: 32px 32px;
+      -webkit-mask-image: linear-gradient(#000, transparent 240px);
+      mask-image: linear-gradient(#000, transparent 240px);
+    }
+    .section-panel .panel > * { position: relative; z-index: 1; }
+    .section-panel .panel-head h2 { display: inline-flex; align-items: center; gap: .55rem; letter-spacing: -.02em; }
+    .section-panel .panel-head h2::before {
+      content: ""; width: 7px; height: 7px; border-radius: 2px;
+      background: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 12%, transparent),
+                  0 0 8px color-mix(in oklab, var(--primary) 45%, transparent);
+    }
+
+    /* Tabelas com cabeçalho tech e linhas interativas */
+    .section-panel .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+    .section-panel thead th {
+      color: var(--primary);
+      background: linear-gradient(180deg, color-mix(in oklab, var(--primary) 6%, var(--surface)), var(--surface-alt));
+      border-bottom: 2px solid color-mix(in oklab, var(--primary) 32%, var(--border));
+    }
+    .section-panel tbody tr { animation: row-in .38s cubic-bezier(.2,.8,.2,1) backwards; }
+    .section-panel tbody tr:nth-child(1) { animation-delay: .03s; }
+    .section-panel tbody tr:nth-child(2) { animation-delay: .06s; }
+    .section-panel tbody tr:nth-child(3) { animation-delay: .09s; }
+    .section-panel tbody tr:nth-child(4) { animation-delay: .12s; }
+    .section-panel tbody tr:nth-child(5) { animation-delay: .15s; }
+    .section-panel tbody tr:nth-child(6) { animation-delay: .18s; }
+    .section-panel tbody tr:nth-child(n+7) { animation-delay: .21s; }
+    @keyframes row-in { from { opacity: 0; transform: translateY(6px); } }
+    .section-panel tbody tr { transition: background .18s ease; }
+    .section-panel tbody tr:hover td { background: color-mix(in oklab, var(--primary) 7%, var(--surface)); }
+    .section-panel tbody td:first-child { font-weight: 700; color: var(--text); }
+    .section-panel tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--primary); }
+    #clientes tbody tr:hover td:first-child,
+    #vendas tbody tr:hover td:first-child { box-shadow: none; }
+
+    /* ===== Regras e Prêmios: pack visual tech adaptado de regras.html ===== */
+    /* Fundo em grade + barra de energia animada no topo do painel */
+    #regras .panel,
+    #premios .panel {
+      position: relative;
+      overflow: hidden;
+      background-image:
+        linear-gradient(color-mix(in oklab, var(--primary) 6%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in oklab, var(--primary) 6%, transparent) 1px, transparent 1px);
+      background-size: 36px 36px;
+      background-position: -1px -1px;
+    }
+    #regras .panel::before,
+    #premios .panel::before {
+      content: ""; position: absolute; inset: 0 0 auto; height: 4px; z-index: 2;
+      background: linear-gradient(90deg, var(--green-900), var(--green-500), var(--sand), var(--green-900));
+      background-size: 200% 100%;
+      animation: tech-flow 6s linear infinite;
+    }
+    #regras .panel > *,
+    #premios .panel > * { position: relative; z-index: 1; }
+    @keyframes tech-flow { to { background-position: 200% 0; } }
+
+    /* Selo do título */
+    #regras .panel-head h2,
+    #premios .panel-head h2 { display: flex; align-items: center; gap: .7rem; }
+    .tech-title-icon {
+      flex: 0 0 auto;
+      width: 2.35rem; height: 2.35rem; border-radius: 13px;
+      display: grid; place-items: center; color: #fff;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500));
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--green-500) 18%, transparent),
+                  0 8px 22px -6px var(--green-700);
+    }
+    .tech-title-icon svg { width: 1.2rem; height: 1.2rem; }
+
+    /* Botões: elevação no hover, compressão no clique */
+    #regras .btn,
+    #premios .btn {
+      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+    }
+    #regras .btn:hover,
+    #premios .btn:hover {
+      border-color: var(--green-500);
+      box-shadow: 0 6px 16px -8px var(--green-500);
+    }
+    #regras .btn:active,
+    #premios .btn:active { transform: scale(.96); }
+    #regras .panel-head .btn,
+    #premios .panel-head .btn {
+      color: #fff; border-color: transparent;
+      background: linear-gradient(135deg, var(--green-900), var(--green-500));
+      box-shadow: 0 10px 22px -10px var(--green-700);
+    }
+    #regras .panel-head .btn svg,
+    #premios .panel-head .btn svg { width: 1rem; height: 1rem; flex: 0 0 auto; }
+    #regras .btn-danger,
+    #premios .btn-danger {
+      background: color-mix(in oklab, #b42318 8%, var(--surface));
+      border-color: color-mix(in oklab, #b42318 28%, var(--border));
+      color: #b42318;
+    }
+    html[data-theme="dark"] #regras .btn-danger,
+    html[data-theme="dark"] #premios .btn-danger { color: #F08A6E; }
+
+    /* Promoção: ícone pulsante + controle segmentado */
+    .promo-box {
+      position: relative; overflow: hidden;
+      border-color: color-mix(in oklab, var(--primary) 25%, var(--border));
+      background: linear-gradient(110deg, color-mix(in oklab, var(--primary) 7%, var(--surface)), var(--surface));
+      transition: border-color .3s ease, box-shadow .3s ease;
+    }
+    .promo-box.on {
+      border-color: var(--green-500);
+      box-shadow: 0 0 0 1px color-mix(in oklab, var(--green-500) 25%, transparent),
+                  0 8px 24px -14px var(--green-500);
+    }
+    .promo-box::after {
+      content: ""; position: absolute; right: -40px; top: -60px;
+      width: 180px; height: 180px; border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle, color-mix(in oklab, var(--primary) 12%, transparent), transparent 70%);
+    }
+    .promo-box > * { position: relative; z-index: 1; }
+    .promo-info { display: flex; align-items: center; gap: .85rem; }
+    .promo-ico {
+      flex: 0 0 auto; width: 2.6rem; height: 2.6rem; border-radius: 12px;
+      display: grid; place-items: center; color: var(--green-700);
+      background: var(--surface); border: 1px solid var(--border);
+      transition: all .3s ease;
+    }
+    .promo-ico svg { width: 1.2rem; height: 1.2rem; }
+    .promo-box.on .promo-ico {
+      color: #fff; border-color: transparent;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500));
+      box-shadow: 0 0 18px color-mix(in oklab, var(--green-500) 60%, transparent);
+      animation: tech-pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes tech-pulse { 50% { box-shadow: 0 0 28px var(--green-500); } }
+    .promo-actions {
+      display: inline-flex; flex-wrap: wrap; gap: .25rem; padding: .28rem;
+      border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+    }
+    .promo-btn {
+      border: 0 !important; background: transparent !important;
+      color: var(--muted) !important; box-shadow: none !important;
+      border-radius: 9px; transition: all .2s ease;
+    }
+    .promo-btn:hover { color: var(--text) !important; background: color-mix(in oklab, var(--primary) 8%, transparent) !important; }
+    .promo-btn.active {
+      color: #fff !important;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500)) !important;
+      box-shadow: 0 6px 14px -6px var(--green-700) !important;
+    }
+    html[data-theme="dark"] .promo-btn.active { color: #06130C !important; }
+
+    /* Neon no raio de "Aplicar promoção" no modo noturno */
+    html[data-theme="dark"] #regras .promo-ico {
+      color: #5FD08A;
+      border-color: color-mix(in oklab, #5FD08A 45%, var(--border));
+      background: color-mix(in oklab, #5FD08A 14%, var(--surface));
+      box-shadow: 0 0 0 1px color-mix(in oklab, #5FD08A 30%, transparent),
+                  0 0 16px -4px color-mix(in oklab, #5FD08A 75%, transparent),
+                  inset 0 0 12px -8px color-mix(in oklab, #5FD08A 90%, transparent);
+    }
+    html[data-theme="dark"] #regras .promo-ico svg,
+    html[data-theme="dark"] #regras .promo-box.on .promo-ico svg {
+      filter: drop-shadow(0 0 5px color-mix(in oklab, #5FD08A 85%, transparent));
+    }
+    html[data-theme="dark"] #regras .promo-box.on .promo-ico {
+      color: #06130C;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500));
+      border-color: transparent;
+      box-shadow: 0 0 0 2px color-mix(in oklab, #5FD08A 55%, transparent),
+                  0 0 26px -4px color-mix(in oklab, #5FD08A 95%, transparent);
+      animation-name: tech-pulse-dark;
+    }
+    @keyframes tech-pulse-dark {
+      50% {
+        box-shadow: 0 0 0 2px color-mix(in oklab, #5FD08A 55%, transparent),
+                    0 0 34px -2px color-mix(in oklab, #5FD08A 100%, transparent);
+      }
+    }
+
+    /* Cards: tiers, varredura de brilho, anel orbital e flutuação */
+    .card-grid .entity-card {
+      --tier: var(--green-500);
+      --tier-2: var(--green-700);
+      background: linear-gradient(160deg, var(--surface), color-mix(in oklab, var(--primary) 4%, var(--surface)));
+    }
+    .card-grid .rank-card-1 { --tier: #c9972b; --tier-2: #f3d27a; }
+    .card-grid .rank-card-2 { --tier: #7f93a0; --tier-2: #d3dde4; }
+    .card-grid .rank-card-3 { --tier: #a4592e; --tier-2: #e6a577; }
+    .card-grid .entity-card::before {
+      background: linear-gradient(90deg, var(--tier), var(--tier-2));
+      opacity: 1;
+    }
+    .card-grid .entity-card::after {
+      content: ""; position: absolute; top: 0; left: -60%; z-index: 3;
+      width: 40%; height: 100%; pointer-events: none;
+      background: linear-gradient(100deg, transparent, rgba(255,255,255,.26), transparent);
+      transform: skewX(-18deg); transition: left .7s ease;
+    }
+    .card-grid .entity-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--tier);
+      box-shadow: var(--shadow), 0 0 0 1px var(--tier);
+    }
+    .card-grid .entity-card:hover::after { left: 130%; }
+    .card-grid .rank-badge { position: relative; }
+    .card-grid .rank-badge::after {
+      content: ""; position: absolute; inset: -5px; border-radius: 50%;
+      border: 1px dashed color-mix(in oklab, var(--tier) 75%, transparent);
+      opacity: 0; pointer-events: none;
+      animation: tech-spin 8s linear infinite;
+      transition: opacity .3s ease;
+    }
+    .card-grid .rank-card-1 .rank-badge::after,
+    .card-grid .rank-card-2 .rank-badge::after,
+    .card-grid .rank-card-3 .rank-badge::after { opacity: .55; }
+    .card-grid .entity-card:hover .rank-badge::after { opacity: 1; }
+    .card-grid .rank-card-1 .rank-badge { animation: tech-float 3.5s ease-in-out infinite; }
+    @keyframes tech-spin { to { transform: rotate(360deg); } }
+    @keyframes tech-float { 50% { transform: translateY(-3px); } }
+
+    /* Número em gradiente e selo de promoção com efeito pop */
+    .card-grid .card-metric strong {
+      font-size: clamp(2.1rem, 3.2vw, 3rem);
+      background: linear-gradient(135deg, var(--green-900), var(--green-500));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    html[data-theme="dark"] .card-grid .card-metric strong {
+      background: linear-gradient(135deg, #9BE7B8, #5FD08A);
+      -webkit-background-clip: text; background-clip: text;
+    }
+    .promo-tag {
+      display: inline-flex; align-items: center; gap: .2rem;
+      font-style: normal; font-size: .72rem; font-weight: 800;
+      color: #fff; padding: .22rem .55rem; border-radius: 99px;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500));
+      box-shadow: 0 0 14px color-mix(in oklab, var(--green-500) 45%, transparent);
+      animation: tech-pop .35s cubic-bezier(.3,1.6,.5,1);
+    }
+    .promo-tag svg { width: .8rem; height: .8rem; }
+    @keyframes tech-pop { from { transform: scale(.4); opacity: 0; } }
+
+    /* Medidor animado */
+    .meter {
+      height: 6px; border-radius: 99px; overflow: hidden;
+      background: var(--surface-alt); border: 1px solid var(--border);
+    }
+    .meter i {
+      display: block; height: 100%; width: 0; border-radius: 99px;
+      background: linear-gradient(90deg, var(--green-500), var(--sand));
+      box-shadow: 0 0 12px color-mix(in oklab, var(--green-500) 40%, transparent);
+      transition: width 1s cubic-bezier(.2,.8,.2,1);
+    }
+    html[data-theme="dark"] .meter i { background: linear-gradient(90deg, #4FB67F, #9BE7B8); }
+
+    /* Toast de confirmação */
+    .tech-toast {
+      position: fixed; left: 50%; bottom: 24px; z-index: 60;
+      transform: translate(-50%, 20px);
+      display: flex; align-items: center; gap: .5rem;
+      padding: .75rem 1.1rem; border-radius: 12px;
+      background: #101A15; color: #fff;
+      font-size: .88rem; font-weight: 700;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+      box-shadow: 0 14px 30px -10px rgba(0,0,0,.55);
+    }
+    .tech-toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .tech-toast svg { width: 1rem; height: 1rem; color: var(--green-500); }
+    @media (max-width: 640px) {
+      #regras .panel-head, #premios .panel-head { flex-wrap: wrap; }
+      .promo-actions { width: 100%; }
+      .promo-btn { flex: 1 1 auto; justify-content: center; text-align: center; }
+    }
+
+    /* Ações e campanhas (adaptado de acoes.html) */
+    #acao .panel { padding: 0 0 1.5rem; border-radius: 22px; overflow: hidden; }
+    #acao .panel::before {
+      content: ""; position: relative; display: block; height: 4px;
+      background: linear-gradient(90deg, var(--green-900), var(--green-500), var(--sand), var(--green-900));
+      background-size: 200% 100%;
+      animation: tech-flow 6s linear infinite;
+    }
+    #acao .acao-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap; padding: 1.5rem 1.5rem 0;
+    }
+    #acao .acao-title {
+      display: inline-flex; align-items: center; gap: .85rem; margin: 0;
+      font-size: clamp(1.6rem, 2.6vw, 2.2rem); letter-spacing: -.04em;
+    }
+    #acao .acao-title-icon {
+      flex: 0 0 auto; width: 2.8rem; height: 2.8rem; border-radius: 14px;
+      display: grid; place-items: center; color: #06130C;
+      background: linear-gradient(135deg, var(--green-500), #9BE564);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--green-500) 18%, transparent),
+                  0 8px 22px -6px var(--green-500);
+    }
+    #acao .acao-title-icon svg { width: 1.4rem; height: 1.4rem; }
+    #acao .acao-head p { margin: .55rem 0 0; color: var(--muted); font-size: .92rem; }
+    #acao .acao-sec { padding: 0 1.5rem; margin-top: 1.4rem; }
+    #acao .acao-sec > h3 { display: flex; align-items: center; gap: .5rem; font-size: 1.05rem; margin: 0 0 .2rem; }
+    #acao .acao-sec > p { color: var(--muted); font-size: .85rem; margin: 0 0 .9rem; }
+
+    #acao .acao-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .85rem; }
+    #acao .acao-kpi {
+      display: flex; align-items: center; gap: .85rem; padding: 1rem;
+      border: 1px solid var(--border); border-radius: 16px; background: var(--surface-alt);
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    #acao .acao-kpi:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--green-500); }
+    #acao .acao-kpi-i {
+      flex: 0 0 auto; width: 2.6rem; height: 2.6rem; border-radius: 12px;
+      display: grid; place-items: center; color: var(--primary);
+      background: var(--surface); border: 1px solid var(--border);
+    }
+    #acao .acao-kpi small { display: block; color: var(--muted); font-size: .7rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+    #acao .acao-kpi b { display: block; font-size: 1.55rem; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+
+    #acao .acao-todo { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: .85rem; }
+    #acao .acao-td {
+      position: relative; display: flex; flex-direction: column; gap: .6rem;
+      padding: 1.1rem; border-radius: 16px; overflow: hidden;
+      border: 1px solid color-mix(in oklab, var(--green-500) 40%, var(--border));
+      background: linear-gradient(160deg, color-mix(in oklab, var(--green-500) 9%, var(--surface)), var(--surface));
+      animation: ac-rise .45s both; animation-delay: var(--d, 0ms);
+    }
+    @keyframes ac-rise { from { opacity: 0; transform: translateY(10px); } }
+    #acao .acao-td .n { position: absolute; right: .9rem; top: .2rem; font: 800 3.2rem Manrope, sans-serif; color: color-mix(in oklab, var(--green-500) 16%, transparent); letter-spacing: -.05em; }
+    #acao .acao-td b { font-size: 1rem; max-width: 85%; }
+    #acao .acao-td p { margin: 0; color: var(--muted); font-size: .85rem; }
+    #acao .acao-td .btn { align-self: flex-start; margin-top: auto; }
+    #acao .acao-empty { padding: 1.8rem; text-align: center; color: var(--muted); border: 1px dashed var(--border); border-radius: 16px; }
+
+    #acao .acao-tabs { display: flex; gap: .25rem; padding: .3rem; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 14px; flex-wrap: wrap; width: fit-content; margin-bottom: 1rem; }
+    #acao .acao-tabs button { border: 0; background: transparent; color: var(--muted); padding: .5rem .85rem; border-radius: 10px; font-weight: 700; font-size: .82rem; transition: all .2s; }
+    #acao .acao-tabs button:hover { color: var(--text); }
+    #acao .acao-tabs button[aria-pressed="true"] { background: var(--primary); color: #06130C; box-shadow: 0 6px 14px -6px var(--primary); }
+    #acao .acao-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+    #acao .acao-card {
+      position: relative; display: flex; flex-direction: column; gap: .75rem;
+      padding: 1.15rem 1.15rem 1.15rem 1.35rem; border: 1px solid var(--border); border-radius: 18px;
+      background: var(--surface); transition: transform .25s, box-shadow .25s, border-color .25s;
+      animation: ac-rise .45s both; animation-delay: var(--d, 0ms);
+    }
+    #acao .acao-card::before { content: ""; position: absolute; left: 0; top: .9rem; bottom: .9rem; width: 4px; border-radius: 0 4px 4px 0; background: var(--st, var(--border)); }
+    #acao .acao-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--green-500); }
+    #acao .acao-card-top { display: flex; gap: .85rem; align-items: flex-start; }
+    #acao .acao-card-i { flex: 0 0 auto; width: 2.7rem; height: 2.7rem; border-radius: 13px; display: grid; place-items: center; color: var(--primary); background: var(--surface-alt); border: 1px solid var(--border); }
+    #acao .acao-card h4 { margin: 0; font-size: 1rem; line-height: 1.25; }
+    #acao .acao-card p { margin: .2rem 0 0; color: var(--muted); font-size: .84rem; }
+    #acao .acao-pill { margin-left: auto; font-size: .72rem; font-weight: 800; padding: .25rem .65rem; border-radius: 99px; border: 1px solid transparent; white-space: nowrap; }
+    #acao .ac-ativa { --st: var(--green-500); }
+    #acao .ac-ativa .acao-pill { background: color-mix(in oklab, var(--green-500) 14%, transparent); color: var(--primary); }
+    #acao .ac-ideia { --st: var(--gold); }
+    #acao .ac-ideia .acao-pill { background: var(--gold-soft); color: var(--gold); }
+    #acao .ac-planejada { --st: #4B5FB8; }
+    #acao .ac-planejada .acao-pill { background: color-mix(in oklab, #4B5FB8 13%, transparent); color: #4B5FB8; }
+    html[data-theme="dark"] #acao .ac-planejada .acao-pill { color: #9AAAF2; }
+    #acao .ac-concluida { --st: var(--muted); }
+    #acao .ac-concluida .acao-pill { background: var(--surface-alt); color: var(--muted); border-color: var(--border); }
+    #acao .acao-stats { display: flex; gap: .5rem; flex-wrap: wrap; }
+    #acao .acao-chip { font-size: .74rem; font-weight: 700; padding: .2rem .6rem; border-radius: 99px; background: var(--surface-alt); border: 1px solid var(--border); color: var(--muted); display: inline-flex; gap: .35rem; align-items: center; }
+    #acao .acao-chip.g { background: color-mix(in oklab, var(--green-500) 12%, transparent); color: var(--primary); border-color: transparent; }
+    #acao .acao-chip.y { background: var(--gold-soft); color: var(--gold); border-color: transparent; }
+    #acao .acao-prog { height: 6px; border-radius: 9px; background: var(--surface-alt); border: 1px solid var(--border); overflow: hidden; }
+    #acao .acao-prog i { display: block; height: 100%; width: 0; border-radius: 9px; background: linear-gradient(90deg, var(--green-700), var(--green-500), #9BE564); transition: width .9s cubic-bezier(.2,.8,.2,1); }
+    #acao .acao-card-act { display: flex; gap: .5rem; margin-top: auto; }
+
+    #acao .acao-autos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: .85rem; }
+    #acao .acao-auto { display: flex; gap: .85rem; align-items: center; padding: 1rem; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-alt); }
+    #acao .acao-auto b { display: block; font-size: .9rem; }
+    #acao .acao-auto small { display: block; color: var(--muted); font-size: .8rem; margin-top: .15rem; }
+    #acao .acao-sw { margin-left: auto; width: 46px; height: 26px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface); position: relative; flex: none; transition: background .2s, border-color .2s; }
+    #acao .acao-sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--muted); transition: all .2s; }
+    #acao .acao-sw[aria-checked="true"] { background: var(--green-500); border-color: var(--green-500); }
+    #acao .acao-sw[aria-checked="true"]::after { left: 23px; background: #06130C; }
+    #acao .acao-soon { margin-left: auto; font-size: .72rem; font-weight: 800; padding: .25rem .65rem; border-radius: 99px; background: color-mix(in oklab, #4B5FB8 13%, transparent); color: #4B5FB8; }
+    html[data-theme="dark"] #acao .acao-soon { color: #9AAAF2; }
+
+    /* Diálogos de Ações */
+    dialog.acao-dialog {
+      width: min(880px, calc(100% - 24px)); max-height: calc(100vh - 32px);
+      border: 1px solid var(--border); border-radius: 22px; background: var(--surface); color: var(--text);
+      padding: 0; box-shadow: var(--shadow); overflow: hidden;
+    }
+    dialog.acao-dialog::backdrop { background: rgba(5,12,10,.6); backdrop-filter: blur(4px); }
+    dialog.acao-dialog[open] { animation: ac-pop .3s cubic-bezier(.2,.8,.2,1); display: flex; flex-direction: column; }
+    @keyframes ac-pop { from { opacity: 0; transform: translateY(16px) scale(.97); } }
+    .ac-dh { display: flex; gap: .85rem; align-items: center; padding: 1.3rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .ac-dh h2 { font-size: 1.25rem; margin: 0; }
+    .ac-dh p { color: var(--muted); font-size: .85rem; margin: .2rem 0 0; }
+    .ac-x { margin-left: auto; width: 2.35rem; height: 2.35rem; border-radius: 11px; border: 1px solid var(--border); background: var(--surface-alt); color: var(--muted); display: grid; place-items: center; cursor: pointer; }
+    .ac-x:hover { color: var(--text); border-color: var(--primary); }
+    .ac-db { overflow: auto; padding: 1.3rem 1.5rem; display: grid; gap: 1.3rem; }
+    .ac-db h4 { font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem; }
+    .ac-two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; }
+    .ac-label { display: block; font-size: .72rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: .5rem; }
+    .ac-prev { background: linear-gradient(160deg, #0F3D2A, #0B2A1D); color: #E8FFF2; border-radius: 16px 16px 16px 4px; padding: .9rem 1rem; font-size: .87rem; line-height: 1.5; box-shadow: var(--shadow); }
+    .ac-prev small { display: block; opacity: .6; margin-bottom: .25rem; font-size: .7rem; }
+    .ac-rl { display: grid; gap: .5rem; }
+    .ac-r { display: grid; grid-template-columns: auto 1fr auto; gap: .75rem; align-items: center; padding: .65rem .75rem; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+    .ac-av { width: 2.35rem; height: 2.35rem; border-radius: 11px; display: grid; place-items: center; font-weight: 800; font-size: .8rem; color: #fff; background: linear-gradient(135deg, var(--a), var(--b)); }
+    .ac-r b { font-size: .87rem; }
+    .ac-r small { display: block; color: var(--muted); font-size: .75rem; }
+    .ac-done { font-size: .74rem; font-weight: 800; color: var(--primary); background: color-mix(in oklab, var(--green-500) 13%, transparent); padding: .3rem .6rem; border-radius: 99px; display: inline-flex; gap: .35rem; align-items: center; }
+    .ac-seg { display: flex; gap: .25rem; padding: .25rem; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 12px; width: fit-content; flex-wrap: wrap; }
+    .ac-seg button { border: 0; background: transparent; color: var(--muted); padding: .45rem .8rem; border-radius: 9px; font-weight: 700; font-size: .8rem; }
+    .ac-seg button[aria-pressed="true"] { background: var(--primary); color: #06130C; }
+    .ac-slots { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .ac-slots button { border: 1px solid var(--border); background: var(--surface-alt); padding: .5rem .85rem; border-radius: 99px; font-weight: 700; font-size: .8rem; transition: all .2s; }
+    .ac-slots button[aria-pressed="true"] { background: color-mix(in oklab, var(--green-500) 13%, transparent); color: var(--primary); border-color: var(--green-500); box-shadow: 0 0 0 3px color-mix(in oklab, var(--green-500) 14%, transparent); }
+    .ac-res { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+    .ac-res div { padding: .75rem; border-radius: 14px; background: var(--surface-alt); border: 1px solid var(--border); text-align: center; }
+    .ac-res b { display: block; font-size: 1.35rem; letter-spacing: -.03em; }
+    .ac-res small { color: var(--muted); font-size: .72rem; font-weight: 600; }
+    .ac-df { display: flex; gap: .6rem; justify-content: flex-end; padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: var(--surface-alt); flex-wrap: wrap; }
+    .ac-toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: #10181B; color: #fff; padding: .75rem 1.1rem; border-radius: 12px; font-size: .87rem; font-weight: 600; opacity: 0; pointer-events: none; transition: all .25s; z-index: 99; display: flex; gap: .5rem; align-items: center; }
+    .ac-toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .ac-toast .ico { color: #9BE564; }
+    .ac-vars { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .6rem; font-size: .75rem; color: var(--muted); align-items: center; }
+    .ac-vars button { border: 1px dashed var(--border); background: transparent; border-radius: 8px; padding: .2rem .5rem; font-size: .75rem; font-weight: 800; color: var(--primary); cursor: pointer; }
+    .ac-field { margin-bottom: .9rem; }
+    .ac-textarea { width: 100%; min-height: 120px; resize: vertical; padding: .85rem; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-alt); outline: 0; line-height: 1.5; font-family: inherit; font-size: .9rem; }
+    .ac-textarea:focus, .ac-input:focus { background: var(--surface); border-color: var(--green-500); box-shadow: 0 0 0 4px color-mix(in oklab, var(--green-500) 16%, transparent); }
+    .ac-input { width: 100%; padding: .75rem .85rem; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-alt); outline: 0; font-family: inherit; font-size: .9rem; }
+    select.ac-input { cursor: pointer; }
+    #acao .acao-kpi-i, #acao .acao-card-i { font-size: 1.2rem; }
+    .ac-x, .ac-done { font-size: 1rem; }
+    .acao-chip .ico, .acao-stats .ico { font-size: .9rem; }
+    #acao .acao-btn-wa, .acao-btn-wa {
+      background: linear-gradient(135deg, #1FAA59, #16C26A);
+      border-color: transparent; color: #fff;
+      box-shadow: 0 8px 16px -8px #1FAA59;
+    }
+    .acao-btn-wa:hover { background: linear-gradient(135deg, #16C26A, #1FAA59); }
+    @media (max-width: 760px) { .ac-two { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) {
+      #acao .acao-head, #acao .acao-sec { padding-left: 1rem; padding-right: 1rem; }
+      #acao .acao-cards { grid-template-columns: 1fr; }
+      .ac-r { grid-template-columns: auto 1fr; }
+      .ac-r > :last-child { grid-column: 1 / -1; }
+    }
+
+    /* ===== Clientes e Vendas: estrutura adaptada de senfy-clientes.html ===== */
+    #clientes .panel,
+    #vendas .panel { padding: 0 0 1.5rem; border-radius: 22px; }
+    #clientes .panel::before,
+    #vendas .panel::before {
+      height: 4px;
+      background: linear-gradient(90deg, var(--green-900), var(--green-500), var(--sand), var(--green-900));
+      background-size: 200% 100%;
+      animation: tech-flow 6s linear infinite;
+    }
+    #clientes .panel::after,
+    #vendas .panel::after { background-size: 36px 36px; }
+
+    .list-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap; padding: 2rem 1.75rem 0;
+    }
+    .list-head h2 {
+      display: inline-flex; align-items: center; gap: .8rem;
+      font-size: clamp(1.55rem, 2.6vw, 2.2rem); letter-spacing: -.04em; margin: 0;
+    }
+    .list-head h2::before { display: none; }
+    .list-title-icon {
+      flex: 0 0 auto; width: 2.8rem; height: 2.8rem; border-radius: 14px;
+      display: grid; place-items: center; color: #fff;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500));
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--green-500) 18%, transparent),
+                  0 8px 22px -6px var(--green-700);
+    }
+    .list-title-icon svg { width: 1.4rem; height: 1.4rem; }
+    .list-sub { margin: .55rem 0 0; color: var(--muted); font-size: .92rem; }
+    .list-tools { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; justify-content: flex-end; }
+    .ico { width: 1em; height: 1em; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .list-search { position: relative; display: flex; align-items: center; width: min(100%, 21rem); }
+    .list-search > .ico {
+      position: absolute; left: .85rem; font-size: 1.1rem; color: var(--muted);
+      pointer-events: none; transition: color .2s ease;
+    }
+    .list-search input {
+      width: 100%; height: 2.85rem; padding: 0 2.5rem 0 2.35rem;
+      border: 1px solid var(--border); border-radius: 13px;
+      background: var(--surface-alt); outline: 0; font-size: .9rem;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .list-search input::placeholder { color: var(--muted); }
+    .list-search input:focus {
+      background: var(--surface); border-color: var(--green-500);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--green-500) 16%, transparent);
+    }
+    .list-search:focus-within > .ico { color: var(--green-500); }
+    .list-search kbd {
+      position: absolute; right: .7rem; font: 700 .68rem var(--font); color: var(--muted);
+      border: 1px solid var(--border); border-radius: 6px; padding: .1rem .4rem; background: var(--surface);
+    }
+    #vendas .list-head .btn {
+      color: #fff; border-color: transparent;
+      background: linear-gradient(135deg, var(--green-900), var(--green-500));
+      box-shadow: 0 10px 22px -10px var(--green-700);
+    }
+    #vendas .list-head .btn svg { width: 1rem; height: 1rem; flex: 0 0 auto; }
+    html[data-theme="dark"] #vendas .list-head .btn { color: #06130C; }
+
+    .list-kpis {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: .8rem; padding: 1.5rem 1.75rem 0;
+    }
+    .list-kpi {
+      display: flex; align-items: center; gap: .85rem;
+      padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 16px;
+      background: var(--surface-alt);
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .list-kpi:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--green-500); }
+    .list-kpi-i {
+      flex: 0 0 auto; width: 2.6rem; height: 2.6rem; border-radius: 12px;
+      display: grid; place-items: center; font-size: 1.2rem; color: var(--primary);
+      background: var(--surface); border: 1px solid var(--border);
+    }
+    .list-kpi small {
+      display: block; color: var(--muted); font-size: .68rem; font-weight: 700;
+      letter-spacing: .05em; text-transform: uppercase;
+    }
+    .list-kpi b {
+      display: block; font-size: 1.5rem; letter-spacing: -.03em;
+      font-variant-numeric: tabular-nums; line-height: 1.2;
+    }
+
+    .list-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: 1.4rem 1.75rem .75rem; color: var(--muted); font-size: .82rem;
+    }
+    .list-count { display: inline-flex; align-items: center; gap: .5rem; color: var(--text); font-weight: 700; }
+    .list-count i {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--green-500);
+      box-shadow: 0 0 10px color-mix(in oklab, var(--green-500) 70%, transparent);
+    }
+    .list-wrap {
+      margin: 0 1.75rem; border: 1px solid var(--border); border-radius: 18px;
+      overflow-x: auto; background: var(--surface);
+    }
+    .list-table { width: 100%; min-width: 880px; border-collapse: separate; border-spacing: 0; }
+    .clients-table { min-width: 980px; }
+    .list-table thead th {
+      position: sticky; top: 0; z-index: 1; padding: 0; text-align: left;
+      background: var(--surface-alt); border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    .list-table thead th .sort-btn {
+      width: 100%; display: flex; align-items: center; gap: .5rem;
+      padding: .9rem 1.1rem; border: 0; background: transparent; cursor: pointer;
+      color: var(--muted); font-size: .7rem; font-weight: 800;
+      letter-spacing: .07em; text-transform: uppercase;
+      transition: color .2s ease, background .2s ease;
+    }
+    .list-table thead th .sort-btn:hover {
+      color: var(--green-700); background: color-mix(in oklab, var(--green-500) 8%, transparent);
+    }
+    .list-table thead th .sort-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+    .list-table thead th[aria-sort] .sort-btn { color: var(--primary); }
+    .list-table th.no-sort {
+      padding: .9rem 1.1rem; color: var(--muted);
+      font-size: .7rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
+    }
+    .sort-caret {
+      width: 0; height: 0; flex: 0 0 auto;
+      border-left: 4px solid transparent; border-right: 4px solid transparent;
+      border-top: 5px solid currentColor; opacity: .3;
+      transition: transform .18s ease, opacity .18s ease;
+    }
+    th[aria-sort="ascending"] .sort-caret,
+    th[aria-sort="descending"] .sort-caret { opacity: 1; }
+    th[aria-sort="descending"] .sort-caret { transform: rotate(180deg); }
+    .list-table tbody tr {
+      border-bottom: 1px solid var(--border); transition: background .2s ease;
+      animation: list-rise .45s both;
+    }
+    .list-table tbody tr:last-child { border-bottom: 0; }
+    .list-table tbody tr:hover { background: color-mix(in oklab, var(--green-500) 7%, transparent); }
+    @keyframes list-rise { from { opacity: 0; transform: translateY(8px); } }
+    .list-table td { padding: .9rem 1.1rem; vertical-align: middle; font-size: .9rem; }
+    .list-table .who { display: flex; align-items: center; gap: .75rem; font-weight: 700; white-space: nowrap; }
+    .list-table .avatar {
+      position: relative; flex: 0 0 auto; width: 2.5rem; height: 2.5rem; border-radius: 12px;
+      display: grid; place-items: center; color: #fff; font-size: .8rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--a), var(--b)); box-shadow: 0 6px 12px -6px var(--a);
+    }
+    .list-table tr.is-top .avatar::after {
+      content: ""; position: absolute; right: -3px; top: -3px; width: 11px; height: 11px;
+      border-radius: 50%; background: var(--gold); border: 2px solid var(--surface);
+      box-shadow: 0 0 8px color-mix(in oklab, var(--gold) 70%, transparent);
+    }
+    .tag-top {
+      font-size: .68rem; font-weight: 800; color: var(--gold);
+      background: color-mix(in oklab, var(--gold) 15%, transparent);
+      padding: .15rem .5rem; border-radius: 99px; margin-left: .15rem;
+    }
+    .tier-badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      padding: .2rem .5rem; border-radius: 99px;
+      font-size: .68rem; font-weight: 800; letter-spacing: .01em;
+      white-space: nowrap; border: 1px solid transparent;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 5px 12px -7px currentColor;
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
+      cursor: default;
+    }
+    .tier-badge .ico { font-size: .85rem; fill: none; }
+    .tier-badge:hover { transform: translateY(-1px) scale(1.05); box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 8px 16px -8px currentColor; }
+    .tier-badge.tier-bronze { color: #71360F; background: linear-gradient(135deg, #F5C08B, #C87938); border-color: #B96A2E; }
+    .tier-badge.tier-silver { color: #37474F; background: linear-gradient(135deg, #F7FAFB, #BCC7CF); border-color: #AEBBC4; }
+    .tier-badge.tier-gold { color: #684700; background: linear-gradient(135deg, #FFE49A, #E2B552); border-color: #D6A438; }
+    .tier-badge.tier-platinum { color: #0B4A59; background: linear-gradient(135deg, #D8FAFF, #7DD3E0 55%, #BEE8FF); border-color: #67B8CC; }
+    .phone { display: inline-flex; align-items: center; gap: .5rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .phone .ico { font-size: 1rem; }
+    .pts { min-width: 9rem; }
+    .pts b { font-size: 1.15rem; letter-spacing: -.02em; color: var(--primary); font-variant-numeric: tabular-nums; }
+    .mini {
+      height: 5px; border-radius: 9px; background: var(--surface-alt);
+      border: 1px solid var(--border); margin-top: .4rem; overflow: hidden;
+    }
+    .mini i {
+      display: block; height: 100%; width: 0; border-radius: 9px;
+      background: linear-gradient(90deg, var(--green-500), var(--sand));
+      transition: width 1s cubic-bezier(.2,.8,.2,1);
+    }
+    .pill {
+      display: inline-flex; align-items: center; gap: .4rem; font-weight: 700;
+      padding: .3rem .65rem; border-radius: 99px; font-size: .85rem;
+      font-variant-numeric: tabular-nums; white-space: nowrap;
+    }
+    .pill .ico { font-size: .9rem; }
+    .pill.soft { background: color-mix(in oklab, var(--green-500) 13%, transparent); color: var(--primary); }
+    .pill.soft.zero { background: var(--surface-alt); color: var(--muted); }
+    .pill.days { background: var(--surface-alt); border: 1px solid var(--border); }
+    .pill.fast { color: var(--primary); }
+    .pill.slow { color: var(--gold); }
+    .when { display: flex; flex-direction: column; gap: .4rem; align-items: flex-start; }
+    .dchips { display: flex; gap: .25rem; flex-wrap: wrap; }
+    .dchips span {
+      font-size: .72rem; font-weight: 700; min-width: 2.2rem; text-align: center;
+      padding: .18rem .5rem; border-radius: 8px;
+      background: var(--surface-alt); border: 1px solid var(--border);
+    }
+    .per { display: inline-flex; align-items: center; gap: .4rem; font-size: .72rem; font-weight: 800; padding: .2rem .6rem; border-radius: 99px; }
+    .per .ico { font-size: .85rem; }
+    .per.m { background: color-mix(in oklab, var(--gold) 16%, transparent); color: var(--gold); }
+    .per.t { background: color-mix(in oklab, var(--green-500) 14%, transparent); color: var(--primary); }
+    .money { font-variant-numeric: tabular-nums; font-weight: 800; }
+    .list-empty { display: none; text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .list-empty.show { display: block; }
+    .list-empty .ico { font-size: 2rem; color: var(--green-500); margin-bottom: .5rem; }
+    .list-table.is-filtering tbody tr { animation: none !important; }
+    @media (max-width: 640px) {
+      .list-head { align-items: stretch; }
+      .list-tools { justify-content: stretch; width: 100%; }
+      .list-search { width: 100%; }
+      .list-kpis, .list-bar, .list-head { padding-left: 1.1rem; padding-right: 1.1rem; }
+      .list-wrap { margin: 0 1.1rem; }
+    }
+
+    /* Tema escuro */
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0A120E; --surface: #101A15; --surface-alt: #14211A;
+      --ink: #E7EFE9; --text: #E7EFE9; --muted: #8A9B91;
+      --border: #1F2D25; --border-strong: #2E4436;
+      --primary: #5FD08A; --primary-hover: #7BE0A3; --primary-soft: #14291C;
+      --green-900: #123524; --green-700: #1E5A3D; --green-500: #5FD08A;
+      --sand: #D8C9A8; --gold: #E2B552; --gold-soft: #2A2312;
+      --side-bg: #0C1912; --side-surface: #123524; --side-surface-hover: #1E5A3D;
+      --side-border: #5FD08A; --side-text: #D8C9A8;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.3); --shadow: 0 8px 24px rgba(0,0,0,.4);
+    }
+    html[data-theme="dark"] label,
+    html[data-theme="dark"] th,
+    html[data-theme="dark"] .badge { color: var(--muted); }
+    html[data-theme="dark"] .badge.ok { color: #7BE0A3; border-color: #245C3C; background: #10271A; }
+    html[data-theme="dark"] .badge.warn { color: #E2B552; border-color: #5A4820; background: #2A2312; }
+    html[data-theme="dark"] .btn-danger { background: #2A1512; color: #F08A6E; border-color: #5A2A20; }
+    html[data-theme="dark"] .btn-danger:hover { background: #3A1C17; }
+    html[data-theme="dark"] tr:hover td { background: #14211A; }
+    html[data-theme="dark"] .card.accent { border-color: #2E4436; }
+    html[data-theme="dark"] .period-tab.active { color: #06130C !important; }
+    html[data-theme="dark"] .stat-grid .stat-card:first-child,
+    html[data-theme="dark"] .stats-grid .stat-card:first-child { background: #123524; }
+    html[data-theme="dark"] .heat-0 { background: #16231C; }
+    html[data-theme="dark"] .heat-1 { background: #1B3A29; }
+    html[data-theme="dark"] .heat-2 { background: #245C3C; }
+    html[data-theme="dark"] .heat-3 { background: #2E8A57; }
+    html[data-theme="dark"] .heat-4 { background: #5FD08A; color: #06130C; border-color: #5FD08A; }
+    html[data-theme="dark"] .heatmap-scale { background: linear-gradient(90deg, #16231C, #1B3A29, #245C3C, #2E8A57, #5FD08A); }
+    html[data-theme="dark"] .modal-overlay,
+    html[data-theme="dark"] .backdrop { background: rgba(0,0,0,.6); }
+    html[data-theme="dark"] .section-panel .panel {
+      box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .period-pill, .stat-card, .nav-item svg, .nav-item, .theme-btn,
+      .period-tab, .period-tab::before { transition: none !important; }
+      .heatmap-cell, .section-panel.active, .section-panel tbody tr,
+      .period-tab:hover::before { animation: none !important; }
+      .card-grid .entity-card { transition: none !important; }
+      #acao .acao-kpi, #acao .acao-tabs button, #acao .acao-sw, #acao .acao-sw::after,
+      .ac-slots button, .ac-toast { transition: none !important; }
+      #acao .acao-td, #acao .acao-card, #acao .acao-prog i,
+      #acao .panel::before, dialog.acao-dialog[open] { animation: none !important; }
+      #regras .panel::before, #premios .panel::before,
+      .promo-box.on .promo-ico, .card-grid .rank-badge::after,
+      .card-grid .rank-card-1 .rank-badge, .promo-tag, .meter i,
+      .card-grid .entity-card::after { animation: none !important; transition: none !important; }
+      #clientes .panel::before, #vendas .panel::before,
+      .list-table tbody tr, .mini i { animation: none !important; transition: none !important; }
+      #resumo .resumo-chart .line, #resumo .resumo-chart .area,
+      #resumo .resumo-client, #resumo .resumo-seg, #resumo .resumo-seg-dot, #resumo .resumo-insight,
+      #resumo .resumo-tip, #resumo .resumo-heat-tip {
+        animation: none !important; transition: none !important;
+      }
+      #resumo .resumo-chart .line { stroke-dashoffset: 0; }
+      #resumo .resumo-chart .area { opacity: 1; }
+    }
+  </style>
 </head>
 <body class="app-body">
+  <!-- Ícones reutilizados em Clientes e Vendas (mesmos de senfy-clientes.html) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-4 3-6 6.5-6s6 2 6.5 6"/><path d="M16 4.5a3.5 3.5 0 010 7M18 14c2 .7 3.2 2.5 3.5 5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="5" rx="1"/><path d="M12 8v13M5 13v7h14v-7M12 8c-2-4-6-4-6-1.5S10 8 12 8zm0 0c2-4 6-4 6-1.5S14 8 12 8z"/></symbol>
+    <symbol id="i-medal" viewBox="0 0 24 24"><circle cx="12" cy="14.5" r="4.5"/><path d="M9 10 6.5 3h4L12 6.5 13.5 3h4L15 10"/><path d="M12 12.3l.7 1.4 1.5.2-1.1 1.1.3 1.5-1.4-.7-1.4.7.3-1.5-1.1-1.1 1.5-.2z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 2.6v5.6c0 4.2-3 7.1-7 8.5-4-1.4-7-4.3-7-8.5V5.6z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18M9 4 6 9l6 11 6-11-3-5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+    <symbol id="i-sunset" viewBox="0 0 24 24"><path d="M6.5 17a5.5 5.5 0 0111 0M12 6v3M4.5 10.5l1.5 1.5M19.5 10.5L18 12M2.5 17h19M6 21h12"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 7h14l-1.2 11a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8zM9 7a3 3 0 0 1 6 0"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.2c-.6-.9-1.6-1.4-2.7-1.4-1.6 0-2.8.9-2.8 2.1 0 3 5.6 1.4 5.6 4.3 0 1.3-1.3 2.3-3 2.3-1.2 0-2.3-.5-3-1.4M12 6v12"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3zM9 8h6M9 12h6"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+    <symbol id="i-cash" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 9.5v.01M17.5 14.5v.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v4M12 17.5v.01"/></symbol>
+    <symbol id="i-dn" viewBox="0 0 24 24"><path d="M7 7l10 10M17 9v8H9"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></symbol>
+    <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 2.5 1.5 2.5C10.5 9 11 6 12 3z"/></symbol>
+    <symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></symbol>
+    <symbol id="i-seed" viewBox="0 0 24 24"><path d="M12 21v-9M12 12c0-4 3-7 8-7 0 5-3 8-8 7zM12 14c0-3-2-5-6-5 0 4 2 6 6 5z"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 3l4 4-4 4M3 11V9a2 2 0 012-2h16M7 21l-4-4 4-4M21 13v2a2 2 0 01-2 2H3"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-8-5-8-11a4.5 4.5 0 018-2.5A4.5 4.5 0 0120 9c0 6-8 11-8 11z"/></symbol>
+  </defs></svg>
   <div class="app-shell">
-    <header class="topbar">
-      <div class="topbar-row">
-        <div class="topbar-left">
-          <a class="brand" href="index.html" aria-label="Senfy início">
-            <img src="assets/logo.png" alt="" class="brand-logo" onerror="this.style.display='none'">
-            <span class="brand-mark">S</span>
-            <span>Senfy</span>
-          </a>
-          <button class="btn btn-secondary btn-small menu-btn-mobile" id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false">Menu</button>
-        </div>
-        <div class="topbar-actions">
-          <a href="index.html" class="btn btn-ghost btn-small">Ver site</a>
-        </div>
+    <aside class="sidebar" id="sidebar" aria-label="Menu do dashboard">
+      <a class="brand" href="index.html" aria-label="Senfy início">
+        <img class="brand-logo" src="assets/suricato.png" alt="" aria-hidden="true">
+        <span class="brand-name">Senfy</span>
+      </a>
+      <p class="sidebar-label">Navegação</p>
+      <nav class="sidebar-nav" aria-label="Seções do dashboard">
+        <button class="nav-item active" type="button" data-target="resumo">Resumo</button>
+        <button class="nav-item" type="button" data-target="clientes">Clientes</button>
+        <button class="nav-item" type="button" data-target="vendas">Vendas</button>
+        <button class="nav-item" type="button" data-target="regras">Regras</button>
+        <button class="nav-item" type="button" data-target="premios">Prêmios</button>
+        <button class="nav-item" type="button" data-target="acao">Ação</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <a href="index.html" class="side-link">Ver site</a>
+        <a href="login.html" class="side-link">Sair</a>
       </div>
-      <aside class="sidebar" id="sidebar" aria-label="Menu principal">
-        <nav class="sidebar-nav" aria-label="Seções do dashboard">
-          <button class="nav-item active" type="button" data-target="visao-geral">Visão Geral</button>
-          <button class="nav-item" type="button" data-target="clientes">Clientes</button>
-          <button class="nav-item" type="button" data-target="regras">Regras</button>
-          <button class="nav-item" type="button" data-target="premios">Prêmios</button>
-          <button class="nav-item" type="button" data-target="acao">Ação</button>
-        </nav>
-        <div class="sidebar-footer">
-          <div class="sidebar-user">
-            <span class="avatar" aria-hidden="true">RC</span>
-            <div>
-              <div class="sidebar-user-name">Minha Loja</div>
-              <div class="small muted">Plano MVP</div>
-            </div>
-          </div>
-          <a href="login.html" class="btn btn-secondary btn-small">Sair</a>
-        </div>
-      </aside>
-    </header>
+    </aside>
 
     <div class="app-main">
-      <div class="page-intro">
-        <p class="topbar-kicker">Painel Senfy</p>
-        <h1 id="page-title" style="margin:0;">Visão Geral</h1>
-        <p id="page-subtitle">Acompanhe vendas e a performance de resgates</p>
-      </div>
-
-      <main class="content">
-        <section id="visao-geral" class="section-panel active" aria-labelledby="page-title">
-          <div class="overview-toolbar">
-            <div>
-              <h2 style="margin:0;font-size:1rem;">Período</h2>
-              <p class="muted small" style="margin:0;">Selecione o intervalo para atualizar os indicadores</p>
-            </div>
+      <div class="dots" aria-hidden="true"></div>
+      <header class="topbar">
+        <div class="topbar-row">
+          <div class="topbar-left">
+            <a class="brand topbar-brand" href="index.html" aria-label="Senfy início">
+              <img class="brand-logo" src="assets/suricato.png" alt="" aria-hidden="true">
+              <span class="brand-name">Senfy</span>
+            </a>
+            <button class="btn btn-secondary btn-small menu-btn-mobile" id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false">Menu</button>
+          </div>
+          <div class="topbar-menu">
             <div class="period-tabs" role="tablist" aria-label="Período">
+              <span class="period-pill" aria-hidden="true"></span>
               <button class="period-tab active" type="button" role="tab" aria-selected="true" data-period="hoje">Hoje</button>
               <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="7d">7 dias</button>
               <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="15d">15 dias</button>
@@ -68,250 +1273,1619 @@
               <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="90d">90 dias</button>
               <button class="period-tab" type="button" role="tab" aria-selected="false" data-period="365d">365 dias</button>
             </div>
+            <button class="theme-btn" id="theme-toggle" type="button" aria-label="Alternar tema">
+              <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+              <svg class="sun hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            </button>
+            <div class="sidebar-footer">
+              <div class="sidebar-user">
+                <span class="avatar" aria-hidden="true">LJ</span>
+                <div>
+                  <div class="sidebar-user-name">Minha loja</div>
+                  <div class="small muted">Plano ativo</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="stats-grid two">
-            <article class="stat-card">
-              <p class="stat-label">Total em vendas</p>
-              <p class="stat-value" id="stat-sales-total">R$ 0,00</p>
-              <p class="stat-delta" id="stat-sales-total-note">Acumulado no período selecionado (Hoje)</p>
+        </div>
+      </header>
+
+      <main class="content">
+        <section id="resumo" class="section-panel active" aria-label="Resumo">
+          <article class="panel resumo-panel">
+            <header class="resumo-head">
+              <div>
+                <h2 class="resumo-title"><span class="resumo-title-icon" aria-hidden="true"><svg class="ico"><use href="#i-grid"/></svg></span>Resumo</h2>
+                <p>Como a loja está indo e quem merece sua atenção agora</p>
+              </div>
+              <span class="resumo-live"><i aria-hidden="true"></i>Dados de exemplo</span>
+            </header>
+            <div class="stats-grid">
+              <article class="stat-card">
+                <p class="stat-label">Total em vendas</p>
+                <p class="stat-value" id="stat-sales-total">R$ 0,00</p>
+                <p class="stat-delta" id="stat-sales-total-note">Soma das vendas no período (Hoje)</p>
+                <span class="stat-trend" id="stat-sales-total-trend"></span>
+              </article>
+              <article class="stat-card">
+                <p class="stat-label">Quantidade de vendas</p>
+                <p class="stat-value" id="stat-sales-count">0</p>
+                <p class="stat-delta" id="stat-sales-count-note">Compras no período (Hoje)</p>
+                <span class="stat-trend" id="stat-sales-count-trend"></span>
+              </article>
+              <article class="stat-card">
+                <p class="stat-label">Pontos creditados</p>
+                <p class="stat-value" id="stat-points-total">0</p>
+                <p class="stat-delta" id="stat-points-total-note">Pontos creditados no período (Hoje)</p>
+                <span class="stat-trend" id="stat-points-total-trend"></span>
+              </article>
+              <article class="stat-card">
+                <p class="stat-label">Número de resgates</p>
+                <p class="stat-value" id="stat-redemptions-total">0</p>
+                <p class="stat-delta" id="stat-redemptions-total-note">Resgates no período (Hoje)</p>
+                <span class="stat-trend" id="stat-redemptions-total-trend"></span>
+              </article>
+            </div>
+          </article>
+
+          <div class="resumo-grid">
+            <article class="panel resumo-card">
+              <div class="panel-head">
+                <div>
+                  <h2>Vendas no período</h2>
+                  <p id="resumo-chart-hint">Dados de exemplo</p>
+                </div>
+              </div>
+              <div class="resumo-chart-wrap">
+                <svg class="resumo-chart" id="resumo-chart" role="img" aria-label="Gráfico de vendas no período"></svg>
+                <div class="resumo-tip" id="resumo-tip" aria-hidden="true"></div>
+              </div>
             </article>
-            <article class="stat-card">
-              <p class="stat-label">Total de vendas (Quantidade)</p>
-              <p class="stat-value" id="stat-sales-count">0</p>
-              <p class="stat-delta" id="stat-sales-count-note">Compras registradas no período (Hoje)</p>
+            <article class="panel resumo-card">
+              <div class="panel-head">
+                <div>
+                  <h2>Saúde da base</h2>
+                  <p>Toque em um grupo para agir sobre ele</p>
+                </div>
+              </div>
+              <div class="resumo-segs" id="resumo-segs"></div>
             </article>
           </div>
 
-          <article class="panel">
+          <div class="resumo-grid">
+            <article class="panel resumo-card">
+              <div class="panel-head">
+                <div>
+                  <h2>Mapa de calor de movimento</h2>
+                  <p id="resumo-heat-hint">Compras por dia da semana e horário</p>
+                </div>
+              </div>
+              <div class="heatmap-scroll">
+                <div id="heatmap" class="heatmap" aria-label="Mapa de calor de compras por dia e horário"></div>
+              </div>
+              <p class="heatmap-readout" id="heatmap-readout" aria-live="polite">Passe o mouse ou use Tab sobre um horário.</p>
+              <div class="heatmap-legend" aria-hidden="true">
+                <span>Menos compras</span>
+                <span class="heatmap-scale">
+                  <i class="heat-0"></i><i class="heat-1"></i><i class="heat-2"></i><i class="heat-3"></i><i class="heat-4"></i>
+                </span>
+                <span>Mais compras</span>
+              </div>
+              <p class="heatmap-note" id="heatmap-note"></p>
+              <div class="resumo-heat-tip" id="resumo-heat-tip" aria-hidden="true"></div>
+            </article>
+            <article class="panel resumo-card">
+              <div class="panel-head">
+                <div>
+                  <h2>O que o mapa sugere</h2>
+                  <p>Toque para destacar no mapa</p>
+                </div>
+              </div>
+              <div class="resumo-insights" id="resumo-insights"></div>
+              <p class="resumo-insight-note" id="resumo-insight-note"></p>
+            </article>
+          </div>
+
+          <article class="panel resumo-card">
             <div class="panel-head">
               <div>
-                <h2>Performance de resgate por prêmio</h2>
-                <p>Comparativo de resgates realizados para cada prêmio cadastrado</p>
+                <h2 id="resumo-action-title">Clientes para reativar</h2>
+                <p id="resumo-action-hint"></p>
               </div>
             </div>
-            <div id="redemptions-chart" class="chart" aria-label="Gráfico de performance de resgates"></div>
+            <div class="resumo-action">
+              <div>
+                <label class="resumo-label" for="resumo-msg">Mensagem para enviar</label>
+                <textarea class="resumo-msg" id="resumo-msg"></textarea>
+                <div class="resumo-vars">Inserir:
+                  <button type="button" data-var="{nome}">{nome}</button>
+                  <button type="button" data-var="{pontos}">{pontos}</button>
+                  <button type="button" data-var="{dias}">{dias}</button>
+                </div>
+              </div>
+              <div class="resumo-client-list" id="resumo-client-list"></div>
+            </div>
           </article>
         </section>
 
         <section id="clientes" class="section-panel" aria-label="Clientes">
           <article class="panel">
-            <div class="panel-head">
+            <header class="list-head">
               <div>
-                <h2>Clientes</h2>
-                <p>Lista de clientes com pontos disponíveis e número de resgates</p>
+                <h2><span class="list-title-icon" aria-hidden="true"><svg class="ico"><use href="#i-users"/></svg></span>Clientes</h2>
+                <p class="list-sub">Lista de clientes com pontos disponíveis e número de resgates</p>
               </div>
+              <label class="list-search">
+                <svg class="ico" aria-hidden="true"><use href="#i-search"/></svg>
+                <input id="clients-search" type="search" placeholder="Buscar por nome ou telefone" autocomplete="off" aria-label="Buscar clientes por nome ou telefone">
+                <kbd aria-hidden="true">/</kbd>
+              </label>
+            </header>
+            <div class="list-kpis" id="clients-kpis" aria-label="Indicadores de clientes"></div>
+            <div class="list-bar">
+              <span class="list-count"><i aria-hidden="true"></i><span id="clients-count" aria-live="polite">6 clientes</span></span>
+              <span>Clique no cabeçalho para ordenar</span>
             </div>
-            <div class="table-wrap">
-              <table>
+            <div class="list-wrap" id="clients-wrap">
+              <table class="list-table clients-table">
                 <thead>
                   <tr>
-                    <th>Nome</th>
-                    <th>Telefone</th>
-                    <th>Total de pontos disponíveis</th>
-                    <th>Número de resgates</th>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="0" data-type="text">Nome <span class="sort-caret" aria-hidden="true"></span></button></th>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="1" data-type="text">Telefone <span class="sort-caret" aria-hidden="true"></span></button></th>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="2" data-type="number">Pontos disponíveis <span class="sort-caret" aria-hidden="true"></span></button></th>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="3" data-type="number">Resgates <span class="sort-caret" aria-hidden="true"></span></button></th>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="4" data-type="number">Vendas <span class="sort-caret" aria-hidden="true"></span></button></th>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="5" data-type="number">Média entre compras <span class="sort-caret" aria-hidden="true"></span></button></th>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="6" data-type="text">Dias e períodos <span class="sort-caret" aria-hidden="true"></span></button></th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td>Maria Silva</td>
-                    <td>(11) 98888-1020</td>
-                    <td>1.240</td>
-                    <td>3</td>
-                  </tr>
-                  <tr>
-                    <td>João Pereira</td>
-                    <td>(11) 97777-3344</td>
-                    <td>860</td>
-                    <td>2</td>
-                  </tr>
-                  <tr>
-                    <td>Ana Lima</td>
-                    <td>(11) 96666-7788</td>
-                    <td>1.020</td>
-                    <td>4</td>
-                  </tr>
-                  <tr>
-                    <td>Carlos Mendes</td>
-                    <td>(11) 95555-2211</td>
-                    <td>120</td>
-                    <td>0</td>
-                  </tr>
-                  <tr>
-                    <td>Fernanda Costa</td>
-                    <td>(11) 94444-8899</td>
-                    <td>2.150</td>
-                    <td>5</td>
-                  </tr>
-                  <tr>
-                    <td>Ricardo Alves</td>
-                    <td>(11) 93333-4578</td>
-                    <td>540</td>
-                    <td>1</td>
-                  </tr>
-                </tbody>
+                <tbody id="clients-body"></tbody>
               </table>
+              <div class="list-empty" id="clients-empty">
+                <svg class="ico" aria-hidden="true"><use href="#i-search"/></svg>
+                <p>Nenhum cliente encontrado para essa busca.</p>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section id="vendas" class="section-panel" aria-label="Vendas">
+          <article class="panel">
+            <header class="list-head">
+              <div>
+                <h2><span class="list-title-icon" aria-hidden="true"><svg class="ico"><use href="#i-bag"/></svg></span>Log de vendas</h2>
+                <p class="list-sub">Registros recentes. Edite o valor se a compra tiver sido informada incorretamente.</p>
+              </div>
+              <div class="list-tools">
+                <label class="list-search">
+                  <svg class="ico" aria-hidden="true"><use href="#i-search"/></svg>
+                  <input id="sales-search" type="search" placeholder="Buscar por cliente" autocomplete="off" aria-label="Buscar vendas por cliente">
+                </label>
+                <button class="btn btn-small" type="button" id="sale-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nova Venda</button>
+              </div>
+            </header>
+            <div class="list-kpis" id="sales-kpis" aria-label="Indicadores de vendas"></div>
+            <div class="list-bar">
+              <span class="list-count"><i aria-hidden="true"></i><span id="sales-count" aria-live="polite">0 vendas</span></span>
+              <span>Clique no cabeçalho para ordenar</span>
+            </div>
+            <div class="list-wrap" id="sales-wrap">
+              <table class="list-table sales-table">
+                <thead>
+                  <tr>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="name" data-type="text">Cliente <span class="sort-caret" aria-hidden="true"></span></button></th>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="date" data-type="text">Data e hora <span class="sort-caret" aria-hidden="true"></span></button></th>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="value" data-type="number">Valor <span class="sort-caret" aria-hidden="true"></span></button></th>
+                    <th aria-sort="none"><button class="sort-btn" type="button" data-sort="points" data-type="number">Pontos <span class="sort-caret" aria-hidden="true"></span></button></th>
+                    <th class="no-sort">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="sales-table-body"></tbody>
+              </table>
+              <div class="list-empty" id="sales-empty">
+                <svg class="ico" aria-hidden="true"><use href="#i-search"/></svg>
+                <p>Nenhuma venda encontrada para essa busca.</p>
+              </div>
             </div>
           </article>
         </section>
 
         <section id="regras" class="section-panel" aria-label="Regras">
-          <article class="form-card" id="rule-form-card">
-            <div class="panel-head">
-              <div>
-                <h2 id="rule-form-title">Cadastrar regra</h2>
-                <p>Defina a faixa de compra e os pontos concedidos (exemplo em escala até R$ 1.000,00)</p>
-              </div>
-            </div>
-            <form id="rule-form">
-              <input type="hidden" id="rule-id" value="">
-              <div class="form-grid">
-                <div class="field">
-                  <label for="rule-max">Valor da compra (até R$)
-                    <input class="input" id="rule-max" name="rule-max" type="number" min="0" step="0.01" placeholder="Ex.: 50,00" required>
-                  </label>
-                </div>
-                <div class="field">
-                  <label for="rule-points">Pontos concedidos (base)
-                    <input class="input" id="rule-points" name="rule-points" type="number" min="0" step="1" placeholder="Ex.: 2" required>
-                  </label>
-                </div>
-                <div class="field span-2">
-                  <label for="rule-description">Descrição da regra
-                    <input class="input" id="rule-description" name="rule-description" type="text" placeholder="Ex.: Compras até R$ 50,00">
-                  </label>
-                </div>
-              </div>
-              <div class="form-actions">
-                <button class="btn btn-small" type="submit" id="rule-submit">Cadastrar regra</button>
-                <button class="btn btn-secondary btn-small hidden" type="button" id="rule-cancel">Cancelar edição</button>
-              </div>
-            </form>
-          </article>
-
           <article class="panel">
             <div class="panel-head">
               <div>
-                <h2>Regras cadastradas</h2>
+                <h2><span class="tech-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></span>Regras cadastradas</h2>
                 <p>Escala de pontuação por valor de compra</p>
               </div>
+              <button class="btn btn-small" type="button" id="rule-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Cadastrar Novo</button>
             </div>
-            <div class="promo-box" aria-label="Promoção de pontuação">
-              <div>
-                <h3 style="margin:0 0 0.2rem;font-size:1rem;">Aplicar promoção</h3>
-                <p class="muted small" id="promo-status" style="margin:0;">Multiplique a pontuação em dias de menor movimento para incentivar compras.</p>
+            <div class="promo-box" id="promo-box" aria-label="Promoção de pontuação">
+              <div class="promo-info">
+                <span class="promo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></span>
+                <div>
+                  <h3 class="promo-title">Aplicar promoção</h3>
+                  <p class="muted small" id="promo-status">Aumente os pontos em dias de pouco movimento.</p>
+                </div>
               </div>
-              <div class="promo-actions">
-                <button class="btn btn-secondary btn-small promo-btn active" type="button" data-multiplier="1">Sem promoção</button>
-                <button class="btn btn-secondary btn-small promo-btn" type="button" data-multiplier="1.5">Pontuação x1.5</button>
-                <button class="btn btn-secondary btn-small promo-btn" type="button" data-multiplier="2">Pontuação x2.0</button>
+              <div class="promo-actions" role="group" aria-label="Promoção">
+                <button class="btn btn-secondary btn-small promo-btn active" type="button" data-multiplier="1" aria-pressed="true">Sem promoção</button>
+                <button class="btn btn-secondary btn-small promo-btn" type="button" data-multiplier="1.5" aria-pressed="false">Pontuação x1.5</button>
+                <button class="btn btn-secondary btn-small promo-btn" type="button" data-multiplier="2" aria-pressed="false">Pontuação x2.0</button>
               </div>
             </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Faixa de compra</th>
-                    <th>Pontos</th>
-                    <th>Descrição</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody id="rules-table-body"></tbody>
-              </table>
-            </div>
+            <div id="rules-grid" class="card-grid"></div>
           </article>
         </section>
 
         <section id="premios" class="section-panel" aria-label="Prêmios">
-          <article class="form-card" id="prize-form-card">
-            <div class="panel-head">
-              <div>
-                <h2 id="prize-form-title">Cadastrar prêmio</h2>
-                <p>Informe os detalhes do prêmio e os pontos necessários para resgate</p>
-              </div>
-            </div>
-            <form id="prize-form">
-              <input type="hidden" id="prize-id" value="">
-              <div class="form-grid">
-                <div class="field">
-                  <label for="prize-description">Descrição
-                    <input class="input" id="prize-description" name="prize-description" type="text" placeholder="Ex.: Desconto de R$ 20,00" required>
-                  </label>
-                </div>
-                <div class="field">
-                  <label for="prize-points">Pontos necessários
-                    <input class="input" id="prize-points" name="prize-points" type="number" min="0" step="1" placeholder="Ex.: 800" required>
-                  </label>
-                </div>
-                <div class="field span-2">
-                  <label for="prize-comment">Comentário
-                    <textarea class="input" id="prize-comment" name="prize-comment" placeholder="Observações, condições ou instruções de resgate"></textarea>
-                  </label>
-                </div>
-                <div class="field">
-                  <label for="prize-start">Data de início
-                    <input class="input" id="prize-start" name="prize-start" type="date" required>
-                  </label>
-                </div>
-                <div class="field">
-                  <label for="prize-end">Data de término
-                    <input class="input" id="prize-end" name="prize-end" type="date" required>
-                  </label>
-                </div>
-              </div>
-              <div class="form-actions">
-                <button class="btn btn-small" type="submit" id="prize-submit">Cadastrar prêmio</button>
-                <button class="btn btn-secondary btn-small hidden" type="button" id="prize-cancel">Cancelar edição</button>
-              </div>
-            </form>
-          </article>
-
           <article class="panel">
             <div class="panel-head">
               <div>
-                <h2>Prêmios cadastrados</h2>
+                <h2><span class="tech-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12l3 5-9 11L3 9l3-5z"/><path d="M3 9h18M9 4l-1 5 4 11 4-11-1-5"/></svg></span>Prêmios cadastrados</h2>
                 <p>Gerencie descrições, períodos e pontos necessários</p>
               </div>
+              <button class="btn btn-small" type="button" id="prize-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Cadastrar Novo</button>
             </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Descrição</th>
-                    <th>Comentário</th>
-                    <th>Início</th>
-                    <th>Término</th>
-                    <th>Pontos necessários</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody id="prizes-table-body"></tbody>
-              </table>
-            </div>
+            <div id="prizes-grid" class="card-grid"></div>
           </article>
         </section>
 
         <section id="acao" class="section-panel" aria-label="Ação">
           <article class="panel">
-            <div class="panel-head">
+            <header class="acao-head">
               <div>
-                <h2>Ações e campanhas</h2>
-                <p>Área reservada para planejamento de campanhas e ações de retenção</p>
+                <h2 class="acao-title"><span class="acao-title-icon" aria-hidden="true"><svg class="ico"><use href="#i-bolt"/></svg></span>Ações e campanhas</h2>
+                <p>Campanhas ativas e ideias para a base. Tudo pronto para você executar em poucos cliques.</p>
               </div>
-              <button class="btn btn-small" type="button">Nova ação</button>
+              <button class="btn btn-small" type="button" id="acao-new-btn"><svg class="ico"><use href="#i-plus"/></svg>Nova ação</button>
+            </header>
+
+            <div class="acao-sec"><div class="acao-kpis" id="acao-kpis"></div></div>
+
+            <div class="acao-sec">
+              <h3><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg>Faça hoje</h3>
+              <p>As ações com mais clientes esperando por uma mensagem.</p>
+              <div class="acao-todo" id="acao-todo"></div>
             </div>
-            <ul class="list">
-              <li><span><strong>Dobro de pontos em dias frios</strong><br><span class="muted small">Estimula movimento em períodos de menor fluxo</span></span><span class="badge ok">Ativa</span></li>
-              <li><span><strong>Reativação de clientes ausentes</strong><br><span class="muted small">Oferta para quem passou da média de retorno</span></span><span class="badge warn">Sugestão</span></li>
-              <li><span><strong>Upgrade de frequência</strong><br><span class="muted small">Campanha personalizada por padrão de compra</span></span><span class="badge">Planejada</span></li>
-            </ul>
+
+            <div class="acao-sec">
+              <h3><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg>Todas as campanhas</h3>
+              <p>Cada uma já tem público, mensagem pronta e lista de envio. Escolha, ajuste o texto e envie.</p>
+              <div class="acao-tabs" id="acao-tabs" role="group" aria-label="Filtrar por status"></div>
+              <div class="acao-cards" id="acao-cards"></div>
+            </div>
+
+            <div class="acao-sec">
+              <h3><svg class="ico" aria-hidden="true"><use href="#i-repeat"/></svg>Automações</h3>
+              <p>O que a Senfy faz por você sem precisar abrir o painel.</p>
+              <div class="acao-autos">
+                <div class="acao-auto">
+                  <span class="acao-kpi-i" aria-hidden="true"><svg class="ico"><use href="#i-mail"/></svg></span>
+                  <div><b>Resumo semanal por e-mail</b><small>Toda segunda: clientes sumidos, quem voltou e o que fazer.</small></div>
+                  <button class="acao-sw" id="acao-sw-digest" type="button" role="switch" aria-checked="true" aria-label="Resumo semanal"></button>
+                </div>
+                <div class="acao-auto">
+                  <span class="acao-kpi-i" aria-hidden="true"><svg class="ico"><use href="#i-chat"/></svg></span>
+                  <div><b>Envio automático por WhatsApp</b><small>As mensagens saem sozinhas, sem você clicar.</small></div>
+                  <span class="acao-soon">Em breve</span>
+                </div>
+              </div>
+            </div>
           </article>
         </section>
       </main>
+
+      <dialog id="acao-dialog" class="acao-dialog" aria-labelledby="acao-dialog-title"></dialog>
+      <dialog id="acao-new-dialog" class="acao-dialog" aria-labelledby="acao-new-title"></dialog>
+      <div class="ac-toast" id="acao-toast" role="status"></div>
     </div>
   </div>
+  <div class="modal" id="form-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-overlay" data-close-modal></div>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h2 id="modal-title">Cadastrar nova regra</h2>
+          <p id="modal-subtitle">Defina a faixa de compra e os pontos concedidos.</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal aria-label="Fechar">&times;</button>
+      </div>
+
+      <form id="rule-form" class="modal-form">
+        <input type="hidden" id="rule-id" value="">
+        <div class="form-grid">
+          <div class="field">
+            <label for="rule-max">Valor da compra (até R$)
+              <input class="input" id="rule-max" name="rule-max" type="number" min="0" step="0.01" placeholder="Ex.: 50,00" required>
+            </label>
+          </div>
+          <div class="field">
+            <label for="rule-points">Pontos concedidos (base)
+              <input class="input" id="rule-points" name="rule-points" type="number" min="0" step="1" placeholder="Ex.: 2" required>
+            </label>
+          </div>
+          <div class="field span-2">
+            <label for="rule-description">Descrição da regra
+              <input class="input" id="rule-description" name="rule-description" type="text" placeholder="Ex.: Compras até R$ 50,00">
+            </label>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-small" type="submit" id="rule-submit">Cadastrar regra</button>
+          <button class="btn btn-secondary btn-small" type="button" id="rule-cancel">Cancelar</button>
+        </div>
+      </form>
+
+      <form id="prize-form" class="modal-form" hidden>
+        <input type="hidden" id="prize-id" value="">
+        <div class="form-grid">
+          <div class="field">
+            <label for="prize-description">Descrição
+              <input class="input" id="prize-description" name="prize-description" type="text" placeholder="Ex.: Desconto de R$ 20,00" required>
+            </label>
+          </div>
+          <div class="field">
+            <label for="prize-points">Pontos necessários
+              <input class="input" id="prize-points" name="prize-points" type="number" min="0" step="1" placeholder="Ex.: 800" required>
+            </label>
+          </div>
+          <div class="field span-2">
+            <label for="prize-comment">Comentário
+              <textarea class="input" id="prize-comment" name="prize-comment" placeholder="Observações, condições ou instruções de resgate"></textarea>
+            </label>
+          </div>
+          <div class="field">
+            <label for="prize-start">Data de início
+              <input class="input" id="prize-start" name="prize-start" type="date" required>
+            </label>
+          </div>
+          <div class="field">
+            <label for="prize-end">Data de término
+              <input class="input" id="prize-end" name="prize-end" type="date" required>
+            </label>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-small" type="submit" id="prize-submit">Cadastrar prêmio</button>
+          <button class="btn btn-secondary btn-small" type="button" id="prize-cancel">Cancelar</button>
+        </div>
+      </form>
+
+      <article class="form-card modal-sale-form hidden" id="sale-form-card">
+        <h2 id="sale-form-title" class="hidden">Registrar venda</h2>
+        <form id="sale-form" class="modal-form">
+          <input type="hidden" id="sale-id" value="">
+          <div class="form-grid">
+            <div class="field">
+              <label for="sale-customer">Cliente
+                <input class="input" id="sale-customer" list="sale-customer-options" type="text" placeholder="Nome do cliente" required>
+                <datalist id="sale-customer-options">
+                  <option value="Maria Silva"></option>
+                  <option value="João Pereira"></option>
+                  <option value="Ana Lima"></option>
+                  <option value="Carlos Mendes"></option>
+                  <option value="Fernanda Costa"></option>
+                  <option value="Ricardo Alves"></option>
+                </datalist>
+              </label>
+            </div>
+            <div class="field">
+              <label for="sale-date">Data e hora
+                <input class="input" id="sale-date" type="datetime-local" required>
+              </label>
+            </div>
+            <div class="field">
+              <label for="sale-value">Valor da compra (R$)
+                <input class="input" id="sale-value" type="number" min="0" step="0.01" placeholder="Ex.: 120,00" required>
+              </label>
+            </div>
+            <div class="field">
+              <label for="sale-points">Pontos concedidos
+                <input class="input input-readonly" id="sale-points" type="number" min="0" step="1" value="0" readonly aria-describedby="sale-points-hint">
+                <span class="field-hint" id="sale-points-hint">Informe o valor da compra para calcular os pontos.</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-small" type="submit" id="sale-submit">Registrar venda</button>
+            <button class="btn btn-secondary btn-small hidden" type="button" id="sale-cancel">Cancelar</button>
+          </div>
+        </form>
+      </article>
+    </div>
+  </div>
+
   <div class="backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
 
-  <script src="script.js"></script>
+  <div class="tech-toast" id="tech-toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js?v=2"></script>
+  <script>
+  (function () {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const $ = (id) => document.getElementById(id);
+    const root = document.documentElement;
+
+    /* Tema claro/escuro */
+    root.dataset.theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const themeBtn = $('theme-toggle');
+    if (themeBtn) {
+      const syncTheme = () => {
+        const dark = root.dataset.theme === 'dark';
+        themeBtn.setAttribute('aria-label', dark ? 'Ativar tema claro' : 'Ativar tema escuro');
+        themeBtn.querySelector('.moon').classList.toggle('hidden', dark);
+        themeBtn.querySelector('.sun').classList.toggle('hidden', !dark);
+      };
+      syncTheme();
+      themeBtn.addEventListener('click', () => {
+        root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        syncTheme();
+      });
+    }
+
+    /* Ícones do menu lateral */
+    const navIcons = {
+      resumo: '<path d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-4H4z"/>',
+      clientes: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
+      vendas: '<path d="M5 7h14l-1.2 11a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8zM9 7a3 3 0 0 1 6 0"/>',
+      regras: '<path d="M4 6h10M4 12h16M4 18h8"/><circle cx="18" cy="6" r="2"/><circle cx="15" cy="18" r="2"/>',
+      premios: '<path d="M20 12v8H4v-8M2 8h20v4H2zM12 8v12M12 8H8a2.5 2.5 0 1 1 0-5c2 0 4 2.5 4 5zm0 0h4a2.5 2.5 0 1 0 0-5c-2 0-4 2.5-4 5z"/>',
+      acao: '<path d="M13 3 5 14h6l-1 7 8-11h-6z"/>'
+    };
+    document.querySelectorAll('.nav-item[data-target]').forEach((item) => {
+      if (item.querySelector('svg')) return;
+      const paths = navIcons[item.dataset.target];
+      if (!paths) return;
+      item.insertAdjacentHTML('afterbegin',
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>');
+    });
+
+    /* Helpers compartilhados entre Clientes e Vendas */
+    const ico = (id) => '<svg class="ico" aria-hidden="true"><use href="#' + id + '"/></svg>';
+    const nf = (value, digits = 0) => Number(value).toLocaleString('pt-BR', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    const stripAccents = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const digitsOnly = (s) => String(s || '').replace(/\D/g, '');
+    const formatName = (value) => window.Senfy && window.Senfy.formatCustomerName
+      ? window.Senfy.formatCustomerName(value)
+      : String(value || '').trim();
+    const initials = (name) => String(name || '')
+      .split(' ')
+      .filter((part) => part && !/^(de|da|do|das|dos|e)$/i.test(part))
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join('')
+      .toUpperCase();
+    const countUp = (el, to, dec = 0, prefix = '') => {
+      if (!el) return;
+      if (reduce) { el.textContent = prefix + nf(to, dec); return; }
+      const start = performance.now();
+      const step = (now) => {
+        const progress = Math.min((now - start) / 800, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = prefix + nf(to * eased, dec);
+        if (progress < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+    const renderKpiCards = (target, items) => {
+      if (!target) return;
+      target.innerHTML = items.map((item) =>
+        '<div class="list-kpi"><span class="list-kpi-i">' + ico(item[0]) + '</span><div>' +
+        '<small>' + item[1] + '</small><b data-to="' + item[2] + '" data-dec="' + item[3] + '" data-prefix="' + (item[4] || '') + '">0</b></div></div>'
+      ).join('');
+      target.querySelectorAll('b[data-to]').forEach((el) => countUp(el, Number(el.dataset.to), Number(el.dataset.dec), el.dataset.prefix));
+    };
+    document.querySelectorAll('#sale-customer-options option').forEach((option) => {
+      option.value = formatName(option.value);
+    });
+
+    /* Clientes: mesma estrutura visual de senfy-clientes.html */
+    const CLIENTS = [
+      { name: 'Maria Silva', phone: '(11) 98888-1020', points: 1240, redeems: 3, buys: 18, avg: 12, last: 10, days: ['Seg', 'Qua'], period: 'Manhã' },
+      { name: 'João Pereira', phone: '(11) 97777-3344', points: 860, redeems: 27, buys: 12, avg: 9, last: 16, days: ['Ter', 'Qui'], period: 'Tarde' },
+      { name: 'Ana Lima', phone: '(11) 96666-7788', points: 1020, redeems: 12, buys: 22, avg: 7, last: 3, days: ['Sáb'], period: 'Manhã' },
+      { name: 'Carlos Mendes', phone: '(11) 95555-2211', points: 120, redeems: 0, buys: 3, avg: 30, last: 50, days: ['Qui'], period: 'Tarde' },
+      { name: 'Fernanda Costa', phone: '(11) 94444-8899', points: 2150, redeems: 34, buys: 40, avg: 5, last: 4, days: ['Seg', 'Sex'], period: 'Manhã' },
+      { name: 'Ricardo Alves', phone: '(11) 93333-4578', points: 540, redeems: 9, buys: 6, avg: 18, last: 44, days: ['Qua', 'Sáb'], period: 'Tarde' }
+    ].map((client) => ({ ...client, name: formatName(client.name) }));
+    const clientsTable = document.querySelector('#clientes .clients-table');
+    if (clientsTable) {
+      const TIERS = [
+        { min: 30, key: 'platinum', label: 'Platinum', icon: 'i-diamond', next: null },
+        { min: 21, key: 'gold', label: 'Gold', icon: 'i-star', next: 30 },
+        { min: 11, key: 'silver', label: 'Silver', icon: 'i-shield', next: 21 },
+        { min: 0, key: 'bronze', label: 'Bronze', icon: 'i-medal', next: 11 }
+      ];
+      const getTier = (redeems) => {
+        const tier = TIERS.find((item) => redeems >= item.min) || TIERS[TIERS.length - 1];
+        const missing = tier.next ? Math.max(0, tier.next - redeems) : 0;
+        const tip = tier.next
+          ? tier.label + ' · faltam ' + missing + ' resgate' + (missing === 1 ? '' : 's') + ' para o próximo nível'
+          : tier.label + ' · nível máximo';
+        return { ...tier, tip };
+      };
+      const PALETTE = [
+        ['#2F7D5B', '#0B3D2E'], ['#3B82A0', '#1D4E6B'], ['#7A5FC0', '#43308A'],
+        ['#C0793A', '#8A4A1A'], ['#C0507A', '#8A2A52'], ['#4A9A9A', '#1F6464']
+      ];
+      const tbody = $('clients-body');
+      const headers = Array.from(clientsTable.querySelectorAll('thead th'));
+      const searchInput = $('clients-search');
+      const countEl = $('clients-count');
+      const emptyEl = $('clients-empty');
+      const maxPoints = Math.max.apply(null, CLIENTS.map((client) => client.points));
+      let sortCol = 0;
+      let sortDir = 1;
+
+      const getClientSalesCount = (client) => {
+        const fromSales = window.Senfy && typeof window.Senfy.getSalesCountByCustomer === 'function'
+          ? window.Senfy.getSalesCountByCustomer(client.name)
+          : 0;
+        return Math.max(Number(client.buys) || 0, fromSales);
+      };
+
+      const renderClientsKpis = () => {
+        const sum = (key) => CLIENTS.reduce((total, client) => total + client[key], 0);
+        renderKpiCards($('clients-kpis'), [
+          ['i-users', 'Clientes', CLIENTS.length, 0],
+          ['i-star', 'Pontos em aberto', sum('points'), 0],
+          ['i-gift', 'Resgates', sum('redeems'), 0],
+          ['i-clock', 'Média entre compras (dias)', sum('avg') / CLIENTS.length, 1]
+        ]);
+      };
+
+      const applyClients = () => {
+        const term = searchInput ? searchInput.value.trim() : '';
+        const termNorm = stripAccents(term);
+        const termDigits = digitsOnly(term);
+        const maxSales = Math.max(1, ...CLIENTS.map(getClientSalesCount));
+        const list = CLIENTS.filter((client) => {
+          if (!term) return true;
+          const nameMatch = stripAccents(client.name).includes(termNorm);
+          const phoneMatch = termDigits
+            ? digitsOnly(client.phone).includes(termDigits)
+            : stripAccents(client.phone).includes(termNorm);
+          return nameMatch || phoneMatch;
+        });
+
+        const key = ['name', 'phone', 'points', 'redeems', 'sales', 'avg', 'days'][sortCol];
+        list.sort((a, b) => {
+          const av = key === 'days' ? a.days[0] : key === 'sales' ? getClientSalesCount(a) : a[key];
+          const bv = key === 'days' ? b.days[0] : key === 'sales' ? getClientSalesCount(b) : b[key];
+          if (typeof av === 'number') return (av - bv) * sortDir;
+          return stripAccents(av).localeCompare(stripAccents(bv), 'pt-BR', { sensitivity: 'base' }) * sortDir;
+        });
+
+        tbody.innerHTML = list.map((client, index) => {
+          const idx = CLIENTS.indexOf(client);
+          const pair = PALETTE[idx % PALETTE.length];
+          const isTop = client.points === maxPoints;
+          const fast = client.avg <= 10;
+          const morning = client.period === 'Manhã';
+          const tier = getTier(client.redeems);
+          const salesCount = getClientSalesCount(client);
+          const salesWidth = (salesCount / maxSales * 100).toFixed(1);
+          return '<tr class="' + (isTop ? 'is-top' : '') + '" style="animation-delay:' + (index * 45) + 'ms">' +
+            '<td><div class="who"><span class="avatar" style="--a:' + pair[0] + ';--b:' + pair[1] + '">' + initials(client.name) + '</span>' +
+            '<span class="tier-badge tier-' + tier.key + '" title="' + tier.tip + '" aria-label="' + tier.tip + '">' + ico(tier.icon) + tier.label + '</span>' +
+            '<span>' + client.name + '</span>' + (isTop ? '<span class="tag-top">Top</span>' : '') + '</div></td>' +
+            '<td><span class="phone">' + ico('i-phone') + client.phone + '</span></td>' +
+            '<td class="pts"><b>' + nf(client.points) + '</b><div class="mini"><i data-w="' + (client.points / maxPoints * 100).toFixed(1) + '"></i></div></td>' +
+            '<td><span class="pill soft' + (client.redeems === 0 ? ' zero' : '') + '">' + ico('i-gift') + client.redeems + '</span></td>' +
+            '<td class="pts"><b>' + nf(salesCount) + '</b><div class="mini"><i data-w="' + salesWidth + '"></i></div></td>' +
+            '<td><span class="pill days ' + (fast ? 'fast' : 'slow') + '">' + ico(fast ? 'i-bolt' : 'i-clock') + client.avg + ' dias</span></td>' +
+            '<td><div class="when"><div class="dchips">' + client.days.map((day) => '<span>' + day + '</span>').join('') + '</div>' +
+            '<span class="per ' + (morning ? 'm' : 't') + '">' + ico(morning ? 'i-sun' : 'i-sunset') + client.period + '</span></div></td>' +
+            '</tr>';
+        }).join('');
+
+        headers.forEach((th, i) => th.setAttribute('aria-sort', i === sortCol ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'));
+        if (countEl) countEl.textContent = list.length + (list.length === 1 ? ' cliente' : ' clientes');
+        if (emptyEl) emptyEl.classList.toggle('show', !list.length);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          tbody.querySelectorAll('.mini i').forEach((bar) => { bar.style.width = bar.dataset.w + '%'; });
+        }));
+      };
+
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          clientsTable.classList.add('is-filtering');
+          applyClients();
+        });
+      }
+      clientsTable.querySelectorAll('.sort-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const col = Number(btn.dataset.sort);
+          clientsTable.classList.remove('is-filtering');
+          if (col === sortCol) sortDir *= -1;
+          else { sortCol = col; sortDir = 1; }
+          applyClients();
+        });
+      });
+      const clientsNav = document.querySelector('.nav-item[data-target="clientes"]');
+      if (clientsNav) {
+        clientsNav.addEventListener('click', () => {
+          sortCol = 0; sortDir = 1;
+          if (searchInput) searchInput.value = '';
+          clientsTable.classList.remove('is-filtering');
+          applyClients();
+        });
+      }
+      renderClientsKpis();
+      applyClients();
+      if (window.Senfy) window.Senfy.refreshClients = () => { renderClientsKpis(); applyClients(); };
+    }
+
+    /* Resumo: gráfico, saúde da base, insights e reativação (adaptado de resumo.html) */
+    const rsData = window.Senfy && window.Senfy.resumo;
+    if (rsData) {
+      const rsChart = document.getElementById('resumo-chart');
+      const rsTip = document.getElementById('resumo-tip');
+      const rsSegs = document.getElementById('resumo-segs');
+      const rsInsights = document.getElementById('resumo-insights');
+      const rsInsightNote = document.getElementById('resumo-insight-note');
+      const rsHeatTip = document.getElementById('resumo-heat-tip');
+      const rsMsg = document.getElementById('resumo-msg');
+      const rsClientList = document.getElementById('resumo-client-list');
+      const rsActionTitle = document.getElementById('resumo-action-title');
+      const rsActionHint = document.getElementById('resumo-action-hint');
+      const rsChartHint = document.getElementById('resumo-chart-hint');
+      const rsHeatHint = document.getElementById('resumo-heat-hint');
+      const rsToast = document.getElementById('tech-toast');
+
+      const rsPalette = [
+        ['#2F7D5B', '#0B3D2E'], ['#3B82A0', '#1D4E6B'], ['#7A5FC0', '#43308A'],
+        ['#C0793A', '#8A4A1A'], ['#C0507A', '#8A2A52'], ['#4A9A9A', '#1F6464']
+      ];
+      const rsRatio = (client) => Number(client.last || 0) / Math.max(1, Number(client.avg || 1));
+      const rsSegments = {
+        risk: {
+          label: 'Em risco', desc: 'Passou 1,3x a 2x do ritmo normal',
+          ico: 'i-alert', cls: 'warn', title: 'Clientes para reativar',
+          hint: 'Estão demorando mais que o normal para voltar. Um lembrete agora costuma funcionar.',
+          test: (client) => rsRatio(client) > 1.3 && rsRatio(client) <= 2,
+          msg: 'Oi {nome}! Sentimos sua falta por aqui. Você tem {pontos} pontos na Senfy esperando por você. Passe na loja e aproveite!'
+        },
+        lost: {
+          label: 'Inativos', desc: 'Mais de 2x o ritmo normal',
+          ico: 'i-dn', cls: 'red', title: 'Clientes para recuperar',
+          hint: 'Já passaram muito do ritmo habitual. Vale uma mensagem especial de retorno.',
+          test: (client) => rsRatio(client) > 2,
+          msg: 'Oi {nome}, faz {dias} dias que não nos vemos! Seus {pontos} pontos continuam guardados na Senfy. Volte e use quando quiser.'
+        },
+        ok: {
+          label: 'Ativos', desc: 'Comprando no ritmo normal',
+          ico: 'i-ok', cls: 'ok', title: 'Clientes ativos',
+          hint: 'Estão no ritmo. Reforce o hábito mostrando quanto já acumularam.',
+          test: (client) => rsRatio(client) <= 1.3,
+          msg: 'Oi {nome}! Você já acumulou {pontos} pontos na Senfy. Continue assim e aproveite seus prêmios!'
+        },
+        vip: {
+          label: 'VIP (1.000+ pontos)', desc: 'Seus maiores acumuladores',
+          ico: 'i-crown', cls: 'vip', title: 'Clientes VIP',
+          hint: 'Quem mais acumula merece reconhecimento. Agradeça e mantenha o vínculo.',
+          test: (client) => Number(client.points) >= 1000,
+          msg: 'Oi {nome}, obrigado por ser um dos nossos melhores clientes! Você já tem {pontos} pontos na Senfy. Venha conferir seus prêmios.'
+        }
+      };
+      const rsSegmentOrder = ['risk', 'lost', 'ok', 'vip'];
+      const rsTrendMap = {
+        hoje: [12.4, 8.1, 6.7, -2.3],
+        '7d': [9.2, 5.4, 11.3, 3.8],
+        '15d': [-3.1, 2.6, 7.9, 4.5],
+        '30d': [14.7, 10.2, 9.4, 6.1],
+        '90d': [6.8, -1.4, 4.2, -0.9],
+        '365d': [18.3, 12.7, 15.6, 8.4]
+      };
+      let rsSegment = 'risk';
+      let rsToastTimer;
+
+      const rsMoney = (value) => Number(value).toLocaleString('pt-BR', {
+        style: 'currency', currency: 'BRL', maximumFractionDigits: 0
+      });
+      const rsShowToast = (message) => {
+        if (!rsToast) return;
+        rsToast.innerHTML = ico('i-check') + message;
+        rsToast.classList.add('show');
+        clearTimeout(rsToastTimer);
+        rsToastTimer = setTimeout(() => rsToast.classList.remove('show'), 2200);
+      };
+      const rsMsgFor = (client) => String(rsMsg ? rsMsg.value : '')
+        .replaceAll('{nome}', String(client.name).split(' ')[0])
+        .replaceAll('{pontos}', nf(client.points))
+        .replaceAll('{dias}', client.last);
+
+      const renderResumoStats = (period) => {
+        const info = rsData.overviewByPeriod[period] || rsData.overviewByPeriod['30d'];
+        const label = rsData.periodLabels[period] || period;
+        const setText = (id, value) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = value;
+        };
+        setText('stat-points-total', nf(Math.round(Number(info.salesCount) * 34)));
+        setText('stat-points-total-note', `Pontos creditados no período (${label})`);
+        const trends = rsTrendMap[period] || [4.2, 3.1, 5.6, 2.4];
+        [
+          'stat-sales-total-trend', 'stat-sales-count-trend',
+          'stat-points-total-trend', 'stat-redemptions-total-trend'
+        ].forEach((id, index) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const value = trends[index];
+          const up = value >= 0;
+          el.className = 'stat-trend' + (up ? '' : ' dn');
+          el.innerHTML = ico(up ? 'i-up' : 'i-dn') +
+            Math.abs(value).toString().replace('.', ',') + '% vs. período anterior';
+        });
+      };
+
+      const renderResumoChart = (period) => {
+        if (!rsChart) return;
+        const cfg = rsData.cfg[period] || rsData.cfg['30d'];
+        const values = rsData.series(period);
+        const total = values.reduce((sum, value) => sum + value, 0);
+        if (rsChartHint) rsChartHint.textContent = `Total: ${rsMoney(total)} · dados de exemplo`;
+
+        const W = 720, H = 240, L = 46, B = 26, T = 14, R = 10;
+        const max = Math.max(...values) * 1.12;
+        const X = (index) => L + (W - L - R) * (values.length === 1 ? .5 : index / (values.length - 1));
+        const Y = (value) => T + (H - T - B) * (1 - value / max);
+        const points = values.map((value, index) => [X(index), Y(value)]);
+        const line = points.map((point, index) =>
+          (index ? 'L' : 'M') + point[0].toFixed(1) + ' ' + point[1].toFixed(1)
+        ).join(' ');
+        const area = line + ` L${X(values.length - 1).toFixed(1)} ${H - B} L${X(0).toFixed(1)} ${H - B}Z`;
+        const ticks = [0, .5, 1].map((factor) => max * factor / 1.12);
+        const step = Math.ceil(values.length / 8);
+
+        rsChart.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        rsChart.innerHTML =
+          '<defs>' +
+            '<linearGradient id="resumo-line" x1="0" x2="1">' +
+              '<stop offset="0" stop-color="#2F8A5C"/><stop offset="1" stop-color="#38E0C0"/>' +
+            '</linearGradient>' +
+            '<linearGradient id="resumo-area" x1="0" y1="0" x2="0" y2="1">' +
+              '<stop offset="0" stop-color="#3FA66E" stop-opacity=".28"/>' +
+              '<stop offset="1" stop-color="#3FA66E" stop-opacity="0"/>' +
+            '</linearGradient>' +
+          '</defs>' +
+          '<g class="grid">' + ticks.map((value) =>
+            `<line x1="${L}" x2="${W - R}" y1="${Y(value)}" y2="${Y(value)}"/>` +
+            `<text x="${L - 8}" y="${Y(value) + 4}" text-anchor="end">` +
+            (value >= 1000 ? Math.round(value / 1000) + 'k' : Math.round(value)) + '</text>'
+          ).join('') + '</g>' +
+          values.map((_, index) => index % step === 0
+            ? `<text x="${X(index)}" y="${H - 6}" text-anchor="middle">${cfg.lab(index)}</text>`
+            : '').join('') +
+          `<path class="area" d="${area}"/><path class="line" id="resumo-line-path" d="${line}"/>` +
+          `<line class="cursor" id="resumo-cursor" y1="${T}" y2="${H - B}"/>` +
+          '<circle class="dot" id="resumo-dot" r="6"/>';
+
+        const path = document.getElementById('resumo-line-path');
+        if (path) path.style.setProperty('--len', path.getTotalLength());
+
+        rsChart.onpointermove = (event) => {
+          const rect = rsChart.getBoundingClientRect();
+          const x = (event.clientX - rect.left) / rect.width * W;
+          let index = Math.round((x - L) / (W - L - R) * (values.length - 1));
+          index = Math.max(0, Math.min(values.length - 1, index));
+          const cx = X(index), cy = Y(values[index]);
+          const cursor = document.getElementById('resumo-cursor');
+          const dot = document.getElementById('resumo-dot');
+          if (cursor) {
+            cursor.setAttribute('x1', cx); cursor.setAttribute('x2', cx);
+            cursor.style.opacity = 1;
+          }
+          if (dot) {
+            dot.setAttribute('cx', cx); dot.setAttribute('cy', cy);
+            dot.style.opacity = 1;
+          }
+          if (rsTip) {
+            rsTip.innerHTML = `${cfg.lab(index)}<b>${rsMoney(values[index])}</b>`;
+            rsTip.style.left = cx / W * rect.width + 'px';
+            rsTip.style.top = cy / H * rect.height + 'px';
+            rsTip.style.opacity = 1;
+          }
+        };
+        rsChart.onpointerleave = () => {
+          const cursor = document.getElementById('resumo-cursor');
+          const dot = document.getElementById('resumo-dot');
+          if (cursor) cursor.style.opacity = 0;
+          if (dot) dot.style.opacity = 0;
+          if (rsTip) rsTip.style.opacity = 0;
+        };
+      };
+
+      const renderResumoSegments = () => {
+        if (!rsSegs) return;
+        rsSegs.innerHTML = rsSegmentOrder.map((key) => {
+          const seg = rsSegments[key];
+          const count = CLIENTS.filter(seg.test).length;
+          return `<button class="resumo-seg${rsSegment === key ? ' active' : ''}" type="button" data-seg="${key}" aria-pressed="${rsSegment === key}">` +
+            `<span class="resumo-seg-dot ${seg.cls}">${ico(seg.ico)}</span>` +
+            `<span><strong>${seg.label}</strong><small>${seg.desc}</small></span>` +
+            `<em>${count}</em></button>`;
+        }).join('');
+      };
+
+      const refreshResumoLinks = () => {
+        if (!rsClientList) return;
+        rsClientList.querySelectorAll('[data-wa]').forEach((link) => {
+          const client = CLIENTS[Number(link.dataset.wa)];
+          if (!client) return;
+          link.href = `https://wa.me/55${client.phone.replace(/\D/g, '')}?text=${encodeURIComponent(rsMsgFor(client))}`;
+        });
+      };
+      const renderResumoAction = (resetMessage) => {
+        const seg = rsSegments[rsSegment];
+        if (rsActionTitle) rsActionTitle.textContent = seg.title;
+        if (rsActionHint) rsActionHint.textContent = seg.hint;
+        if (resetMessage && rsMsg) rsMsg.value = seg.msg;
+        if (!rsClientList) return;
+        const list = CLIENTS.filter(seg.test).sort((a, b) => rsRatio(b) - rsRatio(a));
+        rsClientList.innerHTML = list.length
+          ? list.map((client, index) => {
+              const idx = CLIENTS.indexOf(client);
+              const pair = rsPalette[idx % rsPalette.length];
+              const ratio = rsRatio(client);
+              const chipCls = ratio > 2 ? ' red' : ratio > 1.3 ? ' warn' : '';
+              const vipCls = Number(client.points) >= 1000 ? ' vip' : '';
+              return `<div class="resumo-client" style="--a:${pair[0]};--b:${pair[1]};--d:${index * 60}ms">` +
+                `<span class="resumo-avatar">${initials(client.name)}</span>` +
+                `<div><b>${client.name}</b><div class="resumo-chips">` +
+                  `<span class="resumo-chip${chipCls}">${client.last} dias sem comprar</span>` +
+                  `<span class="resumo-chip">Costuma voltar em ${client.avg} dias</span>` +
+                  `<span class="resumo-chip${vipCls}">${nf(client.points)} pts</span>` +
+                '</div></div>' +
+                `<div class="resumo-actions">` +
+                  `<button class="btn btn-secondary btn-small" type="button" data-copy="${idx}">${ico('i-copy')}Copiar</button>` +
+                  `<a class="btn btn-small resumo-wa" target="_blank" rel="noopener" data-wa="${idx}" href="#">${ico('i-chat')}WhatsApp</a>` +
+                '</div></div>';
+            }).join('')
+          : '<div class="resumo-empty">Nenhum cliente neste grupo agora. Bom sinal!</div>';
+        refreshResumoLinks();
+      };
+
+      const highlightResumoCell = (day, hour) => {
+        const heat = document.getElementById('heatmap');
+        if (!heat) return;
+        heat.querySelectorAll('.heatmap-cell.is-hot').forEach((cell) => cell.classList.remove('is-hot'));
+        const cell = heat.querySelector(`.heatmap-cell[data-rs-day="${day}"][data-rs-hour="${hour}"]`);
+        if (!cell) return;
+        cell.classList.add('is-hot');
+        cell.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+        setTimeout(() => cell.classList.remove('is-hot'), 2200);
+      };
+
+      const renderResumoInsights = () => {
+        const heat = document.getElementById('heatmap');
+        if (!heat || !rsInsights) return;
+        const items = [];
+        let dayIndex = -1;
+        let colIndex = -1;
+        Array.from(heat.children).forEach((el) => {
+          if (el.classList.contains('heatmap-day')) {
+            dayIndex += 1; colIndex = -1; return;
+          }
+          if (!el.classList.contains('heatmap-cell')) return;
+          colIndex += 1;
+          if (el.classList.contains('off')) return;
+          const label = el.getAttribute('aria-label') || '';
+          const hour = Number((label.match(/às (\d+)h/) || [])[1]);
+          el.dataset.rsDay = String(dayIndex);
+          el.dataset.rsHour = String(colIndex);
+          items.push({
+            el, day: label.split(' às ')[0], hour,
+            value: Number(el.textContent), dayIndex, colIndex
+          });
+        });
+        if (!items.length) return;
+
+        const peak = items.reduce((best, item) => item.value > best.value ? item : best, items[0]);
+        const low = items.reduce((best, item) => item.value < best.value ? item : best, items[0]);
+        const dayTotals = {};
+        const total = items.reduce((sum, item) => {
+          dayTotals[item.day] = (dayTotals[item.day] || 0) + item.value;
+          return sum + item.value;
+        }, 0);
+        const busiest = Object.entries(dayTotals).sort((a, b) => b[1] - a[1])[0];
+
+        const insights = [
+          [peak, 'i-fire', 'Pico de movimento'],
+          [low, 'i-snow', 'Momento mais fraco'],
+          [low, 'i-bolt', 'Teste uma promoção x2']
+        ];
+        rsInsights.innerHTML = insights.map(([item, icon, label]) =>
+          `<button class="resumo-insight" type="button" data-day="${item.dayIndex}" data-hour="${item.colIndex}">` +
+            `<span class="dot-s">${ico(icon)}</span>` +
+            `<span><small>${label}</small><b>${item.day}, ${item.hour}h</b></span>` +
+          '</button>'
+        ).join('');
+        if (rsInsightNote && busiest && total) {
+          rsInsightNote.textContent = `${busiest[0]} concentra ${Math.round(busiest[1] / total * 100)}% das compras. ` +
+            'Use o horário mais fraco para uma ação de reativação ou para um multiplicador de pontos.';
+        }
+      };
+
+      const renderResumoPeriod = (period) => {
+        const label = rsData.periodLabels[period] || period;
+        if (rsHeatHint) {
+          const scope = period === 'hoje' || period === '7d' ? 'por semana' : `em ${label}`;
+          rsHeatHint.textContent = `Compras por dia e horário, ${scope} · dados de exemplo`;
+        }
+        renderResumoStats(period);
+        renderResumoChart(period);
+        requestAnimationFrame(renderResumoInsights);
+      };
+
+      const rsPeriodButtons = Array.from(document.querySelectorAll('.period-tab[data-period]'));
+      const rsActivePeriod = (rsPeriodButtons.find((button) => button.classList.contains('active')) || rsPeriodButtons[0] || {}).dataset?.period || '30d';
+      rsPeriodButtons.forEach((button) => {
+        button.addEventListener('click', () => renderResumoPeriod(button.dataset.period));
+      });
+
+      if (rsSegs) {
+        rsSegs.addEventListener('click', (event) => {
+          const button = event.target.closest('.resumo-seg');
+          if (!button) return;
+          rsSegment = button.dataset.seg;
+          renderResumoSegments();
+          renderResumoAction(true);
+        });
+      }
+      if (rsInsights) {
+        rsInsights.addEventListener('click', (event) => {
+          const button = event.target.closest('.resumo-insight');
+          if (!button) return;
+          highlightResumoCell(button.dataset.day, button.dataset.hour);
+        });
+      }
+      if (rsMsg) rsMsg.addEventListener('input', refreshResumoLinks);
+      const rsVars = document.querySelector('#resumo .resumo-vars');
+      if (rsVars && rsMsg) {
+        rsVars.addEventListener('click', (event) => {
+          const button = event.target.closest('button[data-var]');
+          if (!button) return;
+          rsMsg.setRangeText(button.dataset.var, rsMsg.selectionStart, rsMsg.selectionEnd, 'end');
+          rsMsg.focus();
+          refreshResumoLinks();
+        });
+      }
+      if (rsClientList) {
+        rsClientList.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-copy]');
+          if (!button) return;
+          const client = CLIENTS[Number(button.dataset.copy)];
+          if (!client) return;
+          const copy = () => rsShowToast('Mensagem copiada');
+          const fail = () => rsShowToast('Não foi possível copiar');
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(rsMsgFor(client)).then(copy, fail);
+          } else {
+            fail();
+          }
+        });
+      }
+      const heatEl = document.getElementById('heatmap');
+      if (heatEl && rsHeatTip) {
+        heatEl.addEventListener('pointermove', (event) => {
+          const cell = event.target.closest('.heatmap-cell:not(.off)');
+          if (!cell) { rsHeatTip.style.opacity = 0; return; }
+          const label = cell.getAttribute('aria-label') || '';
+          const value = Number(cell.textContent);
+          rsHeatTip.innerHTML = `${label.split(':')[0]}<b>${value} ${value === 1 ? 'compra' : 'compras'}</b>`;
+          rsHeatTip.style.left = event.clientX + 'px';
+          rsHeatTip.style.top = event.clientY + 'px';
+          rsHeatTip.style.opacity = 1;
+        });
+        heatEl.addEventListener('pointerleave', () => { rsHeatTip.style.opacity = 0; });
+      }
+
+      renderResumoPeriod(rsActivePeriod);
+      renderResumoSegments();
+      renderResumoAction(true);
+    }
+
+    /* Atalho "/" para a busca da seção visível */
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target;
+      const tag = ((target && target.tagName) || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || (target && target.isContentEditable)) return;
+      const active = document.querySelector('.section-panel.active');
+      const input = active && active.querySelector('.list-search input');
+      if (input) { event.preventDefault(); input.focus(); }
+    });
+
+    /* Vendas: KPIs, busca e ordenação sobre a tabela renderizada por script.js */
+    const salesTable = document.querySelector('#vendas .sales-table');
+    if (salesTable) {
+      const salesBody = $('sales-table-body');
+      const salesSearch = $('sales-search');
+      const salesCount = $('sales-count');
+      const salesEmpty = $('sales-empty');
+      const salesHeaders = Array.from(salesTable.querySelectorAll('thead th'));
+      let salesSortKey = 'date';
+      let salesSortDir = -1;
+
+      const updateSalesKpis = () => {
+        const rows = Array.from(salesBody.querySelectorAll('tr[data-name]'));
+        const total = rows.reduce((sum, tr) => sum + (Number(tr.dataset.value) || 0), 0);
+        const points = rows.reduce((sum, tr) => sum + (Number(tr.dataset.points) || 0), 0);
+        renderKpiCards($('sales-kpis'), [
+          ['i-coin', 'Total em vendas', total.toFixed(2), 2, 'R$ '],
+          ['i-receipt', 'Vendas registradas', rows.length, 0],
+          ['i-star', 'Pontos concedidos', points, 0],
+          ['i-clock', 'Ticket médio', rows.length ? total / rows.length : 0, 2, 'R$ ']
+        ]);
+      };
+
+      const applySalesView = () => {
+        const rows = Array.from(salesBody.querySelectorAll('tr[data-name]'));
+        const term = stripAccents(salesSearch ? salesSearch.value.trim() : '');
+        const list = rows.filter((tr) => !term || stripAccents(tr.dataset.name).includes(term));
+        const dir = salesSortDir;
+        list.sort((a, b) => {
+          const av = a.dataset[salesSortKey];
+          const bv = b.dataset[salesSortKey];
+          if (salesSortKey === 'value' || salesSortKey === 'points') return (Number(av) - Number(bv)) * dir;
+          return String(av).localeCompare(String(bv), 'pt-BR', { sensitivity: 'base' }) * dir;
+        });
+        salesBody.innerHTML = '';
+        list.forEach((tr) => salesBody.appendChild(tr));
+        if (salesEmpty) salesEmpty.classList.toggle('show', !list.length);
+        if (salesCount) salesCount.textContent = list.length + (list.length === 1 ? ' venda' : ' vendas');
+        salesHeaders.forEach((th, i) => {
+          const keys = ['name', 'date', 'value', 'points'];
+          const active = keys[i] === salesSortKey;
+          th.setAttribute('aria-sort', active ? (salesSortDir === 1 ? 'ascending' : 'descending') : 'none');
+        });
+      };
+
+      window.Senfy.onSalesRendered = () => {
+        updateSalesKpis();
+        applySalesView();
+        if (typeof window.Senfy.refreshClients === 'function') window.Senfy.refreshClients();
+      };
+
+      if (salesSearch) salesSearch.addEventListener('input', () => {
+        salesTable.classList.add('is-filtering');
+        applySalesView();
+      });
+      salesTable.querySelectorAll('.sort-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.sort;
+          salesTable.classList.remove('is-filtering');
+          if (key === salesSortKey) salesSortDir *= -1;
+          else { salesSortKey = key; salesSortDir = key === 'name' || key === 'date' ? 1 : -1; }
+          applySalesView();
+        });
+      });
+      const salesNav = document.querySelector('.nav-item[data-target="vendas"]');
+      if (salesNav) salesNav.addEventListener('click', () => {
+        salesSortKey = 'date'; salesSortDir = -1;
+        if (salesSearch) salesSearch.value = '';
+        salesTable.classList.remove('is-filtering');
+        applySalesView();
+      });
+
+      updateSalesKpis();
+      applySalesView();
+    }
+
+    /* Período: pill deslizante e atalhos 1 a 6 */
+    const tabsWrap = document.querySelector('.period-tabs');
+    const tabs = Array.from(document.querySelectorAll('.period-tab[data-period]'));
+    const pill = tabsWrap && tabsWrap.querySelector('.period-pill');
+    const movePill = () => {
+      if (!pill || !tabs.length) return;
+      const active = tabs.find((tab) => tab.classList.contains('active')) || tabs[0];
+      pill.style.left = active.offsetLeft + 'px';
+      pill.style.width = active.offsetWidth + 'px';
+    };
+    tabs.forEach((tab) => tab.addEventListener('click', () => requestAnimationFrame(movePill)));
+    window.addEventListener('resize', movePill);
+    requestAnimationFrame(movePill);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target;
+      const tag = ((target && target.tagName) || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || (target && target.isContentEditable)) return;
+      const number = Number(event.key);
+      if (number >= 1 && number <= 6 && tabs[number - 1]) tabs[number - 1].click();
+    });
+
+    /* Contadores animados dos KPIs */
+    const money = (value) => Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const integer = (value) => Math.round(value).toLocaleString('pt-BR');
+    const parseNumber = (text) => Number(String(text).replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.'));
+
+    const kpis = [
+      { el: $('stat-sales-total'), fmt: money },
+      { el: $('stat-sales-count'), fmt: integer },
+      { el: $('stat-points-total'), fmt: integer },
+      { el: $('stat-redemptions-total'), fmt: integer }
+    ].filter((kpi) => kpi.el);
+    kpis.forEach((kpi) => { kpi.value = parseNumber(kpi.el.textContent) || 0; });
+
+    const countTo = (kpi, from, to) => {
+      kpi.token = (kpi.token || 0) + 1;
+      const token = kpi.token;
+      if (reduce) { kpi.el.textContent = kpi.fmt(to); return; }
+      const start = performance.now();
+      const step = (now) => {
+        if (kpi.token !== token) return;
+        const progress = Math.min((now - start) / 700, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        kpi.el.textContent = kpi.fmt(from + (to - from) * eased);
+        if (progress < 1) requestAnimationFrame(step);
+        else kpi.el.textContent = kpi.fmt(to);
+      };
+      requestAnimationFrame(step);
+    };
+    const animateKpis = () => {
+      kpis.forEach((kpi) => {
+        const next = parseNumber(kpi.el.textContent);
+        if (!Number.isFinite(next) || next === kpi.value) return;
+        const from = kpi.value;
+        kpi.value = next;
+        if (!reduce) kpi.el.textContent = kpi.fmt(from);
+        countTo(kpi, from, next);
+      });
+    };
+    tabs.forEach((tab) => tab.addEventListener('click', () => requestAnimationFrame(animateKpis)));
+
+    /* Mapa de calor: rolagem, foco, animação e menor movimento */
+    const heat = $('heatmap');
+    const readout = $('heatmap-readout');
+    const idleText = readout ? readout.textContent : '';
+    if (heat) {
+      if (!heat.parentElement.classList.contains('heatmap-scroll')) {
+        const wrap = document.createElement('div');
+        wrap.className = 'heatmap-scroll';
+        heat.parentNode.insertBefore(wrap, heat);
+        wrap.appendChild(heat);
+      }
+
+      const decorate = () => {
+        let day = -1;
+        let col = -1;
+        const active = [];
+        Array.from(heat.children).forEach((el) => {
+          if (el.classList.contains('heatmap-day')) { day += 1; col = -1; return; }
+          if (!el.classList.contains('heatmap-cell')) return;
+          col += 1;
+          if (el.classList.contains('off')) return;
+          el.dataset.day = String(day);
+          el.dataset.hour = String(col);
+          el.tabIndex = 0;
+          el.setAttribute('role', 'img');
+          el.style.setProperty('--d', reduce ? '0s' : (active.length * 14) + 'ms');
+          active.push(el);
+        });
+        active.forEach((cell) => cell.classList.remove('is-min'));
+        let min = null;
+        active.forEach((cell) => {
+          const value = Number(cell.textContent);
+          if (!min || value < min.value) min = { cell, value };
+        });
+        if (min) min.cell.classList.add('is-min');
+      };
+      decorate();
+      new MutationObserver(decorate).observe(heat, { childList: true, subtree: true });
+
+      let css = '#heatmap:has(.heatmap-cell:hover) .heatmap-cell,#heatmap:has(.heatmap-cell:focus-visible) .heatmap-cell{opacity:.35}';
+      css += '#heatmap .heatmap-cell:hover,#heatmap .heatmap-cell:focus-visible{opacity:1;transform:scale(1.06);z-index:2}';
+      for (let d = 0; d < 6; d += 1) {
+        css += '#heatmap:has(.heatmap-cell[data-day="' + d + '"]:hover) .heatmap-cell[data-day="' + d + '"],';
+        css += '#heatmap:has(.heatmap-cell[data-day="' + d + '"]:focus-visible) .heatmap-cell[data-day="' + d + '"]{opacity:1}';
+      }
+      for (let h = 0; h < 12; h += 1) {
+        css += '#heatmap:has(.heatmap-cell[data-hour="' + h + '"]:hover) .heatmap-cell[data-hour="' + h + '"],';
+        css += '#heatmap:has(.heatmap-cell[data-hour="' + h + '"]:focus-visible) .heatmap-cell[data-hour="' + h + '"]{opacity:1}';
+      }
+      document.head.appendChild(Object.assign(document.createElement('style'), { textContent: css }));
+
+      const show = (cell) => {
+        if (readout) readout.textContent = cell.getAttribute('aria-label') || '';
+      };
+      heat.addEventListener('mouseover', (event) => {
+        const cell = event.target.closest('.heatmap-cell:not(.off)');
+        if (cell) show(cell);
+      });
+      heat.addEventListener('focusin', (event) => {
+        const cell = event.target.closest('.heatmap-cell:not(.off)');
+        if (cell) show(cell);
+      });
+      heat.addEventListener('mouseout', (event) => {
+        if (!event.relatedTarget || !heat.contains(event.relatedTarget)) {
+          if (readout) readout.textContent = idleText;
+        }
+      });
+      heat.addEventListener('focusout', () => {
+        if (readout) readout.textContent = idleText;
+      });
+    }
+
+    /* Vendas: formulário no modal centralizado (mesmo padrão de Regras/Prêmios) */
+    const saleCard = $('sale-form-card');
+    const saleNew = $('sale-new');
+    const saleCancelBtn = $('sale-cancel');
+    const saleFormEl = $('sale-form');
+    const saleCustomerField = $('sale-customer');
+    const saleValueField = $('sale-value');
+    const saleIdField = $('sale-id');
+    const salesBody = $('sales-table-body');
+    const formModal = $('form-modal');
+    const modalTitle = $('modal-title');
+    const modalSubtitle = $('modal-subtitle');
+    const ruleForm = $('rule-form');
+    const prizeForm = $('prize-form');
+
+    if (formModal && saleCard && saleNew && saleFormEl) {
+      const saleSubtitle = 'Informe os dados da compra. Os pontos são calculados pela faixa de regra.';
+      let openingNew = false;
+      let editingSaleId = null;
+
+      const hideSaleCard = () => saleCard.classList.add('hidden');
+
+      const closeSaleModal = () => {
+        formModal.hidden = true;
+        document.body.style.overflow = '';
+        hideSaleCard();
+        editingSaleId = null;
+      };
+
+      // Fechamento unificado: X, clique fora do cartão e Esc fecham qualquer formulário
+      const closeAnyModal = () => closeSaleModal();
+      formModal.querySelectorAll('[data-close-modal]').forEach((el) => {
+        el.addEventListener('click', closeAnyModal);
+      });
+      formModal.addEventListener('click', (event) => {
+        if (event.target === formModal) closeAnyModal();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeAnyModal();
+      });
+
+      const openSaleModal = (editing) => {
+        if (ruleForm) ruleForm.hidden = true;
+        if (prizeForm) prizeForm.hidden = true;
+        saleCard.classList.remove('hidden');
+        if (modalTitle) modalTitle.textContent = editing ? 'Editar venda' : 'Nova venda';
+        if (modalSubtitle) modalSubtitle.textContent = saleSubtitle;
+        formModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => saleCustomerField.focus());
+      };
+
+      saleNew.addEventListener('click', () => {
+        openingNew = true;
+        saleCancelBtn.click(); // reutiliza resetSaleForm() de script.js
+        openingNew = false;
+        editingSaleId = null;
+        openSaleModal(false);
+      });
+
+      saleCancelBtn.addEventListener('click', () => {
+        if (!openingNew) closeSaleModal();
+      });
+
+      if (salesBody) {
+        salesBody.addEventListener('click', (event) => {
+          const btn = event.target.closest('button[data-action]');
+          if (!btn) return;
+          if (btn.dataset.action === 'edit-sale') {
+            editingSaleId = btn.dataset.id;
+            openSaleModal(true);
+          }
+          if (btn.dataset.action === 'delete-sale' && editingSaleId === btn.dataset.id && saleIdField && !saleIdField.value) {
+            closeSaleModal();
+          }
+        });
+      }
+
+      saleFormEl.addEventListener('submit', () => {
+        // script.js limpa os campos somente quando o salvamento é válido
+        if (!saleCustomerField.value && !saleValueField.value) closeSaleModal();
+      });
+
+      // Mantém apenas um formulário visível no modal compartilhado
+      $('rule-new')?.addEventListener('click', hideSaleCard);
+      $('prize-new')?.addEventListener('click', hideSaleCard);
+      ['rules-grid', 'prizes-grid'].forEach((id) => {
+        $(id)?.addEventListener('click', (event) => {
+          if (event.target.closest('button[data-action="edit-rule"], button[data-action="edit-prize"]')) hideSaleCard();
+        });
+      });
+    }
+
+    /* ===== Ações e campanhas (adaptado de acoes.html) ===== */
+    (() => {
+      const aq = (sel) => document.querySelector(sel);
+      const aIco = (id) => ico(id);
+      const aNf = (n) => Math.round(n).toLocaleString('pt-BR');
+      const aBrl = (n) => Number(n).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+      const aIni = (name) => String(name).split(' ').map((p) => p[0]).slice(0, 2).join('');
+      const aRatio = (c) => c.last / c.avg;
+      const PAL = [
+        ['#2f8a5c', '#1f5a3d'], ['#3b82a0', '#1d4e6b'], ['#7a5fc0', '#43308a'],
+        ['#c0793a', '#8a4a1a'], ['#c0507a', '#8a2a52'], ['#4a9a9a', '#1f6464']
+      ];
+      const AUD = {
+        absent: { label: 'Clientes ausentes', test: (c) => aRatio(c) > 1.3 },
+        vip: { label: 'Clientes VIP (1.000+ pontos)', test: (c) => c.points >= 1000 },
+        newc: { label: 'Clientes novos (até 3 compras)', test: (c) => c.buys <= 3 },
+        slow: { label: 'Compram a cada 14+ dias', test: (c) => c.avg >= 14 },
+        loyal: { label: 'Clientes ativos', test: (c) => aRatio(c) <= 1.3 },
+        all: { label: 'Toda a base', test: () => true }
+      };
+      const ST = { ativa: 'Ativa', ideia: 'Ideia', planejada: 'Planejada', concluida: 'Concluída' };
+      const SLOTS = ['Sáb 7h', 'Sáb 18h', 'Seg 7h', 'Ter 7h', 'Qui 7h', 'Sáb 15h'];
+      let camps = [
+        { id: 'promo', kind: 'promo', icon: 'i-snow', title: 'Dobro de pontos em dias frios', desc: 'Estimula movimento em períodos de menor fluxo.', status: 'ativa', aud: 'all',
+          msg: 'Oi {nome}! Neste(s) horário(s): {horarios}, toda compra vale pontos x{mult} na Senfy. Aproveite!' },
+        { id: 'react', kind: 'msg', icon: 'i-back', title: 'Reativação de clientes ausentes', desc: 'Oferta para quem passou da média de retorno.', status: 'ideia', aud: 'absent',
+          msg: 'Oi {nome}! Sentimos sua falta por aqui. Você tem {pontos} pontos na Senfy esperando por você. Passe na loja e aproveite!' },
+        { id: 'freq', kind: 'msg', icon: 'i-repeat', title: 'Upgrade de frequência', desc: 'Campanha personalizada por padrão de compra. Combine o bônus com sua loja.', status: 'planejada', aud: 'slow',
+          msg: 'Oi {nome}! Faça 2 compras nos próximos 15 dias e ganhe pontos extras na Senfy. Vale voltar logo!' },
+        { id: 'vip', kind: 'msg', icon: 'i-crown', title: 'Agradecimento aos VIP', desc: 'Reconheça quem mais acumula e mantenha o vínculo.', status: 'ideia', aud: 'vip',
+          msg: 'Oi {nome}, obrigado por ser um dos nossos melhores clientes! Você já tem {pontos} pontos na Senfy. Venha conferir seus prêmios.' },
+        { id: 'second', kind: 'msg', icon: 'i-seed', title: 'Incentivo à segunda compra', desc: 'Faça o cliente novo criar o hábito de voltar.', status: 'ideia', aud: 'newc',
+          msg: 'Oi {nome}, que bom ter você por aqui! Na próxima compra você acumula mais pontos e chega mais perto do primeiro prêmio. Te esperamos!' },
+        { id: 'refer', kind: 'msg', icon: 'i-share', title: 'Indique um amigo', desc: 'Peça indicação para quem já gosta da loja. Combine o benefício antes.', status: 'ideia', aud: 'loyal',
+          msg: 'Oi {nome}! Traga um amigo para conhecer a loja. Quando ele comprar, vocês dois ganham pontos na Senfy.' }
+      ];
+      let promo = { mult: 2, slots: new Set(['Sáb 7h', 'Seg 7h']) };
+      let log = [
+        { c: 'react', i: 3, ago: 5, ret: true, val: 94 }, { c: 'react', i: 5, ago: 5, ret: false, val: 0 },
+        { c: 'vip', i: 0, ago: 8, ret: true, val: 120 }, { c: 'vip', i: 4, ago: 8, ret: true, val: 86 },
+        { c: 'vip', i: 2, ago: 8, ret: true, val: 142 }
+      ];
+      let filter = 'todas';
+      let openId = null;
+      let toastTimer;
+      const dlg = $('acao-dialog');
+      const nd = $('acao-new-dialog');
+      const toast = $('acao-toast');
+
+      const say = (message) => {
+        if (!toast) return;
+        toast.innerHTML = aIco('i-check') + message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2300);
+      };
+      const audience = (c) => CLIENTS.map((x, i) => ({ x, i })).filter((o) => AUD[c.aud].test(o.x)).sort((a, b) => aRatio(b.x) - aRatio(a.x));
+      const sentOf = (c, i) => log.find((l) => l.c === c.id && l.i === i);
+      const pending = (c) => (c.kind === 'msg' ? audience(c).filter((o) => !sentOf(c, o.i)).length : 0);
+      const fill = (text, cl, c) => text.replaceAll('{nome}', cl.name.split(' ')[0])
+        .replaceAll('{pontos}', aNf(cl.points)).replaceAll('{dias}', cl.last)
+        .replaceAll('{mult}', String(promo.mult).replace('.', ','))
+        .replaceAll('{horarios}', [...promo.slots].join(', ') || 'horários selecionados');
+      const ago = (l) => l.ts ? 'agora há pouco' : `há ${l.ago} dias`;
+
+      function renderKpis() {
+        const sent = log.length;
+        const back = log.filter((l) => l.ret).length;
+        const rec = log.reduce((sum, l) => sum + l.val, 0);
+        const on = camps.filter((c) => c.status === 'ativa').length;
+        const K = [
+          ['i-bolt', 'Ações ativas', on, aNf],
+          ['i-chat', 'Mensagens enviadas', sent, aNf],
+          ['i-back', 'Clientes que voltaram', back, aNf],
+          ['i-cash', 'Venda recuperada', rec, aBrl]
+        ];
+        aq('#acao-kpis').innerHTML = K.map(([ic, label, value, fmt]) =>
+          `<div class="acao-kpi"><span class="acao-kpi-i">${aIco(ic)}</span><div><small>${label}</small><b>${fmt(value)}</b></div></div>`
+        ).join('');
+      }
+
+      function renderTodo() {
+        const rec = camps.filter((c) => c.kind === 'msg' && pending(c) > 0 && c.status !== 'concluida')
+          .sort((a, b) => pending(b) - pending(a)).slice(0, 3);
+        aq('#acao-todo').innerHTML = rec.length ? rec.map((c, k) => `<div class="acao-td" style="animation-delay:${k * 80}ms"><span class="n">${k + 1}</span><b>${c.title}</b>
+          <p>${pending(c)} ${pending(c) === 1 ? 'cliente espera' : 'clientes esperam'} sua mensagem.</p>
+          <button class="btn btn-small" type="button" data-acao-open="${c.id}">${aIco('i-chat')}Enviar agora</button></div>`).join('')
+          : '<div class="acao-empty">Tudo em dia. Nenhuma mensagem pendente hoje.</div>';
+      }
+
+      function renderTabs() {
+        const T = [['todas', 'Todas'], ['ativa', 'Ativas'], ['ideia', 'Ideias'], ['planejada', 'Planejadas'], ['concluida', 'Concluídas']];
+        aq('#acao-tabs').innerHTML = T.map(([k, l]) =>
+          `<button type="button" data-acao-f="${k}" aria-pressed="${filter === k}">${l}</button>`
+        ).join('');
+      }
+
+      function renderCards() {
+        const list = camps.filter((c) => filter === 'todas' || c.status === filter);
+        aq('#acao-cards').innerHTML = list.length ? list.map((c, k) => {
+          const au = audience(c);
+          const sent = au.filter((o) => sentOf(c, o.i)).length;
+          const pc = au.length ? (sent / au.length) * 100 : 0;
+          const body = c.kind === 'promo'
+            ? `<div class="acao-stats"><span class="acao-chip g">${aIco('i-bolt')}x${String(promo.mult).replace('.', ',')}</span><span class="acao-chip">${promo.slots.size} ${promo.slots.size === 1 ? 'horário' : 'horários'}</span></div>`
+            : `<div class="acao-stats"><span class="acao-chip">${aIco('i-users')}${au.length} ${au.length === 1 ? 'cliente' : 'clientes'}</span>${pending(c) ? `<span class="acao-chip y">${pending(c)} para enviar</span>` : '<span class="acao-chip g">Tudo enviado</span>'}</div>
+               <div class="acao-prog" title="${sent} de ${au.length} enviados"><i data-w="${pc}"></i></div>`;
+          return `<article class="acao-card ac-${c.status}" style="animation-delay:${k * 60}ms">
+            <div class="acao-card-top"><span class="acao-card-i">${aIco(c.icon)}</span><div><h4>${c.title}</h4><p>${c.desc}</p></div><span class="acao-pill">${ST[c.status]}</span></div>
+            ${body}<div class="acao-card-act"><button class="btn btn-small" type="button" data-acao-open="${c.id}">${c.kind === 'promo' ? 'Configurar' : 'Abrir e enviar'}</button></div>
+          </article>`;
+        }).join('') : '<div class="acao-empty" style="grid-column:1/-1">Nenhuma campanha neste filtro.</div>';
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          aq('#acao-cards')?.querySelectorAll('.acao-prog i').forEach((e) => { e.style.width = e.dataset.w + '%'; });
+        }));
+      }
+
+      function renderAll() { renderKpis(); renderTodo(); renderTabs(); renderCards(); }
+
+      function statusSeg(c) {
+        return `<div class="ac-seg" id="ac-st-seg">${Object.entries(ST).map(([k, l]) =>
+          `<button type="button" data-acao-st="${k}" aria-pressed="${c.status === k}">${l}</button>`
+        ).join('')}</div>`;
+      }
+
+      function openCamp(id) {
+        const c = camps.find((x) => x.id === id);
+        if (!c) return;
+        openId = id;
+        const head = `<div class="ac-dh"><span class="acao-card-i">${aIco(c.icon)}</span><div><h2 id="acao-dialog-title">${c.title}</h2><p>${c.desc}</p></div>
+          <button class="ac-x" type="button" data-acao-close aria-label="Fechar">${aIco('i-x')}</button></div>`;
+        let body;
+        if (c.kind === 'promo') {
+          body = `<div class="ac-db"><div><h4>Situação</h4>${statusSeg(c)}</div>
+            <div class="ac-two"><div>
+              <h4>Multiplicador de pontos</h4>
+              <div class="ac-seg" id="ac-m-seg">${[1.5, 2].map((m) => `<button type="button" data-acao-m="${m}" aria-pressed="${promo.mult === m}">x${String(m).replace('.', ',')}</button>`).join('')}</div>
+              <h4 style="margin-top:1.1rem">Horários mais fracos (do mapa de calor)</h4>
+              <div class="ac-slots" id="ac-slots">${SLOTS.map((s) => `<button type="button" data-acao-s="${s}" aria-pressed="${promo.slots.has(s)}">${s}</button>`).join('')}</div>
+            </div><div>
+              <h4>Aviso para a base (opcional)</h4>
+              <textarea class="ac-textarea" id="ac-msg">${c.msg}</textarea>
+              <div class="ac-vars">Inserir: <button type="button" data-acao-v="{nome}">{nome}</button><button type="button" data-acao-v="{horarios}">{horarios}</button><button type="button" data-acao-v="{mult}">{mult}</button></div>
+            </div></div>
+            <div><h4>Prévia</h4><div class="ac-prev"><small>Mensagem para ${CLIENTS[0].name.split(' ')[0]}</small><span id="ac-prev"></span></div></div>
+            <div><h4>Enviar o aviso</h4><div class="ac-rl" id="ac-rl"></div></div></div>`;
+        } else {
+          const au = audience(c);
+          const sent = au.filter((o) => sentOf(c, o.i)).length;
+          const ret = au.filter((o) => sentOf(c, o.i) && sentOf(c, o.i).ret).length;
+          const val = au.reduce((sum, o) => sum + ((sentOf(c, o.i) && sentOf(c, o.i).val) || 0), 0);
+          body = `<div class="ac-db"><div class="ac-two"><div>
+              <h4>Situação</h4>${statusSeg(c)}<h4 style="margin-top:1.1rem">Resultado</h4>
+              <div class="ac-res"><div><b>${sent}</b><small>enviadas</small></div><div><b>${ret}</b><small>voltaram</small></div><div><b>${aBrl(val)}</b><small>recuperado</small></div></div>
+            </div><div>
+              <h4>Para quem (${AUD[c.aud].label})</h4>
+              <p class="muted" style="font-size:.85rem">${au.length} ${au.length === 1 ? 'cliente' : 'clientes'} neste público agora. A lista se atualiza com o ritmo de compra de cada um.</p>
+            </div></div>
+            <div class="ac-two"><div>
+              <h4>Mensagem pronta (edite se quiser)</h4>
+              <textarea class="ac-textarea" id="ac-msg">${c.msg}</textarea>
+              <div class="ac-vars">Inserir: <button type="button" data-acao-v="{nome}">{nome}</button><button type="button" data-acao-v="{pontos}">{pontos}</button><button type="button" data-acao-v="{dias}">{dias}</button></div>
+            </div><div>
+              <h4>Prévia</h4><div class="ac-prev"><small id="ac-pv-n"></small><span id="ac-prev"></span></div>
+            </div></div>
+            <div><h4>Lista de envio</h4><div class="ac-rl" id="ac-rl"></div></div></div>`;
+        }
+        dlg.innerHTML = head + body + `<div class="ac-df"><button class="btn btn-secondary btn-small" type="button" data-acao-close>Fechar</button></div>`;
+        if (!dlg.open) dlg.showModal();
+        paint();
+      }
+
+      function paint() {
+        const c = camps.find((x) => x.id === openId);
+        if (!c || !dlg.open) return;
+        const msg = aq('#ac-msg');
+        if (msg) c.msg = msg.value;
+        const au = audience(c);
+        const first = (au[0] && au[0].x) || CLIENTS[0];
+        const prev = aq('#ac-prev');
+        if (prev) prev.textContent = fill(c.msg, first, c);
+        const pvn = aq('#ac-pv-n');
+        if (pvn) pvn.textContent = 'Prévia para ' + first.name.split(' ')[0];
+        const rl = aq('#ac-rl');
+        if (!rl) return;
+        rl.innerHTML = au.length ? au.map((o) => {
+          const [a, b] = PAL[o.i % PAL.length];
+          const s = sentOf(c, o.i);
+          const m = fill(c.msg, o.x, c);
+          return `<div class="ac-r"><span class="ac-av" style="--a:${a};--b:${b}">${aIni(o.x.name)}</span><div><b>${o.x.name}</b><small>${o.x.last} dias sem comprar · ${aNf(o.x.points)} pts</small></div>
+            ${s ? `<span class="ac-done">${aIco('i-check')}Enviado ${ago(s)}${s.ret ? ' · voltou ' + aBrl(s.val) : ''}</span>`
+                : `<a class="btn btn-small acao-btn-wa" data-acao-send="${o.i}" target="_blank" rel="noopener" href="https://wa.me/55${o.x.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(m)}">${aIco('i-chat')}WhatsApp</a>`}</div>`;
+        }).join('') : '<div class="acao-empty">Ninguém neste público agora.</div>';
+      }
+
+      document.addEventListener('click', (event) => {
+        const t = event.target;
+        const op = t.closest('[data-acao-open]');
+        if (op) { openCamp(op.dataset.acaoOpen); return; }
+        if (t.closest('[data-acao-close]')) { t.closest('dialog')?.close(); return; }
+        const f = t.closest('#acao-tabs [data-acao-f]');
+        if (f) { filter = f.dataset.acaoF; renderTabs(); renderCards(); return; }
+        const sw = t.closest('#acao-sw-digest');
+        if (sw) {
+          const v = sw.getAttribute('aria-checked') !== 'true';
+          sw.setAttribute('aria-checked', String(v));
+          say(v ? 'Resumo semanal ligado' : 'Resumo semanal desligado');
+          return;
+        }
+        const st = t.closest('#ac-st-seg [data-acao-st]');
+        if (st) {
+          const c = camps.find((x) => x.id === openId);
+          if (c) { c.status = st.dataset.acaoSt; openCamp(openId); renderAll(); say('Situação: ' + ST[c.status]); }
+          return;
+        }
+        const m = t.closest('#ac-m-seg [data-acao-m]');
+        if (m) { promo.mult = Number(m.dataset.acaoM); openCamp(openId); renderAll(); return; }
+        const sl = t.closest('#ac-slots [data-acao-s]');
+        if (sl) {
+          const s = sl.dataset.acaoS;
+          if (promo.slots.has(s)) promo.slots.delete(s); else promo.slots.add(s);
+          openCamp(openId); renderAll();
+          return;
+        }
+        const v = t.closest('.ac-vars [data-acao-v]');
+        if (v) {
+          const ta = aq('#ac-msg');
+          if (ta) { ta.setRangeText(v.dataset.acaoV, ta.selectionStart, ta.selectionEnd, 'end'); ta.focus(); paint(); }
+          return;
+        }
+        const sd = t.closest('[data-acao-send]');
+        if (sd) {
+          const c = camps.find((x) => x.id === openId);
+          if (c) {
+            log.push({ c: c.id, i: Number(sd.dataset.acaoSend), ts: Date.now(), ret: false, val: 0 });
+            if (c.status !== 'ativa') c.status = 'ativa';
+            setTimeout(() => { paint(); renderAll(); say('Envio registrado. Acompanhamos se ele volta em 7 dias.'); }, 60);
+          }
+        }
+      });
+
+      document.addEventListener('input', (event) => {
+        if (event.target && event.target.id === 'ac-msg') paint();
+      });
+
+      [dlg, nd].forEach((d) => {
+        d.addEventListener('click', (event) => { if (event.target === d) d.close(); });
+      });
+      dlg.addEventListener('close', () => { openId = null; renderAll(); });
+      nd.addEventListener('close', renderAll);
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        if (dlg.open) dlg.close();
+        if (nd.open) nd.close();
+      });
+
+      aq('#acao-new-btn').addEventListener('click', () => {
+        nd.innerHTML = `<div class="ac-dh"><span class="acao-card-i">${aIco('i-plus')}</span><div><h2 id="acao-new-title">Nova ação</h2><p>Crie uma campanha própria com público e mensagem.</p></div>
+          <button class="ac-x" type="button" data-acao-close aria-label="Fechar">${aIco('i-x')}</button></div>
+          <div class="ac-db">
+            <div class="ac-field"><label class="ac-label" for="ac-nome">Nome da ação</label><input class="ac-input" type="text" id="ac-nome" placeholder="Ex.: Volta às aulas"></div>
+            <div class="ac-field"><label class="ac-label" for="ac-aud">Quem recebe</label><select class="ac-input" id="ac-aud">${Object.entries(AUD).map(([k, a]) => `<option value="${k}">${a.label}</option>`).join('')}</select></div>
+            <div class="ac-field"><label class="ac-label" for="ac-nmsg">Mensagem</label><textarea class="ac-textarea" id="ac-nmsg">Oi {nome}! Temos uma novidade para você na loja. Você tem {pontos} pontos na Senfy.</textarea></div>
+          </div>
+          <div class="ac-df"><button class="btn btn-secondary btn-small" type="button" data-acao-close>Cancelar</button><button class="btn btn-small" type="button" id="ac-mk">Criar ação</button></div>`;
+        if (!nd.open) nd.showModal();
+        aq('#ac-mk').addEventListener('click', () => {
+          const name = aq('#ac-nome').value.trim();
+          if (!name) { aq('#ac-nome').focus(); return; }
+          camps.push({
+            id: 'c' + Date.now(), kind: 'msg', icon: 'i-heart', title: name,
+            desc: 'Ação criada por você.', status: 'planejada', aud: aq('#ac-aud').value, msg: aq('#ac-nmsg').value
+          });
+          nd.close();
+          renderAll();
+          say('Ação criada. Abra e envie quando quiser.');
+        });
+      });
+
+      renderAll();
+      if (window.Senfy) {
+        window.Senfy.acoes = { render: renderAll, closeDialogs: () => { dlg.close(); nd.close(); } };
+      }
+    })();
+  })();
+  </script>
 </body>
 </html>
