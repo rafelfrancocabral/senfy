@@ -85,14 +85,16 @@ drop trigger if exists settings_set_updated_at on public.settings;
 create trigger settings_set_updated_at before update on public.settings
 for each row execute function public.set_updated_at();
 
--- RLS simples para MVP. Ajuste antes de produção.
+-- RLS simples para MVP. NÃO USAR EM PRODUÇÃO.
+-- Para produção, execute supabase/security-hardening.sql após o modelo multi-tenant.
 alter table public.customers enable row level security;
 alter table public.sales enable row level security;
 alter table public.rules enable row level security;
 alter table public.prizes enable row level security;
 alter table public.settings enable row level security;
 
--- ATENÇÃO: políticas abertas para anon (MVP). Restrinja com auth em produção.
+-- ATENÇÃO: políticas abertas para anon (MVP). INSEGURO PARA PRODUÇÃO.
+-- Remova/restrinja com supabase/security-hardening.sql.
 create policy "anon read customers" on public.customers for select to anon using (true);
 create policy "anon insert customers" on public.customers for insert to anon with check (true);
 create policy "anon update customers" on public.customers for update to anon using (true) with check (true);

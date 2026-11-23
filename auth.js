@@ -19,6 +19,8 @@
   const links = $('auth-links');
 
   let mode = 'login';
+  let loginAttempts = 0;
+  let loginLockedUntil = 0;
 
   const STORE_KEY = 'senfy:active-store-id';
 
@@ -104,7 +106,8 @@
     const country = countryInput.value;
     if (!companyName) { setFeedback('Informe o nome da empresa.', 'error'); companyInput.focus(); return; }
     if (!email) { setFeedback('Informe seu e-mail.', 'error'); emailInput.focus(); return; }
-    if (!password || password.length < 6) { setFeedback('A senha deve ter pelo menos 6 caracteres.', 'error'); passwordInput.focus(); return; }
+    if (!password || password.length < 8) { setFeedback('A senha deve ter pelo menos 8 caracteres.', 'error'); passwordInput.focus(); return; }
+    if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) { setFeedback('Use uma senha com letras e números para maior segurança.', 'error'); passwordInput.focus(); return; }
 
     setLoading(true);
     setFeedback('');
@@ -148,11 +151,20 @@
     if (!email) { setFeedback('Informe seu e-mail.', 'error'); emailInput.focus(); return; }
     if (!password) { setFeedback('Informe sua senha.', 'error'); passwordInput.focus(); return; }
 
+    const now = Date.now();
+    if (now < loginLockedUntil) {
+      const secs = Math.ceil((loginLockedUntil - now) / 1000);
+      setFeedback(`Muitas tentativas. Aguarde ${secs}s para tentar novamente.`, 'error');
+      return;
+    }
+
     setLoading(true);
     setFeedback('');
     try {
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) throw error;
+      loginAttempts = 0;
+      loginLockedUntil = 0;
       const user = data.user || data.session?.user;
       const store = await getStoreByOwner(user.id);
       if (!store) {
@@ -165,7 +177,11 @@
       redirectToDashboard();
     } catch (err) {
       console.error(err);
-      setFeedback(err?.message || 'Não foi possível entrar.', 'error');
+      loginAttempts += 1;
+      const delay = Math.min(30000, 1000 * Math.pow(2, Math.max(0, loginAttempts - 3)));
+      if (loginAttempts >= 3) loginLockedUntil = Date.now() + delay;
+      // Mensagem genérica para não vazar se o e-mail existe
+      setFeedback('E-mail ou senha inválidos. Verifique seus dados e tente novamente.', 'error');
       setLoading(false);
     }
   };

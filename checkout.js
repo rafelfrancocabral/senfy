@@ -22,6 +22,28 @@
   const loadSupabaseConfig = async () => {
     if (!sb) return;
     try {
+      // Prefer secure RPC (works with hardened RLS)
+      if (STORE_ID) {
+        const { data, error } = await sb.rpc('get_checkout_store', { p_store_id: STORE_ID });
+        if (!error && data && !data.error) {
+          if (data.store) { STORE = data.store; applyStoreBranding(STORE); }
+          if (Array.isArray(data.rules) && data.rules.length) {
+            RULES = data.rules
+              .filter((r) => r.active !== false)
+              .map((r) => ({ maxValue: Number(r.max_value), points: Number(r.points), description: r.description || '' }))
+              .sort((a, b) => a.maxValue - b.maxValue);
+          }
+          if (Array.isArray(data.prizes) && data.prizes.length) {
+            PRIZES = data.prizes
+              .filter((p) => p.active !== false)
+              .map((p) => ({ description: p.description, points: Number(p.points), comment: p.comment || '' }))
+              .sort((a, b) => a.points - b.points);
+          }
+          return true;
+        }
+      }
+
+      // Legacy fallback (before security migration)
       let rulesQ = sb.from('rules').select('max_value, points, description, active').order('max_value', { ascending: true });
       let prizesQ = sb.from('prizes').select('description, points, comment, start_date, end_date, active').order('points', { ascending: true });
       if (STORE_ID) { rulesQ = rulesQ.eq('store_id', STORE_ID); prizesQ = prizesQ.eq('store_id', STORE_ID); }
@@ -38,8 +60,10 @@
           .map((p) => ({ description: p.description, points: Number(p.points), comment: p.comment || '' }))
           .sort((a, b) => a.points - b.points);
       }
+      return false;
     } catch (err) {
       /* fallback local */
+      return false;
     }
   };
 
@@ -78,9 +102,17 @@
   const loadStore = async () => {
     if (!sb || !STORE_ID) return null;
     try {
-      const { data, error } = await sb.from('stores').select('*').eq('id', STORE_ID).eq('ativo', true).maybeSingle();
-      if (error) throw error;
-      STORE = data || null;
+      // Prefer secure RPC
+      const { data, error } = await sb.rpc('get_checkout_store', { p_store_id: STORE_ID });
+      if (!error && data && !data.error && data.store) {
+        STORE = data.store;
+        applyStoreBranding(STORE);
+        return STORE;
+      }
+      // Legacy fallback
+      const { data: legacy, error: legacyErr } = await sb.from('stores').select('id, nome_loja, cor_primaria, logo_url, tipo_programa, ativo').eq('id', STORE_ID).eq('ativo', true).maybeSingle();
+      if (legacyErr) throw legacyErr;
+      STORE = legacy || null;
       if (STORE) applyStoreBranding(STORE);
       return STORE;
     } catch (err) {
@@ -199,6 +231,34 @@
   const upsertCustomerAndSale = async ({ name, phone, phoneDigits, amount, pointsEarned }) => {
     if (!sb) return { client: null, error: null };
     try {
+      // Prefer secure RPC (server-side validation + points calculation)
+      if (STORE_ID) {
+        const { data, error } = await sb.rpc('register_checkout_purchase', {
+          p_store_id: STORE_ID,
+          p_name: name,
+          p_phone: phoneDigits,
+          p_value: amount
+        });
+        if (!error && data?.ok && data.customer) {
+          return {
+            client: {
+              id: data.customer.id,
+              name: data.customer.name,
+              phone: formatPhone(data.customer.phone || phoneDigits),
+              points: Number(data.customer.points || 0),
+              purchases: Number(data.customer.purchases || 0),
+              redemptions: Number(data.customer.redemptions || 0)
+            },
+            error: null,
+            pointsEarned: Number(data.points_earned ?? pointsEarned)
+          };
+        }
+        if (error || data?.error) {
+          console.warn('checkout RPC failed, trying legacy', error || data?.error);
+        }
+      }
+
+      // Legacy fallback (before security migration)
       let findQ = sb.from('customers').select('*').eq('phone', phone);
       if (STORE_ID) findQ = findQ.eq('store_id', STORE_ID);
       const { data: existing, error: findErr } = await findQ.maybeSingle();
@@ -234,7 +294,6 @@
       });
       if (saleErr) throw saleErr;
 
-      // Multi-tenant log (vendas_fidelidade) + saldo RPC
       if (STORE_ID) {
         try {
           const tipoRegistro = STORE?.tipo_programa === 'pontos' ? 'ponto' : 'stamp';
@@ -267,25 +326,45 @@
 
   $('checkout-redeem').addEventListener('click', async () => {
     if (!activeClient || !activePrize || !activeKey) return;
-    activeClient.points = Math.max(0, Number(activeClient.points) - activePrize.points);
-    activeClient.redemptions = Number(activeClient.redemptions || 0) + 1;
-    activeClient.updatedAt = new Date().toISOString();
-    saveClient(activeKey, activeClient);
+    const prizePoints = Number(activePrize.points || 0);
+    let redeemedOk = false;
 
-    if (sb && activeClient.id) {
+    if (sb && STORE_ID) {
       try {
-        let q = sb.from('customers').update({ points: activeClient.points, redemptions: activeClient.redemptions }).eq('id', activeClient.id);
-        if (STORE_ID) q = q.eq('store_id', STORE_ID);
-        await q;
-      } catch (err) { /* mantém estado local */ }
-    } else if (sb && activeClient.phone) {
-      try {
-        let q = sb.from('customers').update({ points: activeClient.points, redemptions: activeClient.redemptions }).eq('phone', activeClient.phone);
-        if (STORE_ID) q = q.eq('store_id', STORE_ID);
-        await q;
-      } catch (err) { /* mantém estado local */ }
+        const { data, error } = await sb.rpc('register_checkout_redeem', {
+          p_store_id: STORE_ID,
+          p_phone: activeKey,
+          p_prize_points: prizePoints
+        });
+        if (!error && data?.ok && data.customer) {
+          activeClient = { ...activeClient, ...data.customer, phone: formatPhone(data.customer.phone || activeKey) };
+          redeemedOk = true;
+        } else {
+          console.warn('redeem RPC failed, trying legacy', error || data?.error);
+        }
+      } catch (err) { console.warn('redeem RPC error', err); }
     }
 
+    if (!redeemedOk) {
+      activeClient.points = Math.max(0, Number(activeClient.points) - prizePoints);
+      activeClient.redemptions = Number(activeClient.redemptions || 0) + 1;
+      activeClient.updatedAt = new Date().toISOString();
+      if (sb && activeClient.id) {
+        try {
+          let q = sb.from('customers').update({ points: activeClient.points, redemptions: activeClient.redemptions }).eq('id', activeClient.id);
+          if (STORE_ID) q = q.eq('store_id', STORE_ID);
+          await q;
+        } catch (err) { /* mantém estado local */ }
+      } else if (sb && activeClient.phone) {
+        try {
+          let q = sb.from('customers').update({ points: activeClient.points, redemptions: activeClient.redemptions }).eq('phone', activeClient.phone);
+          if (STORE_ID) q = q.eq('store_id', STORE_ID);
+          await q;
+        } catch (err) { /* mantém estado local */ }
+      }
+    }
+
+    saveClient(activeKey, activeClient);
     const code = 'SNFY-' + activeKey.slice(-4) + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
     $('redeemed-prize').textContent = activePrize.description;
     $('redeem-code').textContent = code;
@@ -301,19 +380,21 @@
     const amount = parseFloat(valueInput.value);
     const rule = findRule(amount);
 
-    if (!name) return showError('Informe seu nome.');
+    if (!name || name.length < 2 || name.length > 120) return showError('Informe um nome válido.');
     if (phoneDigits.length < 10 || phoneDigits.length > 11) return showError('Informe um telefone válido com DDD.');
-    if (!Number.isFinite(amount) || amount <= 0) return showError('Informe o valor da compra.');
+    if (!Number.isFinite(amount) || amount <= 0 || amount > 999999) return showError('Informe um valor de compra válido.');
     if (!rule) return showError('Não há regra de pontos para esse valor.');
 
     const key = phoneDigits;
     const phone = formatPhone(phoneDigits);
     let client = readClient(key) || { name, phone, points: 0, purchases: 0, redemptions: 0 };
 
+    let earnedPoints = rule.points;
     if (sb) {
       const remote = await upsertCustomerAndSale({ name, phone, phoneDigits, amount, pointsEarned: rule.points });
       if (remote.client) {
         client = { ...client, ...remote.client };
+        if (Number.isFinite(Number(remote.pointsEarned))) earnedPoints = Number(remote.pointsEarned);
       } else {
         client.name = name;
         client.phone = phone;
@@ -338,7 +419,7 @@
     const remaining = reached ? 0 : Math.max(0, goal - client.points);
 
     $('result-client').textContent = `Obrigado, ${client.name}!`;
-    $('result-earned').textContent = String(rule.points);
+    $('result-earned').textContent = String(earnedPoints);
     $('result-total').textContent = String(client.points);
     $('result-prize').textContent = reached ? targetPrize.description : `Próximo: ${targetPrize.description}`;
     $('result-missing').textContent = reached ? 'Disponível!' : `${remaining} pts`;

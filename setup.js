@@ -88,10 +88,22 @@
   logoInput?.addEventListener('change', () => {
     const file = logoInput.files?.[0];
     if (!file) return;
+    const allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+    if (!allowed.includes(file.type)) {
+      setFeedback('Formato inválido. Use PNG, JPG, WEBP ou SVG.', 'error');
+      logoInput.value = '';
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setFeedback('Imagem muito grande. Limite de 2 MB.', 'error');
+      logoInput.value = '';
+      return;
+    }
     logoFile = file;
     removeLogo = false;
     setLogoPreview(URL.createObjectURL(file));
     if (logoStatus) logoStatus.textContent = file.name;
+    setFeedback('');
   });
 
   logoRemove?.addEventListener('click', () => {
