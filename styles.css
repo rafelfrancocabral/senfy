@@ -32,8 +32,9 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: clip; }
 body {
+  overflow-x: clip;
   margin: 0;
   font-family: var(--font);
   color: var(--text);
@@ -795,27 +796,39 @@ tr:last-child td { border-bottom: none; }
   .topbar-row { padding-bottom: 0.75rem; gap: 0.5rem; flex-wrap: wrap; }
   .topbar-brand { display: inline-flex; }
   .menu-btn-mobile { display: inline-flex; }
-  .topbar-menu { gap: 0.5rem; }
+  .topbar-menu { gap: 0.5rem; width: 100%; justify-content: space-between; flex-wrap: wrap; }
   .topbar .period-tabs {
     overflow-x: auto;
     padding-right: 0;
     border-right: 0;
     scrollbar-width: thin;
+    flex: 1 1 100%;
+    order: 3;
   }
+  .topbar .sidebar-footer { margin-left: auto; }
   .sidebar-user-name { display: none; }
+  .topbar .sidebar-footer .small.muted { display: none; }
+  .topbar .sidebar-user > div:not(.avatar) { display: none; }
+  .topbar .sidebar-store-actions { margin-top: 0 !important; display: flex !important; gap: .4rem; }
   .page-intro { padding: 1.1rem var(--page-pad) 0.2rem; }
   .content { padding: 1rem var(--page-pad) 1.5rem; }
   .promo-box { flex-direction: column; align-items: stretch; }
 }
 @media (max-width: 760px) {
   .stats-grid, .card-grid { grid-template-columns: 1fr; }
-  .heatmap { grid-template-columns: 42px repeat(12, minmax(0, 1fr)); gap: 3px; }
+  .heatmap { grid-template-columns: 42px repeat(12, minmax(34px, 1fr)); gap: 3px; min-width: 520px; }
   .heatmap-cell { min-height: 28px; font-size: 0.66rem; }
   .heatmap-legend { justify-content: flex-start; }
 }
 @media (max-width: 560px) {
   .hero { padding: 3rem 0 2rem; }
   .section { padding: 3rem 0; }
+  .auth-page { padding: 1rem .75rem; place-items: start center; }
+  .auth-card { padding: 1.25rem; }
+  .auth-head h1 { font-size: 1.6rem; }
+  .topbar .period-tab { font-size: .78rem; padding: .28rem .35rem; }
+  .panel { padding: 1rem; }
+  .panel-head { flex-direction: column; align-items: stretch; }
 }
 
 .backdrop {
