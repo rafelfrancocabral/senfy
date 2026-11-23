@@ -1,199 +1,1280 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-palette="ocean">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Senfy é um sistema de fidelidade que transforma dados de clientes em recorrência, aumento de ticket médio e campanhas inteligentes para lojistas e profissionais.">
-  <title>Senfy — Fidelidade inteligente para o seu negócio</title>
+  <meta name="description" content="Faça seu cliente voltar com um QR Code: pontos em segundos, sem app, sem download e com dados que viram estratégia de vendas. Teste a Senfy agora.">
+  <title>Senfy — Faça seu cliente voltar com um QR Code</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hammersmith+One&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style id="landing-extras">
+    /* Propriedade animável para as bordas luminosas (do landing.html) */
+    @property --border-angle {
+      syntax: "<angle>";
+      inherits: true;
+      initial-value: 0turn;
+    }
+
+    /* ===== Paleta de teste: coral + âmbar sobre o verde Senfy ===== */
+    :root,
+    html[data-palette="ocean"] {
+      --hot: #0284C7;
+      --hot-2: #06B6D4;
+      --hot-dark: #0369A1;
+      --sun: #A3E635;
+      --sun-ink: #142208;
+      --cta-ink: #06202E;
+      --mint: #7BE0A3;
+      --night: #0B1620;
+      --green-800: #0C3F2F;
+
+      --primary: var(--hot);
+      --primary-hover: var(--hot-dark);
+      --primary-soft: #E8F6FF;
+      --gold: var(--sun);
+      --gold-soft: #F4FEE3;
+      --radius-lg: 22px;
+    }
+    html[data-palette="coral"] {
+      --hot: #FF5A36; --hot-2: #FF8A3D; --hot-dark: #E23F1D;
+      --sun: #FFC53D; --sun-ink: #2A1B05; --cta-ink: #2A1506;
+      --primary-soft: #FFF0EA; --gold-soft: #FFF6DF;
+    }
+    html[data-palette="plum"] {
+      --hot: #8B5CF6; --hot-2: #EC4899; --hot-dark: #6D28D9;
+      --sun: #FCD34D; --sun-ink: #2A1B05; --cta-ink: #2A0B1A;
+      --primary-soft: #F5F3FF; --gold-soft: #FFFBEB;
+    }
+    html { color-scheme: light; scroll-behavior: smooth; }
+    body { font-variant-numeric: tabular-nums; overflow-x: hidden; }
+    h1, h2 { text-wrap: balance; }
+    p { text-wrap: pretty; }
+    ::selection { background: color-mix(in oklab, var(--hot) 28%, transparent); }
+    :focus-visible { outline: 2px solid var(--hot); outline-offset: 3px; border-radius: 6px; }
+    main#inicio { position: relative; z-index: 1; }
+
+    /* Barra de progresso de leitura */
+    .scroll-progress {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 100;
+      background: linear-gradient(90deg, var(--mint), var(--sun), var(--hot));
+      transform-origin: 0 50%; transform: scaleX(var(--scroll, 0));
+      pointer-events: none;
+    }
+
+    /* Textura de pontos e glow do hero */
+    .hero {
+      position: relative;
+      padding: 5rem 0 3.5rem;
+      background:
+        radial-gradient(900px 460px at 84% 6%, color-mix(in oklab, var(--hot) 18%, transparent), transparent 66%),
+        radial-gradient(720px 420px at 2% 92%, color-mix(in oklab, var(--sun) 18%, transparent), transparent 62%),
+        var(--bg);
+    }
+    .hero::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(color-mix(in oklab, var(--ink) 12%, transparent) 1px, transparent 1px);
+      background-size: 18px 18px;
+      -webkit-mask-image: linear-gradient(#000, transparent 340px);
+      mask-image: linear-gradient(#000, transparent 340px);
+    }
+    .aurora-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .aurora-orb {
+      position: absolute; border-radius: 50%; filter: blur(85px); opacity: .5;
+      animation: drift 14s ease-in-out infinite alternate;
+    }
+    .orb-1 {
+      width: 500px; height: 500px; top: -150px; right: 2%;
+      background: radial-gradient(circle, color-mix(in oklab, var(--hot) 34%, transparent), transparent 70%);
+    }
+    .orb-2 {
+      width: 440px; height: 440px; bottom: -130px; left: -6%;
+      background: radial-gradient(circle, color-mix(in oklab, var(--sun) 32%, transparent), transparent 70%);
+      animation-delay: -5s;
+    }
+    .orb-3 {
+      width: 340px; height: 340px; top: 38%; left: 42%;
+      background: radial-gradient(circle, color-mix(in oklab, var(--mint) 26%, transparent), transparent 70%);
+      animation-delay: -9s;
+    }
+    @keyframes drift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(35px, -25px) scale(1.08); }
+    }
+    .site-header {
+      backdrop-filter: blur(14px) saturate(1.5);
+      -webkit-backdrop-filter: blur(14px) saturate(1.5);
+      background: color-mix(in oklab, var(--surface) 84%, transparent);
+      transition: box-shadow .3s ease, background .3s ease;
+    }
+    .site-header.scrolled {
+      background: color-mix(in oklab, var(--surface) 94%, transparent);
+      box-shadow: 0 10px 30px -16px rgba(7, 38, 28, .28);
+    }
+    .site-nav a:not(.btn) { position: relative; }
+    .site-nav a:not(.btn)::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: 2px;
+      border-radius: 99px; background: var(--hot);
+      transform: scaleX(0); transform-origin: right;
+      transition: transform .28s cubic-bezier(.22,1,.36,1);
+    }
+    .site-nav a:not(.btn):hover::after { transform: scaleX(1); transform-origin: left; }
+
+    /* Botões */
+    .btn {
+      position: relative; overflow: hidden; isolation: isolate;
+      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+      border-radius: 10px;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -12px var(--hot-dark); }
+    .btn:active { transform: scale(.97); }
+    .btn-hot {
+      color: #fff; border-color: transparent;
+      background: linear-gradient(135deg, var(--hot), var(--hot-2));
+      box-shadow: 0 12px 26px -12px var(--hot-dark);
+    }
+    .btn-hot::before {
+      content: ""; position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.38) 50%, transparent 80%);
+      transform: translateX(-120%);
+      transition: transform .65s cubic-bezier(.22,1,.36,1);
+      pointer-events: none;
+    }
+    .btn-hot:hover::before { transform: translateX(120%); }
+    .btn-hot:hover { color: #fff; background: linear-gradient(135deg, var(--hot-dark), var(--hot)); }
+    .btn .ico, .btn span { position: relative; z-index: 2; }
+    .btn-sun {
+      color: var(--sun-ink); border-color: transparent;
+      background: linear-gradient(135deg, var(--sun), color-mix(in oklab, var(--sun) 68%, white));
+      box-shadow: 0 10px 22px -12px color-mix(in oklab, var(--sun) 70%, #7a5600);
+    }
+    .btn-sun:hover { color: var(--sun-ink); }
+    .btn .ico { width: 1.05rem; height: 1.05rem; }
+    .ico { width: 1em; height: 1em; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Alternador de tema */
+    .theme-btn {
+      width: 2.25rem; height: 2.25rem; display: grid; place-items: center;
+      border: 1px solid var(--border); border-radius: 9px;
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      transition: color .2s ease, border-color .2s ease;
+    }
+    .theme-btn:hover { color: var(--hot); border-color: var(--hot); }
+    .theme-btn svg { width: 1rem; height: 1rem; }
+    .theme-btn .hidden { display: none; }
+
+    /* Selos */
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: .55rem;
+      padding: .4rem .8rem; border-radius: 99px;
+      font-size: .74rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
+      color: var(--hot-dark);
+      background: color-mix(in oklab, var(--hot) 12%, transparent);
+      border: 1px solid color-mix(in oklab, var(--hot) 30%, transparent);
+      margin-bottom: 1.2rem;
+    }
+    .eyebrow::before {
+      content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--hot);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--hot) 16%, transparent);
+      animation: pulse 1.9s ease-out infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--hot) 55%, transparent); }
+      70%, 100% { box-shadow: 0 0 0 8px transparent; }
+    }
+    .mini-tag {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .28rem .6rem; border-radius: 99px;
+      font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
+    }
+    .mini-tag.hot { color: var(--hot-dark); background: var(--primary-soft); }
+    .mini-tag.sun { color: #7a5600; background: var(--gold-soft); }
+    .mini-tag.mint { color: #0d5c37; background: #e5f8ed; }
+
+    /* Hero */
+    .hero-grid { position: relative; z-index: 2; display: grid; grid-template-columns: 1.02fr .98fr; gap: 3rem; align-items: center; }
+    .hero-copy { position: relative; z-index: 2; }
+    .hero h1 { font-size: clamp(2.7rem, 5.4vw, 4.6rem); line-height: 1.02; letter-spacing: -.05em; margin-bottom: 1.3rem; }
+    .hero h1 span { display: block; }
+    .hero h1 .hot {
+      background: linear-gradient(100deg, var(--hot), var(--hot-2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero h1 .deep { color: var(--green-900); }
+    .lead { font-size: 1.14rem; max-width: 56ch; margin-bottom: 1.65rem; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin: 0 0 .8rem; }
+    .micro-trust {
+      display: flex; align-items: center; gap: .5rem; margin: 0 0 1.5rem;
+      font-size: .82rem; font-weight: 700; color: var(--muted);
+    }
+    .micro-trust svg { color: var(--hot); width: 1rem; height: 1rem; }
+    .hero-highlights { color: var(--muted); font-size: .92rem; font-weight: 700; }
+    .hero-highlights li::before { background: var(--hot); }
+
+    /* Seletor de paletas para testar cores */
+    .palette-picker {
+      display: flex; align-items: center; flex-wrap: wrap; gap: .5rem;
+      margin-top: 1.1rem; font-size: .78rem; font-weight: 800; color: var(--muted);
+    }
+    .swatch {
+      width: 26px; height: 26px; padding: 0; border-radius: 50%;
+      border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--border);
+      cursor: pointer; transition: transform .15s ease, box-shadow .2s ease;
+    }
+    .swatch:hover { transform: translateY(-2px); }
+    .swatch.active { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--hot); }
+    .swatch-ocean { background: linear-gradient(135deg, #0284C7, #06B6D4 55%, #A3E635); }
+    .swatch-coral { background: linear-gradient(135deg, #FF5A36, #FF8A3D 55%, #FFC53D); }
+    .swatch-plum { background: linear-gradient(135deg, #8B5CF6, #EC4899 55%, #FCD34D); }
+
+    /* Palco 3D com laptop + celular (interativo, do landing.html) */
+    .hero-stage { position: relative; min-height: 440px; perspective: 1400px; }
+    .stage-3d {
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transform: rotateY(var(--rx, 0deg)) rotateX(var(--ry, 0deg));
+      transition: transform .18s ease-out;
+    }
+    .laptop {
+      position: relative;
+      background: linear-gradient(160deg, #24313d, var(--night));
+      border: 1px solid #31424f; border-radius: 16px;
+      padding: 10px 10px 0;
+      box-shadow: 0 34px 70px -30px rgba(8, 24, 18, .65);
+    }
+    .hero-stage .laptop { width: 94%; }
+    .stage-3d .laptop { transform: rotate(-1.4deg) translateZ(10px); }
+    .laptop-screen { overflow: hidden; border-radius: 9px; background: #fff; border: 3px solid #05090d; }
+    .laptop-screen img {
+      width: 100%; height: auto; display: block;
+      aspect-ratio: 1200 / 760;
+      object-fit: contain; object-position: center;
+    }
+    .laptop-base {
+      height: 13px; margin: 0 -3%;
+      background: linear-gradient(#2c3b47, #0a131b);
+      border-radius: 0 0 14px 14px;
+      clip-path: polygon(3% 0, 97% 0, 100% 100%, 0 100%);
+    }
+    .phone {
+      position: relative; width: 218px;
+      background: linear-gradient(160deg, #1d2a35, var(--night));
+      border: 1px solid #354654; border-radius: 34px; padding: 8px;
+      box-shadow: 0 26px 52px -22px rgba(8, 24, 18, .7);
+    }
+    .phone::before {
+      content: ""; position: absolute; z-index: 3; top: 15px; left: 50%;
+      width: 56px; height: 5px; transform: translateX(-50%);
+      border-radius: 99px; background: #344552;
+    }
+    .phone-screen { overflow: hidden; border-radius: 27px; background: #fff; }
+    .phone-qr {
+      position: absolute; z-index: 4; right: 0; bottom: -2.6rem;
+      transform: rotate(3deg) translateZ(48px);
+    }
+    .qr-screen { padding: 2.4rem 1rem 1.2rem; text-align: center; }
+    .qr-screen h3 { font-size: .95rem; margin: 0 0 .25rem; }
+    .qr-screen p { font-size: .72rem; color: var(--muted); margin: 0 0 .9rem; }
+    .qr-frame {
+      position: relative; width: 148px; height: 148px; margin: 0 auto .9rem;
+      padding: 9px; border: 1px solid var(--border); border-radius: 12px; background: #fff;
+    }
+    .qr-frame img { width: 100%; height: 100%; object-fit: contain; }
+    .scan-line {
+      position: absolute; left: 10%; right: 10%; top: 14%; height: 2px;
+      border-radius: 99px; background: var(--hot);
+      box-shadow: 0 0 12px var(--hot), 0 0 24px color-mix(in oklab, var(--hot) 60%, transparent);
+      animation: scan 2.6s ease-in-out infinite;
+    }
+    @keyframes scan { 0%, 100% { top: 14%; } 50% { top: 84%; } }
+    .qr-foot {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .35rem .65rem; border-radius: 99px;
+      font-size: .68rem; font-weight: 800; color: #0d5c37; background: #e5f8ed;
+    }
+    .float-badge {
+      position: absolute; z-index: 5;
+      display: flex; align-items: center; gap: .5rem;
+      padding: .55rem .8rem; border-radius: 99px;
+      background: var(--surface); border: 1px solid var(--border);
+      box-shadow: var(--shadow); font-size: .78rem; font-weight: 800;
+      animation: float 4.5s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateZ(65px); }
+      50% { transform: translateY(-7px) translateZ(65px); }
+    }
+    .badge-points { top: 2.1rem; right: 0; background: var(--green-900); color: #fff; border-color: transparent; }
+    .badge-points b { color: var(--sun); font-size: 1rem; }
+    .badge-scan { bottom: 5.2rem; left: -2rem; background: var(--sun); color: var(--sun-ink); border-color: transparent; }
+    .float-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+    /* Spotlight magnético nos cards (do landing.html) */
+    .spotlight-card { position: relative; --mx: 50%; --my: 50%; }
+    .spotlight-card::after {
+      content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      opacity: 0; transition: opacity .35s ease;
+      background: radial-gradient(380px circle at var(--mx) var(--my), color-mix(in oklab, var(--hot) 14%, transparent), transparent 70%);
+    }
+    .spotlight-card:hover::after { opacity: 1; }
+
+    /* Faixa de sinais */
+    .signal-strip { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: .9rem; padding: 0 0 4rem; }
+    .signal {
+      display: flex; align-items: center; gap: .7rem;
+      padding: 1rem 1.1rem; border-radius: 15px;
+      background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+      font-size: .9rem; font-weight: 800; color: var(--ink);
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .signal:hover { transform: translateY(-3px); border-color: color-mix(in oklab, var(--hot) 45%, var(--border)); box-shadow: var(--shadow); }
+    .signal .tech-icon {
+      flex: 0 0 auto; width: 2.2rem; height: 2.2rem; border-radius: 11px;
+      display: grid; place-items: center; color: #fff;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500));
+    }
+    .signal:nth-child(2) .tech-icon { background: linear-gradient(135deg, var(--hot), var(--hot-2)); }
+    .signal:nth-child(3) .tech-icon { background: linear-gradient(135deg, #b47a00, var(--sun)); }
+    .signal:nth-child(4) .tech-icon { background: linear-gradient(135deg, #0d5c37, var(--mint)); }
+    .signal .tech-icon svg { width: 1.1rem; height: 1.1rem; }
+
+    /* Cabeçalhos de seção */
+    .section-head { max-width: 720px; margin: 0 auto 2.7rem; text-align: center; }
+    .section-head p { color: var(--muted); font-size: 1.02rem; }
+
+    /* Passos */
+    .steps-grid { gap: 1.2rem; }
+    .step-card {
+      position: relative; overflow: hidden;
+      padding: 1.5rem; border-radius: var(--radius-lg);
+      background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .step-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: linear-gradient(90deg, var(--hot), var(--sun)); }
+    .step-card:hover { transform: translateY(-5px); border-color: color-mix(in oklab, var(--hot) 45%, var(--border)); box-shadow: var(--shadow); }
+    .step-top { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: 1rem; }
+    .step-num {
+      width: 2.4rem; height: 2.4rem; display: grid; place-items: center; border-radius: 13px;
+      font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--hot), var(--hot-2));
+      box-shadow: 0 8px 18px -8px var(--hot-dark);
+    }
+    .step-visual {
+      height: 220px; margin-bottom: 1.15rem; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+      background:
+        radial-gradient(circle at 70% 20%, color-mix(in oklab, var(--hot) 14%, transparent), transparent 60%),
+        var(--surface-alt);
+      border: 1px solid var(--border);
+    }
+    .step-visual.qr { background: radial-gradient(circle at 50% 40%, color-mix(in oklab, var(--hot) 16%, transparent), transparent 65%), var(--surface-alt); }
+    .mini-phone {
+      position: relative; width: 106px; height: 172px; flex: 0 0 auto;
+      padding: 5px; border-radius: 19px;
+      background: linear-gradient(160deg, #24313d, var(--night));
+      border: 1px solid #354654;
+      box-shadow: 0 16px 30px -16px rgba(8,24,18,.7);
+    }
+    .mini-phone::before {
+      content: ""; position: absolute; z-index: 2; top: 9px; left: 50%;
+      width: 28px; height: 3px; transform: translateX(-50%);
+      border-radius: 99px; background: #3c4d5b;
+    }
+    .mini-screen {
+      width: 100%; height: 100%; border-radius: 14px; overflow: hidden;
+      background: #fff; display: flex; align-items: center; justify-content: center;
+    }
+    .mini-phone.qr-phone .mini-screen { padding: 8px; }
+    .mini-phone img {
+      max-width: 100%; max-height: 100%; width: auto; height: auto;
+      object-fit: contain; object-position: center;
+    }
+    .step-card h3 { font-size: 1.12rem; margin-bottom: .5rem; }
+    .step-card p { color: var(--muted); font-size: .92rem; margin: 0; }
+
+    /* Demonstração com laptops */
+    .demo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.2rem; align-items: start; }
+    .demo-card { min-width: 0; }
+    .demo-card .laptop { transform: none; }
+    .demo-card:nth-child(2) .laptop { transform: translateY(1.6rem); }
+    .demo-caption {
+      display: flex; align-items: flex-start; gap: .8rem;
+      padding: 1.1rem 1.2rem; margin-top: 1.2rem;
+      border-radius: 15px; background: var(--surface); border: 1px solid var(--border);
+    }
+    .demo-caption .tech-icon {
+      flex: 0 0 auto; width: 2.2rem; height: 2.2rem; border-radius: 11px;
+      display: grid; place-items: center; color: #fff;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500));
+    }
+    .demo-card:nth-child(2) .demo-caption .tech-icon { background: linear-gradient(135deg, var(--hot), var(--hot-2)); }
+    .demo-caption .tech-icon svg { width: 1.1rem; height: 1.1rem; }
+    .demo-caption h3 { font-size: 1rem; margin: 0 0 .2rem; }
+    .demo-caption p { margin: 0; color: var(--muted); font-size: .86rem; }
+
+    /* Telefone na demonstração */
+    .demo-phone-row { display: flex; justify-content: center; gap: 1.4rem; margin-top: 3.5rem; flex-wrap: wrap; }
+    .demo-phone-row .phone { width: 190px; }
+    .demo-phone-row .phone-shot { width: 100%; height: auto; display: block; object-fit: contain; object-position: center; }
+    .demo-phone-label { margin-top: .7rem; text-align: center; font-size: .82rem; font-weight: 800; color: var(--muted); }
+
+    /* Faixa de dados */
+    .data-band {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;
+      padding: 2.3rem; border-radius: 26px; color: #fff;
+      background:
+        radial-gradient(600px 320px at 100% 0, color-mix(in oklab, var(--hot) 30%, transparent), transparent 65%),
+        linear-gradient(135deg, var(--green-900), #10533C);
+      box-shadow: 0 26px 60px -34px rgba(11,61,46,.8);
+    }
+    .data-band h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); }
+    .data-band p { color: rgba(255,255,255,.82); }
+    .data-list { list-style: none; margin: 1.2rem 0 0; padding: 0; display: grid; gap: .55rem; }
+    .data-list li { display: flex; gap: .6rem; align-items: flex-start; font-size: .93rem; }
+    .data-list li::before { content: "→"; color: var(--sun); font-weight: 800; }
+    .heat-card { padding: 1.2rem; border-radius: 18px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); }
+    .heat-card-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-bottom: 1rem; font-size: .88rem; }
+    .heat-card-head b { font-size: .95rem; }
+    .heat-card-head span { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--sun); font-weight: 800; }
+    .mini-heat { display: grid; grid-template-columns: 30px repeat(5, 1fr); gap: 5px; }
+    .mini-heat > span, .mini-heat > b { font-size: .66rem; color: rgba(255,255,255,.7); align-self: center; text-align: center; }
+    .mini-heat i {
+      position: relative; display: block; height: 28px; border-radius: 6px; background: var(--h0);
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
+    }
+    .mini-heat i[data-tip] { cursor: help; }
+    .mini-heat i[data-tip]:hover { transform: scale(1.16); z-index: 10; box-shadow: 0 0 0 2px #fff, 0 8px 16px rgba(0,0,0,.4); }
+    .mini-heat i[data-tip]::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 8px); left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      white-space: nowrap; padding: .32rem .6rem; border-radius: 7px;
+      background: #050E0B; color: #fff; font-style: normal; font-size: .7rem; font-weight: 700;
+      border: 1px solid rgba(255,255,255,.2);
+      opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease;
+    }
+    .mini-heat i[data-tip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .mini-heat i.empty { background: rgba(255,255,255,.04); }
+    .mini-heat { --h0: rgba(255,255,255,.09); --h1: rgba(123,224,163,.35); --h2: rgba(123,224,163,.6); --h3: #7BE0A3; --h4: var(--sun); }
+    .mini-heat .h0 { background: var(--h0); } .mini-heat .h1 { background: var(--h1); }
+    .mini-heat .h2 { background: var(--h2); } .mini-heat .h3 { background: var(--h3); }
+    .mini-heat .h4 { background: var(--h4); }
+    .heat-note { margin: 1rem 0 0; font-size: .8rem; color: rgba(255,255,255,.85); }
+    .heat-note b { color: var(--sun); }
+
+    /* CTA */
+    .cta-inner {
+      position: relative; overflow: hidden;
+      background: linear-gradient(120deg, var(--hot), var(--hot-2) 52%, var(--sun));
+      color: var(--cta-ink);
+    }
+    .cta-inner::before {
+      content: ""; position: absolute; inset: 0 0 auto; height: 5px;
+      background: linear-gradient(90deg, #fff, var(--sun), #fff);
+      background-size: 200% 100%; animation: flow 6s linear infinite;
+    }
+    @keyframes flow { to { background-position: 200% 0; } }
+    .cta h2 { color: var(--cta-ink); }
+    .cta p { color: color-mix(in oklab, var(--cta-ink) 78%, transparent); }
+    .cta .btn { background: #fff; color: var(--hot-dark); }
+    .cta .btn:hover { background: #fff8f4; }
+    .cta .btn-ghost { background: rgba(255,255,255,.14); color: var(--cta-ink); border-color: rgba(255,255,255,.5); }
+
+    /* Revelação */
+    .js .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease var(--delay, 0s), transform .6s cubic-bezier(.2,.8,.2,1) var(--delay, 0s); }
+    .js .reveal.in { opacity: 1; transform: none; }
+
+    /* Tema escuro */
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #08110D; --surface: #101A15; --surface-alt: #14211A;
+      --text: #E7EFE9; --muted: #8A9B91;
+      --border: #1F2D25; --border-strong: #2E4436;
+      --primary-soft: #2A160F; --gold-soft: #2A2312;
+      --green-900: #123524; --mint: #9BE7B8;
+      --shadow: 0 8px 24px rgba(0,0,0,.4); --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+    }
+    html[data-theme="dark"] .hero {
+      background:
+        radial-gradient(900px 460px at 84% 6%, color-mix(in oklab, var(--hot) 16%, transparent), transparent 66%),
+        radial-gradient(720px 420px at 2% 92%, color-mix(in oklab, var(--sun) 12%, transparent), transparent 62%),
+        var(--bg);
+    }
+    html[data-theme="dark"] .hero h1 .deep { color: #E7EFE9; }
+    html[data-theme="dark"] .hero::before { background-image: radial-gradient(rgba(231,239,233,.1) 1px, transparent 1px); }
+    html[data-theme="dark"] .mini-tag.mint { color: #9BE7B8; background: #10271A; }
+    html[data-theme="dark"] .mini-tag.sun { color: var(--sun); }
+    html[data-theme="dark"] .mini-tag.hot { color: #FF9C80; }
+    html[data-theme="dark"] .eyebrow { color: #FF9C80; }
+    html[data-theme="dark"] .step-card,
+    html[data-theme="dark"] .signal,
+    html[data-theme="dark"] .demo-caption { background: var(--surface); }
+    html[data-theme="dark"] .float-badge { background: #14211A; color: #E7EFE9; border-color: #2E4436; }
+    html[data-theme="dark"] .badge-scan { color: var(--sun-ink); }
+    html[data-theme="dark"] .data-band { background: linear-gradient(135deg, #123524, #0B3D2E); }
+    html[data-theme="dark"] .qr-screen { background: #fff; color: var(--ink); }
+
+    /* Comparativo: antes x depois */
+    .vs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+    .vs-card {
+      padding: 2rem; border-radius: var(--radius-lg);
+      background: var(--surface); border: 1px solid var(--border);
+    }
+    .vs-card.old {
+      background: color-mix(in oklab, var(--surface) 65%, var(--surface-alt));
+      border-style: dashed; opacity: .9;
+    }
+    .vs-card.new {
+      position: relative; border: 2px solid transparent;
+      background:
+        linear-gradient(180deg, color-mix(in oklab, var(--hot) 6%, var(--surface)), var(--surface)) padding-box,
+        conic-gradient(from var(--border-angle), var(--hot), var(--sun), var(--mint), var(--hot)) border-box;
+      box-shadow: var(--shadow);
+      animation: spinBorder 5s linear infinite;
+    }
+    @keyframes spinBorder { to { --border-angle: 1turn; } }
+    .vs-card h3 { font-size: 1.2rem; margin-bottom: 1.1rem; display: flex; align-items: center; gap: .6rem; }
+    .vs-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .85rem; font-size: .95rem; }
+    .vs-list li { display: flex; align-items: flex-start; gap: .65rem; line-height: 1.5; }
+    .vs-card.old .vs-list li { color: var(--muted); }
+    .vs-card.old .vs-list li::before { content: "✕"; color: #DC2626; font-weight: 800; }
+    .vs-card.new .vs-list li { font-weight: 600; color: var(--ink); }
+    .vs-card.new .vs-list li::before { content: "✓"; color: var(--hot); font-weight: 900; }
+
+    /* Segmentos de negócio */
+    .niches-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+    .niche-card {
+      padding: 1.6rem; border-radius: 20px; background: var(--surface);
+      border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .niche-card:hover { transform: translateY(-4px); border-color: var(--hot); box-shadow: var(--shadow); }
+    .niche-badge {
+      display: inline-block; font-size: .75rem; font-weight: 800; color: var(--hot-dark);
+      background: var(--primary-soft); padding: .32rem .75rem; border-radius: 8px; margin-bottom: .85rem;
+    }
+    .niche-card h3 { font-size: 1.1rem; margin-bottom: .45rem; }
+    .niche-card p { font-size: .9rem; color: var(--muted); margin: 0; }
+
+    /* FAQ */
+    .faq-list { max-width: 780px; margin: 0 auto; display: grid; gap: .9rem; }
+    .faq-item {
+      border-radius: 17px; background: var(--surface); border: 1px solid var(--border);
+      padding: 1.2rem 1.45rem;
+      transition: border-color .25s ease, box-shadow .25s ease;
+    }
+    .faq-item[open] { border-color: var(--hot); box-shadow: 0 12px 28px -14px color-mix(in oklab, var(--hot) 40%, transparent); }
+    .faq-item summary {
+      font-weight: 800; font-size: 1rem; color: var(--ink); cursor: pointer;
+      list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: "+"; width: 28px; height: 28px; flex: 0 0 auto;
+      display: grid; place-items: center; border-radius: 50%;
+      background: var(--surface-alt); font-size: 1.2rem; color: var(--hot-dark); font-weight: 800;
+      transition: transform .28s cubic-bezier(.34,1.56,.64,1), background .2s ease, color .2s ease;
+    }
+    .faq-item[open] summary::after { transform: rotate(45deg); background: var(--hot); color: #fff; }
+    .faq-item p { margin: .9rem 0 0; font-size: .94rem; color: var(--muted); animation: fadeSlide .28s ease; }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    /* ===== Novas frases e recursos (adaptados de frase.html) ===== */
+    /* Luz que segue o cursor */
+    .nf-glow {
+      position: fixed; left: 0; top: 0; width: 560px; height: 560px;
+      margin: -280px 0 0 -280px; border-radius: 50%; pointer-events: none; z-index: 2;
+      opacity: 0; background: radial-gradient(color-mix(in oklab, var(--hot) 14%, transparent), transparent 65%);
+      transform: translate3d(var(--gx, 0), var(--gy, 0), 0); transition: opacity .4s;
+    }
+    .nf-glow.on { opacity: 1; }
+    html[data-theme="dark"] .nf-glow.on { opacity: .45; }
+
+    /* Entrada do título e brilho das palavras */
+    .hero h1 span { animation: nf-up .95s cubic-bezier(.2,.8,.2,1) both; }
+    .hero h1 span:nth-child(2) { animation-delay: .12s; }
+    .hero h1 span:nth-child(3) { animation-delay: .24s; }
+    @keyframes nf-up {
+      from { opacity: 0; transform: translateY(46px) skewY(4deg); filter: blur(10px); }
+    }
+    .hero h1 .hot {
+      background: linear-gradient(100deg, var(--hot), var(--sun), var(--hot-2), var(--hot));
+      background-size: 200% auto; -webkit-background-clip: text; background-clip: text;
+      color: transparent; animation: nf-shine 5s linear infinite;
+    }
+    @keyframes nf-shine { to { background-position: 200% center; } }
+    .btn-hot::after {
+      content: ""; position: absolute; top: 0; left: -70%; width: 45%; height: 100%;
+      background: linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent);
+      transform: skewX(-20deg); animation: nf-sheen 3.6s ease-in-out infinite;
+      pointer-events: none; z-index: 1;
+    }
+    @keyframes nf-sheen { 0%, 55% { left: -70%; } 100% { left: 140%; } }
+
+    /* Faixa de palavras em movimento */
+    .nf-marquee {
+      overflow: hidden; margin: 0 0 1rem; padding: 1.2rem 0;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    }
+    .nf-mq { display: flex; width: max-content; animation: nf-mq 32s linear infinite; }
+    .nf-mq span {
+      display: flex; align-items: center; gap: 44px; padding-right: 44px;
+      font-family: 'Hammersmith One', sans-serif; font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+      white-space: nowrap; color: color-mix(in oklab, var(--ink) 26%, transparent);
+      transition: color .3s;
+    }
+    .nf-mq span:hover { color: var(--hot); }
+    .nf-mq span::after { content: "✦"; font-family: 'Manrope', sans-serif; color: var(--hot); font-size: 1rem; }
+    @keyframes nf-mq { to { transform: translateX(-50%); } }
+
+    /* Dores, ponte e resultado */
+    .nf-pains { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+    .nf-pain {
+      position: relative; padding: 1.7rem; border-radius: var(--radius-lg);
+      background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .nf-pain b {
+      display: block; font-family: 'Hammersmith One', sans-serif; font-size: 3rem;
+      line-height: 1; margin-bottom: .8rem; color: transparent;
+      -webkit-text-stroke: 1.5px color-mix(in oklab, var(--hot) 60%, transparent);
+    }
+    .nf-pain h3 { font-size: 1.12rem; margin-bottom: .5rem; }
+    .nf-pain p { font-size: .92rem; margin: 0; }
+    .nf-bridge {
+      max-width: 760px; margin: 2.5rem auto 0; text-align: center;
+      font-size: clamp(1.1rem, 2.1vw, 1.4rem); font-weight: 600; color: var(--ink); line-height: 1.4;
+    }
+    .nf-bridge b {
+      background: linear-gradient(100deg, var(--hot), var(--hot-2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .nf-result {
+      max-width: 720px; margin: 2rem auto 0; text-align: center; padding: 1rem 1.4rem;
+      border-radius: 16px; border: 1px dashed color-mix(in oklab, var(--hot) 45%, var(--border));
+      background: color-mix(in oklab, var(--hot) 6%, transparent); color: var(--ink); font-weight: 600;
+    }
+    .nf-result b { color: var(--hot-dark); }
+    html[data-theme="dark"] .nf-result b { color: var(--hot-2); }
+
+    /* Bento de vantagens */
+    .nf-bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.1rem; }
+    .nf-feature { grid-column: span 2; display: flex; flex-direction: column; gap: .85rem; }
+    .nf-feature.wide { grid-column: span 3; }
+    .nf-feature::before { display: none; }
+    .nf-feature .nf-ib {
+      width: 2.9rem; height: 2.9rem; border-radius: 14px; display: grid; place-items: center;
+      color: #fff; background: linear-gradient(135deg, var(--green-700), var(--green-500));
+    }
+    .nf-feature .nf-ib.o { background: linear-gradient(135deg, var(--hot), var(--hot-2)); }
+    .nf-feature .nf-ib.y { background: linear-gradient(135deg, #b47a00, var(--sun)); color: var(--sun-ink); }
+    .nf-feature .nf-ib.m { background: linear-gradient(135deg, #0d5c37, var(--mint)); }
+    .nf-feature .nf-ib svg { width: 1.25rem; height: 1.25rem; }
+    .nf-feature h3 { font-size: 1.12rem; margin: 0; }
+    .nf-feature p { margin: 0; font-size: .92rem; }
+    .nf-gain {
+      display: flex; gap: .55rem; align-items: flex-start; margin-top: auto;
+      padding-top: .85rem; border-top: 1px dashed var(--border);
+      font-weight: 800; font-size: .86rem; color: var(--green-700) !important;
+    }
+    .nf-gain .ico {
+      margin-top: 2px; color: #fff; background: var(--green-500);
+      border-radius: 50%; padding: 2px; font-size: 15px;
+    }
+    html[data-theme="dark"] .nf-gain { color: var(--mint) !important; }
+
+    /* Simulador */
+    .nf-sim { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: stretch; }
+    .nf-panel h3 { font-size: 1.4rem; margin: 0 0 .3rem; }
+    .nf-panel > p { margin: 0; }
+    .nf-amt {
+      font-size: clamp(2.6rem, 5vw, 3.6rem); font-weight: 800; letter-spacing: -.05em;
+      margin: 1.4rem 0 .6rem; font-variant-numeric: tabular-nums;
+    }
+    .nf-range {
+      width: 100%; height: 8px; border-radius: 99px; appearance: none; -webkit-appearance: none;
+      background: linear-gradient(90deg, var(--hot) var(--p, 24%), var(--border) var(--p, 24%));
+      outline: 0; cursor: pointer;
+    }
+    .nf-range::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
+      background: #fff; border: 4px solid var(--hot); box-shadow: 0 4px 12px -2px var(--hot-dark);
+    }
+    .nf-range::-moz-range-thumb {
+      width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 4px solid var(--hot);
+    }
+    .nf-seg {
+      display: flex; gap: .35rem; padding: .35rem; border: 1px solid var(--border);
+      border-radius: 14px; background: var(--surface-alt); margin-top: 1.5rem;
+    }
+    .nf-seg button {
+      flex: 1; border: 0; background: transparent; padding: .6rem; border-radius: 10px;
+      font: 800 .88rem 'Manrope', sans-serif; color: var(--muted); cursor: pointer; transition: all .2s;
+    }
+    .nf-seg button[aria-pressed="true"] {
+      background: var(--green-700); color: #fff; box-shadow: 0 6px 14px -6px var(--green-700);
+    }
+    html[data-theme="dark"] .nf-seg button[aria-pressed="true"] { background: var(--mint); color: #07140d; }
+    .nf-out {
+      position: relative; overflow: hidden; display: flex; flex-direction: column;
+      justify-content: center; padding: 2rem; border-radius: var(--radius-lg); color: #fff;
+      background: linear-gradient(160deg, var(--green-900), #0b2a1d); box-shadow: var(--shadow);
+    }
+    html[data-theme="dark"] .nf-out {
+      background: linear-gradient(160deg, #16342a, #0b1a15); border: 1px solid var(--border);
+    }
+    .nf-out::after {
+      content: ""; position: absolute; right: -60px; top: -60px; width: 240px; height: 240px;
+      border-radius: 50%; background: radial-gradient(color-mix(in oklab, var(--hot) 40%, transparent), transparent 70%);
+    }
+    .nf-out > * { position: relative; z-index: 1; }
+    .nf-out small { font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .74rem; color: var(--sun); }
+    .nf-big {
+      font-size: clamp(4rem, 8vw, 6rem); font-weight: 800; letter-spacing: -.06em;
+      line-height: 1; margin: .5rem 0; font-variant-numeric: tabular-nums;
+    }
+    .nf-big sub {
+      font-size: 1.05rem; letter-spacing: 0; font-weight: 700; color: var(--mint);
+      vertical-align: baseline; margin-left: .5rem; bottom: 0;
+    }
+    .nf-out p { color: rgba(255,255,255,.78); margin: 0; }
+    .nf-tier {
+      margin-top: 1.3rem; display: inline-flex; align-self: flex-start; gap: .5rem; align-items: center;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+      padding: .5rem .9rem; border-radius: 99px; font-weight: 800; font-size: .85rem;
+    }
+    .nf-confetti {
+      position: absolute; left: 50%; top: 50%; width: 8px; height: 13px; border-radius: 2px;
+      background: var(--c); z-index: 2; animation: nf-cf .95s cubic-bezier(.2,.8,.4,1) forwards;
+    }
+    @keyframes nf-cf { to { transform: translate(var(--x), var(--y)) rotate(var(--r)); opacity: 0; } }
+    .nf-mid {
+      display: flex; align-items: center; justify-content: center; gap: 1.1rem;
+      flex-wrap: wrap; margin-top: 2rem;
+    }
+    .nf-mid span { font-size: .9rem; color: var(--muted); font-weight: 600; }
+
+    /* Ciclo de dados */
+    .nf-loop { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: 1.5rem; }
+    .nf-loop span {
+      padding: .45rem .85rem; border-radius: 99px; font-size: .8rem; font-weight: 800;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+    }
+    .nf-loop span:last-of-type { background: linear-gradient(135deg, var(--hot), var(--hot-2)); border: 0; }
+    .nf-loop i { font-style: normal; color: var(--sun); font-weight: 800; }
+
+    /* CTA e voltar ao topo */
+    .nf-cta-box { background-size: 220% 220%; animation: nf-gshift 9s ease infinite; }
+    @keyframes nf-gshift { 50% { background-position: 100% 100%; } }
+    .nf-micro { margin-top: .85rem; font-size: .84rem !important; font-weight: 700 !important; opacity: .85; }
+    .nf-top {
+      position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+      width: 46px; height: 46px; border-radius: 14px; border: 0; display: grid; place-items: center;
+      color: #fff; cursor: pointer; z-index: 60;
+      background: linear-gradient(135deg, var(--hot), var(--hot-2)); box-shadow: 0 14px 28px -10px var(--hot-dark);
+      opacity: 0; transform: translateY(16px); pointer-events: none; transition: all .3s;
+    }
+    .nf-top.show { opacity: 1; transform: none; pointer-events: auto; }
+    .nf-top:hover { transform: translateY(-3px); }
+    .nf-top svg { width: 1.1rem; height: 1.1rem; transform: rotate(-90deg); }
+
+    /* Responsivo */
+    @media (max-width: 1100px) {
+      .signal-strip { grid-template-columns: repeat(2, 1fr); }
+      .hero-stage { min-height: 400px; }
+      .hero-stage .laptop { width: 100%; }
+      .phone-qr { right: 0; width: 200px; }
+      .badge-points { right: 0; }
+      .badge-scan { left: 0; }
+    }
+    @media (max-width: 900px) {
+      .hero-grid, .demo-grid, .data-band, .vs-grid, .niches-grid, .cta-inner,
+      .nf-pains, .nf-sim { grid-template-columns: 1fr; }
+      .nf-bento { grid-template-columns: 1fr 1fr; }
+      .nf-feature, .nf-feature.wide { grid-column: span 1; }
+      .hero { padding-top: 3.5rem; }
+      .hero-stage { min-height: 0; display: grid; gap: 2.5rem; justify-items: center; }
+      .stage-3d { transform: none !important; }
+      .hero-stage .laptop { width: 100%; transform: none; }
+      .phone-qr { position: relative; right: auto; bottom: auto; transform: rotate(2deg); }
+      .float-badge { display: none; }
+      .demo-card:nth-child(2) .laptop { transform: none; }
+    }
+    @media (max-width: 640px) {
+      .signal-strip { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: clamp(2.35rem, 10.5vw, 3.3rem); }
+      .hero-actions .btn { width: 100%; }
+      .data-band { padding: 1.5rem; }
+      .vs-card, .niche-card { padding: 1.3rem; }
+      .mini-heat { gap: 3px; }
+      .mini-heat i { height: 24px; }
+      .demo-phone-row { gap: 1rem; }
+      .demo-phone-row .phone { width: 150px; }
+      .nf-bento { grid-template-columns: 1fr; }
+      .nf-mid { flex-direction: column; text-align: center; }
+      .nf-top { right: 12px; bottom: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .js .reveal { opacity: 1 !important; transform: none !important; }
+    }
+  </style>
+  <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
-  <header class="site-header">
+  <!-- Barra de progresso de leitura -->
+  <div class="scroll-progress" aria-hidden="true"></div>
+  <div class="nf-glow" aria-hidden="true"></div>
+
+  <!-- Sprite de ícones -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="5" rx="1"/><path d="M12 8v13M5 13v7h14v-7M12 8c-2-4-6-4-6-1.5S10 8 12 8zm0 0c2-4 6-4 6-1.5S14 8 12 8z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18M6 16l4-5 4 3 5-7"/><path d="M15 7h4v4"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-4 3-6 6.5-6s6 2 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .7 3.2 2.5 3.5 5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M3 6h10M17 6h4M3 12h4M11 12h10M3 18h12M19 18h2"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  </defs></svg>
+
+  <header class="site-header" id="site-header">
     <div class="container header-inner">
       <a class="brand" href="index.html" aria-label="Senfy início">
-        <img src="assets/logo.png" alt="" class="brand-logo" onerror="this.style.display='none'">
-        <span class="brand-mark">S</span>
-        <span>Senfy</span>
+        <img class="brand-logo" src="assets/suricato.png" alt="" aria-hidden="true">
+        <span class="brand-name">Senfy</span>
       </a>
       <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Abrir menu">
         <span></span><span></span><span></span>
       </button>
-      <nav id="site-nav" class="site-nav">
+      <nav id="site-nav" class="site-nav" aria-label="Navegação principal">
+        <a href="#problema">O desafio</a>
         <a href="#como-funciona">Como funciona</a>
-        <a href="#lojistas">Para lojistas</a>
-        <a href="#diferenciais">Diferenciais</a>
-        <a href="login.html">Login</a>
-        <a href="#contato" class="btn btn-small">Quero saber mais</a>
+        <a href="#recursos">Vantagens</a>
+        <a href="#simulador">Simulador</a>
+        <a href="#demonstracao">Painel</a>
+        <a href="#dados">Dados</a>
+        <a href="#faq">Dúvidas</a>
+        <button class="theme-btn" id="theme-toggle" type="button" aria-label="Ativar tema escuro">
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+          <svg class="sun hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <a href="checkout.html" class="btn btn-small btn-hot">Testar sem download</a>
       </nav>
     </div>
   </header>
 
   <main id="inicio">
+    <!-- HERO -->
     <section class="hero">
+      <div class="aurora-bg" aria-hidden="true">
+        <div class="aurora-orb orb-1"></div>
+        <div class="aurora-orb orb-2"></div>
+        <div class="aurora-orb orb-3"></div>
+      </div>
+
       <div class="container hero-grid">
-        <div class="hero-copy">
-          <p class="eyebrow">SaaS de fidelidade e inteligência de clientes</p>
-          <h1>Transforme cada compra em relacionamento e recorrência.</h1>
-          <p class="lead">A Senfy ajuda lojistas e profissionais a fidelizar clientes com pontos, vouchers ou selos — enquanto gera insights para aumentar o ticket médio e entender o comportamento do seu público.</p>
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Fidelidade para lojas físicas</p>
+          <h1>
+            <span>Escaneou.</span>
+            <span class="hot">Ganhou pontos.</span>
+            <span class="deep">Voltou.</span>
+          </h1>
+          <p class="lead">A Senfy transforma cada compra em um motivo para o cliente voltar e em um dado para você vender mais. Tudo com um QR Code na loja, <strong>sem app, sem download e sem cadastro prévio</strong>. O cliente informa nome, telefone e valor da compra, vê os pontos na hora e você recebe tudo organizado no painel.</p>
           <div class="hero-actions">
-            <a href="#contato" class="btn">Falar com a Senfy</a>
-            <a href="#como-funciona" class="btn btn-secondary">Ver como funciona</a>
+            <a href="checkout.html" class="btn btn-hot">Testar o QR Code agora <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a href="#simulador" class="btn btn-secondary">Ver quanto o cliente ganha</a>
           </div>
+          <p class="micro-trust"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg> Teste interativo gratuito · Sem download · Funciona em qualquer celular</p>
           <ul class="hero-highlights" aria-label="Destaques">
-            <li>Retenção de clientes</li>
-            <li>Campanhas baseadas em dados</li>
-            <li>Recompensas que engajam</li>
+            <li><b>Rápido:</b> pontos em segundos</li>
+            <li><b>Fácil:</b> sem app para o cliente</li>
+            <li><b>Estratégico:</b> dados no painel</li>
           </ul>
+          <div class="palette-picker" role="group" aria-label="Testar paletas de cores">
+            <span>Teste as cores:</span>
+            <button class="swatch swatch-ocean active" type="button" data-palette="ocean" aria-label="Paleta azul e limão" title="Azul e limão"></button>
+            <button class="swatch swatch-coral" type="button" data-palette="coral" aria-label="Paleta coral e âmbar" title="Coral e âmbar"></button>
+            <button class="swatch swatch-plum" type="button" data-palette="plum" aria-label="Paleta violeta e rosa" title="Violeta e rosa"></button>
+          </div>
         </div>
-        <div class="hero-card" aria-label="Exemplo de experiência do cliente">
-          <div class="mockup">
-            <div class="mockup-top">
-              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+
+        <div class="hero-visual reveal" style="--delay:.12s">
+          <div class="hero-stage" id="hero-stage" aria-label="Demonstração: laptop com o painel e celular com o QR Code">
+            <div class="stage-3d">
+            <div class="laptop">
+              <div class="laptop-screen">
+                <img src="assets/screen-dashboard-top.png" alt="Painel Senfy com vendas, resgates e mapa de calor" width="1200" height="760" fetchpriority="high">
+              </div>
+              <div class="laptop-base" aria-hidden="true"></div>
             </div>
-            <div class="mockup-body">
-              <p class="mockup-label">Compra registrada</p>
-              <h2>+120 pontos</h2>
-              <p>Você acumulou pontos na sua compra de hoje.</p>
-              <div class="progress">
-                <div class="progress-bar" style="width: 72%"></div>
+
+            <div class="float-badge badge-points" aria-hidden="true"><span class="dot"></span> +55 <b>pts</b> creditados</div>
+            <div class="float-badge badge-scan" aria-hidden="true"><span class="dot"></span> QR Code lido</div>
+
+            <div class="phone phone-qr">
+              <div class="phone-screen qr-screen">
+                <h3>Registre sua compra</h3>
+                <p>Aponte a câmera para o QR Code</p>
+                <div class="qr-frame">
+                  <img src="assets/qr-senfy.png" alt="QR Code ilustrativo da Senfy" width="500" height="500">
+                  <span class="scan-line" aria-hidden="true"></span>
+                </div>
+                <span class="qr-foot"><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg> Sem app, sem download</span>
               </div>
-              <div class="mockup-stats">
-                <div><strong>720</strong><span>pontos totais</span></div>
-                <div><strong>280</strong><span>para o próximo prêmio</span></div>
-              </div>
-              <p class="mockup-note">Acompanhe seu saldo e resgate prêmios com facilidade.</p>
+            </div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section" id="problema-solucao">
-      <div class="container two-col">
-        <article class="card">
-          <p class="card-kicker">O problema</p>
-          <h2>Fidelizar clientes ficou essencial para competir</h2>
-          <p>Em um cenário de maior pressão financeira e concorrência acirrada, atrair novos clientes custa caro. Sem uma estratégia de retenção, o negócio perde recorrência e oportunidades de aumentar o valor de cada compra.</p>
-        </article>
-        <article class="card accent">
-          <p class="card-kicker">A solução</p>
-          <h2>Um SaaS para criar programas de fidelidade que geram resultado</h2>
-          <p>A Senfy conecta recompensas para o cliente final com inteligência para o lojista. Você define regras, acompanha resultados e usa dados reais para criar campanhas que fortalecem sua base fiel.</p>
-        </article>
+    <div class="container">
+      <div class="signal-strip reveal" aria-label="Benefícios rápidos">
+        <div class="signal spotlight-card"><span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-bolt"/></svg></span> Pontos em segundos</div>
+        <div class="signal spotlight-card"><span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-qr"/></svg></span> Zero atrito para o cliente</div>
+        <div class="signal spotlight-card"><span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-gift"/></svg></span> Prêmios que fazem voltar</div>
+        <div class="signal spotlight-card"><span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-chart"/></svg></span> Dados que viram decisão</div>
+      </div>
+    </div>
+
+    <div class="nf-marquee" aria-hidden="true">
+      <div class="nf-mq" id="nf-mq">
+        <span>Rápido</span><span>Fácil de usar</span><span>Sem app</span><span>Sem download</span><span>Cliente que volta</span><span>Dados em estratégia</span>
+      </div>
+    </div>
+
+    <!-- O DESAFIO -->
+    <section class="section" id="problema">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">O desafio</p>
+          <h2>Sua loja vende todo dia. Mas você sabe quem volta?</h2>
+          <p>Sem registro, cada venda é uma despedida. O cliente some, você não percebe quando e as decisões ficam no achismo. Fidelizar precisa ser rápido para ele e simples para você.</p>
+        </div>
+        <div class="nf-pains reveal">
+          <article class="nf-pain"><b>01</b><h3>O cliente some e você não vê</h3><p>Sem histórico, não dá para saber quem voltou, quem parou de comprar e há quanto tempo.</p></article>
+          <article class="nf-pain" style="--delay:.08s"><b>02</b><h3>Fidelidade que dá trabalho</h3><p>Cartão de papel, planilha, explicação no balcão. O programa existe, mas ninguém usa.</p></article>
+          <article class="nf-pain" style="--delay:.16s"><b>03</b><h3>Decisões no palpite</h3><p>Qual promoção rodar? Que prêmio oferecer? Sem dados, toda campanha é aposta.</p></article>
+        </div>
+        <p class="nf-bridge reveal">A Senfy fecha essa conta: <b>cada compra vira um motivo para voltar e um dado para você agir.</b></p>
       </div>
     </section>
 
+    <!-- POR QUE MUDAR -->
+    <section class="section" id="comparativo">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">O fim do cartãozinho perdido</p>
+          <h2>Fidelizar precisa ser rápido para o cliente e simples para você</h2>
+          <p>Some o cartão de papel, app pesado ninguém baixa. Quando pontuar é difícil, o cliente desiste — e você perde a chance de aprender com cada compra.</p>
+        </div>
+        <div class="vs-grid reveal">
+          <div class="vs-card old">
+            <h3>Jeito antigo: cartão ou app pesado</h3>
+            <ul class="vs-list">
+              <li>O cliente esquece ou perde o cartão carimbado.</li>
+              <li>Baixar app e criar senha no caixa gera fila e rejeição.</li>
+              <li>Você não sabe quem são seus melhores clientes.</li>
+              <li>Promoções no achismo, sem dados para decidir.</li>
+            </ul>
+          </div>
+          <div class="vs-card new spotlight-card">
+            <h3>Com a Senfy no seu balcão</h3>
+            <ul class="vs-list">
+              <li>Basta apontar a câmera: abre no navegador em segundos.</li>
+              <li>O cliente vê pontos e prêmios na hora, sem download.</li>
+              <li>Cada compra vira histórico organizado automaticamente.</li>
+              <li>Você transforma dados em campanhas no momento certo.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PASSOS -->
     <section class="section alt" id="como-funciona">
       <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">MVP em ação</p>
-          <h2>Como a Senfy funciona</h2>
-          <p>Uma experiência simples para o cliente e completa para o negócio, desde o primeiro registro até insights para campanhas.</p>
+        <div class="section-head reveal">
+          <p class="eyebrow">Rápido e fácil</p>
+          <h2>Do scan ao ponto em 3 passos. Sem manual, sem app.</h2>
+          <p>Cada segundo no balcão conta. Por isso o cliente registra a compra sozinho, no próprio celular, e você não precisa explicar nada. Sem download e sem cadastro prévio.</p>
         </div>
         <div class="steps-grid">
-          <article class="step">
-            <span class="step-num">1</span>
-            <h3>Cliente participa em segundos</h3>
-            <p>Na primeira compra, o cliente escaneia um QR Code ou aproxima o NFC, informa nome e telefone e registra o valor da compra.</p>
+          <article class="step-card spotlight-card reveal">
+            <div class="step-top"><span class="step-num">1</span><span class="mini-tag hot">Sem app</span></div>
+            <div class="step-visual qr">
+              <div class="mini-phone qr-phone"><div class="mini-screen"><img src="assets/qr-senfy.png" alt="QR Code da Senfy dentro do celular" width="500" height="500" loading="lazy" decoding="async"></div></div>
+            </div>
+            <h3>Escaneia o QR Code</h3>
+            <p>A câmera do celular basta. Nada para baixar e nenhuma conta para criar antes.</p>
           </article>
-          <article class="step">
-            <span class="step-num">2</span>
-            <h3>Pontos calculados automaticamente</h3>
-            <p>O sistema converte o valor em pontos conforme as regras definidas pelo lojista e atualiza o saldo do cliente.</p>
+          <article class="step-card spotlight-card reveal" style="--delay:.08s">
+            <div class="step-top"><span class="step-num">2</span><span class="mini-tag sun">Em segundos</span></div>
+            <div class="step-visual">
+              <div class="mini-phone"><div class="mini-screen"><img class="step-shot" src="assets/screen-checkout-form.png" alt="Formulário rápido dentro do celular" loading="lazy" decoding="async"></div></div>
+            </div>
+            <h3>Informa o essencial</h3>
+            <p>Nome, telefone e valor da compra. A regra da loja calcula os pontos sozinha, sem planilha nem conta manual.</p>
           </article>
-          <article class="step">
-            <span class="step-num">3</span>
-            <h3>Feedback imediato</h3>
-            <p>O cliente recebe aviso de quantos pontos ganhou, qual é o saldo total e quanto falta para resgatar um prêmio.</p>
+          <article class="step-card spotlight-card reveal" style="--delay:.16s">
+            <div class="step-top"><span class="step-num">3</span><span class="mini-tag mint">Na hora</span></div>
+            <div class="step-visual">
+              <div class="mini-phone"><div class="mini-screen"><img class="step-shot" src="assets/screen-checkout.png" alt="Resultado com pontos dentro do celular" loading="lazy" decoding="async"></div></div>
+            </div>
+            <h3>Vê o que ganhou</h3>
+            <p>Pontos creditados e prêmio à vista. Esse retorno imediato é o que dá motivo para voltar.</p>
           </article>
         </div>
+        <p class="nf-result reveal"><b>O resultado para você:</b> um registro a cada compra, sem papel e sem explicar o programa no balcão.</p>
       </div>
     </section>
 
-    <section class="section" id="lojistas">
+    <!-- VANTAGENS -->
+    <section class="section" id="recursos">
       <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">Para quem é</p>
-          <h2>Feita para lojistas e profissionais que querem fidelizar</h2>
-          <p>Ideal para negócios que desejam transformar dados em decisões e oferecer vantagens reais para seus clientes.</p>
+        <div class="section-head reveal">
+          <p class="eyebrow">Vantagens</p>
+          <h2>Cada recurso existe para fazer o cliente voltar</h2>
+          <p>Você configura uma vez, ajusta quando quiser e a Senfy trabalha todos os dias por você — sem app, sem download e com dados organizados.</p>
         </div>
-        <div class="feature-grid">
-          <article class="feature">
-            <h3>Controle de registros</h3>
-            <p>Acompanhe os valores informados nas compras e ajuste quando necessário para manter a consistência do programa.</p>
+        <div class="nf-bento">
+          <article class="step-card nf-feature spotlight-card reveal">
+            <span class="nf-ib"><svg class="ico"><use href="#i-sliders"/></svg></span>
+            <h3>Regras por faixa de valor</h3>
+            <p>Defina quantos pontos cada faixa de compra rende, de Bronze a Ouro.</p>
+            <p class="nf-gain"><svg class="ico"><use href="#i-check"/></svg>Você decide quanto vale cada compra e muda quando quiser.</p>
           </article>
-          <article class="feature">
-            <h3>Prêmios e regras flexíveis</h3>
-            <p>Crie recompensas, defina validade, métodos de resgate e escolha a estratégia ideal: pontos, voucher ou selos (stamps).</p>
+          <article class="step-card nf-feature spotlight-card reveal" style="--delay:.06s">
+            <span class="nf-ib o"><svg class="ico"><use href="#i-bolt"/></svg></span>
+            <h3>Promoções com multiplicador</h3>
+            <p>Ative pontuação x1.5 ou x2 com um clique. Todas as faixas se ajustam na hora.</p>
+            <p class="nf-gain"><svg class="ico"><use href="#i-check"/></svg>Aqueça os dias fracos sem mexer em nada mais.</p>
           </article>
-          <article class="feature">
-            <h3>Visão da base de clientes</h3>
-            <p>Consulte clientes com total de pontos e histórico de resgates para entender quem são seus compradores mais fiéis.</p>
+          <article class="step-card nf-feature spotlight-card reveal" style="--delay:.12s">
+            <span class="nf-ib y"><svg class="ico"><use href="#i-gift"/></svg></span>
+            <h3>Catálogo de prêmios</h3>
+            <p>Escolha as recompensas do programa e acompanhe os resgates.</p>
+            <p class="nf-gain"><svg class="ico"><use href="#i-check"/></svg>Ofereça o que o cliente realmente quer e mantenha o interesse.</p>
           </article>
-          <article class="feature">
-            <h3>Campanhas mais inteligentes</h3>
-            <p>Use a frequência de compras para identificar padrões e criar ações que incentivem novos retornos e upgrades no comportamento.</p>
+          <article class="step-card nf-feature wide spotlight-card reveal">
+            <span class="nf-ib m"><svg class="ico"><use href="#i-users"/></svg></span>
+            <h3>Base de clientes organizada</h3>
+            <p>Pontos disponíveis, número de resgates e média de dias entre compras de cada cliente, com busca e ordenação.</p>
+            <p class="nf-gain"><svg class="ico"><use href="#i-check"/></svg>Saiba quem é seu melhor cliente e quem está se afastando.</p>
+          </article>
+          <article class="step-card nf-feature wide spotlight-card reveal" style="--delay:.08s">
+            <span class="nf-ib"><svg class="ico"><use href="#i-shield"/></svg></span>
+            <h3>Zero atrito para o cliente</h3>
+            <p>Sem app e sem cadastro prévio. O cliente informa nome, telefone e valor, e pronto.</p>
+            <p class="nf-gain"><svg class="ico"><use href="#i-check"/></svg>Quanto mais simples, mais clientes participam do programa.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="section alt" id="diferenciais">
+    <!-- SIMULADOR -->
+    <section class="section alt" id="simulador">
       <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">Inteligência do sistema</p>
-          <h2>Mais que fidelidade: visibilidade para crescer</h2>
-          <p>A Senfy organiza regras de resgate e transforma dados em insights práticos para o dia a dia do negócio.</p>
+        <div class="section-head reveal">
+          <p class="eyebrow">Veja o valor</p>
+          <h2>Quanto vale cada compra para o seu cliente?</h2>
+          <p>Arraste e veja o que ele ganha. Quanto mais claro o retorno, mais motivo para voltar.</p>
         </div>
-        <div class="insights-grid">
-          <article class="insight">
-            <h3>Regras centralizadas</h3>
-            <p>Aplicação consistente das regras de acúmulo e resgate, reduzindo esforço operacional.</p>
-          </article>
-          <article class="insight">
-            <h3>Frequência por cliente</h3>
-            <p>Entendimento da dinâmica de compra individual com base na média de dias entre visitas.</p>
-          </article>
-          <article class="insight">
-            <h3>Mapa de calor da loja</h3>
-            <p>Identificação de períodos quentes e frios para apoiar decisões, como dobrar pontos em dias de menor movimento.</p>
-          </article>
-          <article class="insight">
-            <h3>Comportamento do público</h3>
-            <p>Visão completa do comportamento dos clientes para planejar campanhas e fortalecer a recorrência.</p>
-          </article>
+        <div class="nf-sim">
+          <div class="step-card nf-panel spotlight-card reveal">
+            <h3>Valor da compra</h3>
+            <p>Mova o controle para simular.</p>
+            <div class="nf-amt" id="nf-amt">R$ 250</div>
+            <input class="nf-range" type="range" id="nf-rng" min="10" max="1000" step="10" value="250" aria-label="Valor da compra em reais">
+            <div class="nf-seg" id="nf-seg" role="group" aria-label="Promoção">
+              <button type="button" aria-pressed="true" data-m="1">Sem promoção</button>
+              <button type="button" aria-pressed="false" data-m="1.5">x1.5</button>
+              <button type="button" aria-pressed="false" data-m="2">x2</button>
+            </div>
+          </div>
+          <div class="nf-out reveal" id="nf-out" style="--delay:.1s">
+            <small>Pontos creditados</small>
+            <div class="nf-big"><span id="nf-pts">22</span><sub>pontos</sub></div>
+            <p id="nf-why">Compras até R$ 350,00 rendem 22 pontos.</p>
+            <span class="nf-tier" id="nf-tier"><svg class="ico"><use href="#i-gift"/></svg><span>Faixa 04</span></span>
+          </div>
+        </div>
+        <div class="nf-mid reveal">
+          <a class="btn btn-hot" href="login.html?mode=signup">Criar minha conta <svg class="ico"><use href="#i-arrow"/></svg></a>
+          <span>Você define as faixas e os pontos. A escala acima é um exemplo.</span>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <div class="container callout">
-        <div>
-          <p class="eyebrow">Por que agora</p>
-          <h2>Retenção é uma vantagem competitiva real</h2>
-          <p>Com a oscilação do mercado, toda estratégia de retenção importa. Em setores onde a tecnologia ainda é uma barreira — como o de ferramentas — levar uma experiência simples de fidelidade para lojistas e clientes cria um elo poderoso.</p>
+    <!-- DEMONSTRAÇÃO -->
+    <section class="section" id="demonstracao">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Na prática</p>
+          <h2>Simples no celular. Poderoso no painel.</h2>
+          <p>Do lado do cliente, são poucos toques e nenhum download. Do seu lado, cada compra vira histórico, pontos e uma decisão melhor.</p>
         </div>
-        <ul class="checklist">
-          <li>Mais recorrência de compras</li>
-          <li>Maior percepção de valor para o cliente</li>
-          <li>Decisões guiadas por dados</li>
-        </ul>
+
+        <div class="demo-grid">
+          <article class="demo-card reveal">
+            <div class="laptop">
+              <div class="laptop-screen">
+                <img src="assets/screen-dashboard-top.png" alt="Tela Resumo do dashboard Senfy" width="1200" height="760" loading="lazy" decoding="async">
+              </div>
+              <div class="laptop-base" aria-hidden="true"></div>
+            </div>
+            <div class="demo-caption spotlight-card">
+              <span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-chart"/></svg></span>
+              <div><h3>Base de clientes organizada</h3><p>Pontos disponíveis, resgates e frequência de compra de cada cliente, com busca e ordenação.</p></div>
+            </div>
+          </article>
+
+          <article class="demo-card reveal" style="--delay:.1s">
+            <div class="laptop">
+              <div class="laptop-screen">
+                <img src="assets/screen-rules.png" alt="Tela de regras e prêmios do dashboard Senfy" width="1200" height="760" loading="lazy" decoding="async">
+              </div>
+              <div class="laptop-base" aria-hidden="true"></div>
+            </div>
+            <div class="demo-caption spotlight-card">
+              <span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-gift"/></svg></span>
+              <div><h3>Regras e prêmios</h3><p>Ajuste faixas, ative multiplicadores e crie recompensas com base no que o cliente realmente faz.</p></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="demo-phone-row reveal" aria-label="Telas do cliente no celular">
+          <div>
+            <div class="phone"><div class="phone-screen"><img class="phone-shot" src="assets/screen-checkout-form.png" alt="Tela de registro de compra no celular" loading="lazy" decoding="async"></div></div>
+            <p class="demo-phone-label">1. Registro em segundos</p>
+          </div>
+          <div>
+            <div class="phone"><div class="phone-screen"><img class="phone-shot" src="assets/screen-checkout.png" alt="Tela de pontos ganhos no celular" loading="lazy" decoding="async"></div></div>
+            <p class="demo-phone-label">2. Pontos e prêmio na hora</p>
+          </div>
+        </div>
       </div>
     </section>
 
+    <!-- DADOS -->
+    <section class="section alt" id="dados">
+      <div class="container">
+        <div class="data-band reveal">
+          <div>
+            <p class="eyebrow" style="color:var(--sun);background:rgba(255,197,61,.12);border-color:rgba(255,197,61,.3)">Dados em estratégia</p>
+            <h2>Pare de adivinhar. Comece a decidir.</h2>
+            <p>Cada scan vira histórico. O histórico mostra padrões. Os padrões viram campanhas que você sabe que vão funcionar: registro rápido para o cliente, estratégia para você.</p>
+            <ul class="data-list">
+              <li>Quem compra a cada poucos dias e merece um prêmio?</li>
+              <li>Que dia e horário pedem uma promoção x2?</li>
+              <li>Quais prêmios realmente são resgatados?</li>
+            </ul>
+            <div class="nf-loop" aria-label="Ciclo da Senfy"><span>Capta</span><i>→</i><span>Fideliza</span><i>→</i><span>Analisa</span><i>→</i><span>Vende mais</span></div>
+          </div>
+          <div class="heat-card" aria-label="Exemplo interativo de mapa de movimento por dia e horário">
+            <div class="heat-card-head"><b>Movimento da loja</b><span>Passe o mouse · exemplo ilustrativo</span></div>
+            <div class="mini-heat" role="img" aria-label="Mapa com maior movimento de segunda a sexta das 7h às 18h e funcionamento reduzido no sábado das 8h às 13h">
+              <span></span><span>7h</span><span>10h</span><span>13h</span><span>15h</span><span>18h</span>
+              <b>Seg</b><i class="h1" data-tip="Seg 7h: fluxo leve"></i><i class="h3" data-tip="Seg 10h: movimento alto"></i><i class="h4" data-tip="Seg 13h: horário de pico"></i><i class="h3" data-tip="Seg 15h: movimento alto"></i><i class="h2" data-tip="Seg 18h: fluxo moderado"></i>
+              <b>Ter</b><i class="h1" data-tip="Ter 7h: fluxo leve"></i><i class="h2" data-tip="Ter 10h: fluxo moderado"></i><i class="h4" data-tip="Ter 13h: horário de pico"></i><i class="h4" data-tip="Ter 15h: horário de pico"></i><i class="h2" data-tip="Ter 18h: fluxo moderado"></i>
+              <b>Qua</b><i class="h2" data-tip="Qua 7h: fluxo moderado"></i><i class="h3" data-tip="Qua 10h: movimento alto"></i><i class="h3" data-tip="Qua 13h: movimento alto"></i><i class="h4" data-tip="Qua 15h: horário de pico"></i><i class="h2" data-tip="Qua 18h: fluxo moderado"></i>
+              <b>Qui</b><i class="h1" data-tip="Qui 7h: fluxo leve"></i><i class="h2" data-tip="Qui 10h: fluxo moderado"></i><i class="h3" data-tip="Qui 13h: movimento alto"></i><i class="h4" data-tip="Qui 15h: horário de pico"></i><i class="h3" data-tip="Qui 18h: movimento alto"></i>
+              <b>Sex</b><i class="h2" data-tip="Sex 7h: fluxo moderado"></i><i class="h3" data-tip="Sex 10h: movimento alto"></i><i class="h4" data-tip="Sex 13h: horário de pico"></i><i class="h4" data-tip="Sex 15h: horário de pico"></i><i class="h3" data-tip="Sex 18h: movimento alto"></i>
+              <b>Sáb</b><i class="h0" data-tip="Sáb 8h: menor movimento do mapa"></i><i class="h1" data-tip="Sáb 10h: fluxo leve"></i><i class="h2" data-tip="Sáb 13h: fluxo moderado"></i><i class="empty" aria-hidden="true"></i><i class="empty" aria-hidden="true"></i>
+            </div>
+            <p class="heat-note">Menor movimento: <b>sábado, 8h</b>. Um bom momento para testar uma promoção x2 e medir o resultado.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEGMENTOS -->
+    <section class="section" id="segmentos">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Onde a recorrência importa</p>
+          <h2>Fácil de usar em qualquer balcão</h2>
+          <p>Registro rápido por QR Code, sem download para o cliente e dados organizados para você decidir o que oferecer depois.</p>
+        </div>
+        <div class="niches-grid reveal">
+          <div class="niche-card spotlight-card">
+            <span class="niche-badge">Alimentação & Cafés</span>
+            <h3>Cafeterias, padarias e hambúrguerias</h3>
+            <p>Ponte o café da manhã ou o almoço da semana e use os dados para criar o combo que traz o cliente de volta.</p>
+          </div>
+          <div class="niche-card spotlight-card">
+            <span class="niche-badge">Beleza & Bem-estar</span>
+            <h3>Barbearias, salões e estética</h3>
+            <p>Reduza o intervalo entre visitas premiando quem mantém a agenda em dia — sem app e sem complicação no balcão.</p>
+          </div>
+          <div class="niche-card spotlight-card">
+            <span class="niche-badge">Varejo & Serviços</span>
+            <h3>Lojas, pet shops e conveniência</h3>
+            <p>Aumente o ticket médio com metas de pontos e transforme cada compra em uma decisão melhor para a sua loja.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section alt" id="faq">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Dúvidas</p>
+          <h2>Antes de testar, o que você precisa saber</h2>
+        </div>
+        <div class="faq-list reveal">
+          <details class="faq-item" open>
+            <summary>O cliente precisa baixar um aplicativo?</summary>
+            <p>Não. Ele escaneia o QR Code com a câmera do celular e informa nome, telefone e valor da compra. Sem instalação, sem download e sem cadastro prévio.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Vai dar trabalho para a minha equipe?</summary>
+            <p>O cliente registra a compra sozinho, então não há planilha nem cartão para preencher no balcão. Seu trabalho está em configurar as regras e acompanhar o painel.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Como os pontos são calculados?</summary>
+            <p>Pelas regras que você cadastra: cada faixa de valor de compra rende uma quantidade de pontos. Dá para editar ou excluir faixas quando quiser.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Posso mudar as regras ou fazer promoções depois?</summary>
+            <p>Sim. As regras são editáveis a qualquer momento, e um multiplicador como x1.5 ou x2 ajusta a pontuação de todas as faixas de uma vez.</p>
+          </details>
+          <details class="faq-item">
+            <summary>O que vou ver no painel?</summary>
+            <p>Vendas, resgates, pontos disponíveis por cliente, frequência de compra e os dias e períodos de maior movimento — incluindo o Resumo do dashboard.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Como eu começo?</summary>
+            <p>Teste primeiro como cliente: escaneie, registre uma compra e veja os pontos na hora. Depois acesse a plataforma e monte suas regras.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
     <section class="section cta" id="contato">
-      <div class="container cta-inner">
-        <div>
-          <p class="eyebrow">Vamos construir juntos</p>
-          <h2>Quer levar a Senfy para o seu negócio?</h2>
-          <p>Estamos preparando a evolução do produto e buscamos entender as necessidades de lojistas e profissionais que desejam fidelizar clientes com inteligência.</p>
+      <div class="container cta-inner nf-cta-box">
+        <div class="reveal">
+          <p class="eyebrow" style="color:var(--cta-ink);background:rgba(255,255,255,.35);border-color:rgba(255,255,255,.6)">Comece agora</p>
+          <h2>Seu próximo cliente fiel está a um scan de distância</h2>
+          <p>Teste agora como cliente: escaneie, registre uma compra e veja os pontos aparecerem na hora. Depois entre na plataforma e monte suas regras.</p>
+          <p class="nf-micro">Sem instalar nada · Resultado na hora · Regras editáveis a qualquer momento</p>
         </div>
-        <div class="cta-actions">
-          <a class="btn" href="mailto:contato@senfy.com.br?subject=Quero%20saber%20mais%20sobre%20a%20Senfy">Entrar em contato</a>
-          <p class="cta-note">Sugestão: substitua o e-mail no código quando definir o canal oficial.</p>
+        <div class="cta-actions reveal" style="--delay:.1s">
+          <a class="btn" href="checkout.html">Testar sem download <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn-ghost" href="login.html">Acessar plataforma</a>
         </div>
       </div>
     </section>
@@ -201,11 +1282,179 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <p><strong>Senfy</strong> — Sistema de fidelidade com inteligência de dados.</p>
+      <p>Fidelidade simples, sem download, dados que viram estratégia.</p>
       <p>&copy; <span id="year"></span> Senfy. Todos os direitos reservados. · <a href="login.html">Acessar plataforma</a></p>
     </div>
   </footer>
 
+  <button class="nf-top" id="nf-top" type="button" aria-label="Voltar ao topo"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+
   <script src="script.js"></script>
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* Barra de progresso e sombra do header */
+      const header = document.getElementById('site-header');
+      const nfTop = document.getElementById('nf-top');
+      const onScroll = () => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+        root.style.setProperty('--scroll', progress.toFixed(4));
+        if (header) header.classList.toggle('scrolled', window.scrollY > 16);
+        if (nfTop) nfTop.classList.toggle('show', window.scrollY > 700);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+      if (nfTop) nfTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      });
+
+      /* Spotlight nos cards e paralaxe 3D do palco */
+      if (!reduce) {
+        document.querySelectorAll('.spotlight-card').forEach((card) => {
+          card.addEventListener('pointermove', (e) => {
+            const rect = card.getBoundingClientRect();
+            card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+            card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+          });
+        });
+        const stage = document.getElementById('hero-stage');
+        if (stage) {
+          stage.addEventListener('pointermove', (e) => {
+            const rect = stage.getBoundingClientRect();
+            const nx = (e.clientX - rect.left) / rect.width - .5;
+            const ny = (e.clientY - rect.top) / rect.height - .5;
+            stage.style.setProperty('--rx', `${(nx * 9).toFixed(2)}deg`);
+            stage.style.setProperty('--ry', `${(-ny * 7).toFixed(2)}deg`);
+          });
+          stage.addEventListener('pointerleave', () => {
+            stage.style.setProperty('--rx', '0deg');
+            stage.style.setProperty('--ry', '0deg');
+          });
+        }
+      }
+
+      /* Paletas de teste */
+      const swatches = Array.from(document.querySelectorAll('.swatch[data-palette]'));
+      swatches.forEach((swatch) => {
+        swatch.addEventListener('click', () => {
+          root.dataset.palette = swatch.dataset.palette;
+          swatches.forEach((item) => item.classList.toggle('active', item === swatch));
+        });
+      });
+
+      root.dataset.theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const themeBtn = document.getElementById('theme-toggle');
+      const syncTheme = () => {
+        if (!themeBtn) return;
+        const dark = root.dataset.theme === 'dark';
+        themeBtn.setAttribute('aria-label', dark ? 'Ativar tema claro' : 'Ativar tema escuro');
+        themeBtn.querySelector('.moon').classList.toggle('hidden', dark);
+        themeBtn.querySelector('.sun').classList.toggle('hidden', !dark);
+      };
+      syncTheme();
+      if (themeBtn) themeBtn.addEventListener('click', () => {
+        root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        syncTheme();
+      });
+
+      /* Marquee contínuo (duplica o conteúdo para o loop) */
+      const nfMq = document.getElementById('nf-mq');
+      if (nfMq) nfMq.innerHTML += nfMq.innerHTML;
+
+      /* Luz que segue o cursor */
+      const nfGlow = document.querySelector('.nf-glow');
+      const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      if (nfGlow && finePointer && !reduce) {
+        window.addEventListener('pointermove', (event) => {
+          nfGlow.style.setProperty('--gx', `${event.clientX}px`);
+          nfGlow.style.setProperty('--gy', `${event.clientY}px`);
+          nfGlow.classList.add('on');
+        }, { passive: true });
+        document.addEventListener('pointerleave', () => nfGlow.classList.remove('on'));
+      }
+
+      /* Simulador de pontos por faixa de valor */
+      const nfRules = [[50, 2], [100, 5], [200, 12], [350, 22], [500, 35], [750, 55], [1000, 80]];
+      const nfTiers = ['Faixa 07', 'Faixa 06', 'Faixa 05', 'Faixa 04', 'Bronze · Faixa 03', 'Prata · Faixa 02', 'Ouro · Faixa 01'];
+      const nfRng = document.getElementById('nf-rng');
+      const nfOut = document.getElementById('nf-out');
+      if (nfRng && nfOut) {
+        let nfMult = 1;
+        let nfCurrent = 22;
+        let nfLastIndex = 3;
+        let nfFrame = 0;
+        const nfBrl = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const nfBurst = () => {
+          if (reduce) return;
+          const colors = ['#FFC53D', '#FF5A36', '#7BE0A3', '#fff'];
+          for (let i = 0; i < 26; i += 1) {
+            const bit = document.createElement('i');
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 90 + Math.random() * 130;
+            bit.className = 'nf-confetti';
+            bit.style.cssText = `--c:${colors[i % colors.length]};--x:${Math.cos(angle) * dist}px;--y:${Math.sin(angle) * dist - 30}px;--r:${Math.random() * 720}deg`;
+            nfOut.appendChild(bit);
+            window.setTimeout(() => bit.remove(), 1000);
+          }
+        };
+        const nfSim = () => {
+          const value = Number(nfRng.value);
+          const index = Math.max(0, nfRules.findIndex((rule) => value <= rule[0]));
+          const rule = nfRules[index];
+          nfRng.style.setProperty('--p', `${((value - 10) / 990 * 100).toFixed(2)}%`);
+          const amt = document.getElementById('nf-amt');
+          if (amt) amt.textContent = nfBrl(value).replace(',00', '');
+          const target = Math.round(rule[1] * nfMult * 10) / 10;
+          const from = nfCurrent;
+          const start = performance.now();
+          const pts = document.getElementById('nf-pts');
+          cancelAnimationFrame(nfFrame);
+          const step = (now) => {
+            const p = Math.min((now - start) / 450, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            nfCurrent = Math.round((from + (target - from) * eased) * 10) / 10;
+            if (pts) pts.textContent = String(nfCurrent).replace('.', ',');
+            if (p < 1) nfFrame = requestAnimationFrame(step);
+            else nfCurrent = target;
+          };
+          nfFrame = requestAnimationFrame(step);
+          const why = document.getElementById('nf-why');
+          if (why) why.textContent = `Compras até ${nfBrl(rule[0])} rendem ${rule[1]} pontos${nfMult > 1 ? `, multiplicados por x${String(nfMult).replace('.', ',')}` : ''}.`;
+          const tier = document.querySelector('#nf-tier span');
+          if (tier) tier.textContent = nfTiers[index] || 'Faixa 07';
+          if (index === nfRules.length - 1 && nfLastIndex !== index) nfBurst();
+          nfLastIndex = index;
+        };
+        nfRng.addEventListener('input', nfSim);
+        document.querySelectorAll('#nf-seg button').forEach((button) => {
+          button.addEventListener('click', () => {
+            document.querySelectorAll('#nf-seg button').forEach((item) => {
+              item.setAttribute('aria-pressed', String(item === button));
+            });
+            nfMult = Number(button.dataset.m) || 1;
+            nfSim();
+          });
+        });
+        nfSim();
+      }
+
+      const reveals = Array.from(document.querySelectorAll('.reveal'));
+      if (reduce || !('IntersectionObserver' in window)) {
+        reveals.forEach((el) => el.classList.add('in'));
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('in');
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px' });
+      reveals.forEach((el) => observer.observe(el));
+    })();
+  </script>
 </body>
 </html>

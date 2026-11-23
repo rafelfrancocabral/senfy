@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Fidelize mais clientes sem obrigar ninguém a baixar aplicativo. Com a Senfy, seu cliente pontua em 15 segundos pelo QR Code e você ganha dados reais para vender mais.">
+  <title>Senfy — Fidelidade sem app que faz seus clientes voltarem mais vezes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hammersmith+One&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style id="landing-extras">
+    /* ===== Propriedade animável para bordas luminosas ===== */
+    @property --border-angle {
+      syntax: "<angle>";
+      inherits: true;
+      initial-value: 0turn;
+    }
+
+    /* ===== Identidade Visual Senfy: Esmeralda Profundo + Coral + Âmbar ===== */
+    :root {
+      --bg: #F6F9F8;
+      --surface: #FFFFFF;
+      --surface-alt: #EDF4F1;
+      --ink: #0B1B16;
+      --text: #1B2D27;
+      --muted: #4E635B;
+      --border: #D7E3DF;
+      --border-strong: #BCD0C9;
+
+      --green-900: #07261C;
+      --green-800: #0C3F2F;
+      --green-700: #105C44;
+      --green-500: #10B981;
+      --mint: #6EE7B7;
+
+      --hot: #FF5A36;
+      --hot-2: #FF7E57;
+      --hot-dark: #D93B18;
+      --primary-soft: #FFF0EC;
+
+      --sun: #F59E0B;
+      --sun-light: #FCD34D;
+      --sun-ink: #271700;
+      --gold-soft: #FEF3C7;
+
+      --night: #08120F;
+      --radius-lg: 22px;
+      --shadow-sm: 0 2px 10px rgba(7, 38, 28, .05);
+      --shadow: 0 20px 44px -14px rgba(7, 38, 28, .16);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html {
+      color-scheme: light;
+      scroll-behavior: smooth;
+      font-family: 'Manrope', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    body {
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+      overflow-x: hidden;
+      line-height: 1.58;
+    }
+    h1, h2, h3, .brand-name {
+      font-family: 'Hammersmith One', 'Manrope', sans-serif;
+      color: var(--ink);
+      margin-top: 0;
+    }
+    h1, h2 { text-wrap: balance; }
+    p { text-wrap: pretty; }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: color-mix(in oklab, var(--green-500) 30%, transparent); }
+    :focus-visible { outline: 2px solid var(--hot); outline-offset: 3px; border-radius: 8px; }
+
+    .container { width: min(1160px, 92%); margin: 0 auto; }
+    .section { position: relative; padding: 5.5rem 0; }
+    .section.alt {
+      background: var(--surface-alt);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ===== Barra de Progresso de Leitura no Topo ===== */
+    .scroll-progress {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 100;
+      background: linear-gradient(90deg, var(--green-500), var(--sun), var(--hot));
+      transform-origin: 0 50%;
+      transform: scaleX(var(--scroll, 0));
+      pointer-events: none;
+    }
+
+    /* ===== Header Glassmorphism ===== */
+    .site-header {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      background: color-mix(in oklab, var(--surface) 78%, transparent);
+      border-bottom: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
+      transition: box-shadow .3s ease, background .3s ease;
+    }
+    .site-header.scrolled {
+      box-shadow: 0 10px 30px -15px rgba(7, 38, 28, .18);
+      background: color-mix(in oklab, var(--surface) 90%, transparent);
+    }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; height: 74px; gap: 1rem; }
+    .brand { display: inline-flex; align-items: center; gap: .6rem; }
+    .brand-logo { height: 34px; width: auto; transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+    .brand:hover .brand-logo { transform: rotate(-8deg) scale(1.08); }
+    .brand-name { font-size: 1.5rem; letter-spacing: -.03em; color: var(--green-900); }
+
+    .site-nav { display: flex; align-items: center; gap: 1.5rem; font-size: .92rem; font-weight: 700; color: var(--muted); }
+    .site-nav a:not(.btn) { position: relative; padding: .3rem 0; transition: color .2s ease; }
+    .site-nav a:not(.btn)::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+      border-radius: 99px; background: var(--green-500);
+      transform: scaleX(0); transform-origin: right;
+      transition: transform .28s cubic-bezier(.22,1,.36,1);
+    }
+    .site-nav a:not(.btn):hover { color: var(--green-800); }
+    .site-nav a:not(.btn):hover::after { transform: scaleX(1); transform-origin: left; }
+
+    .menu-toggle { display: none; background: none; border: 1px solid var(--border); border-radius: 8px; padding: .45rem; cursor: pointer; }
+    .menu-toggle span { display: block; width: 20px; height: 2px; background: var(--ink); margin: 4px 0; }
+
+    /* ===== Botões com Shimmer & Micro-elevação ===== */
+    .btn {
+      position: relative; overflow: hidden; isolation: isolate;
+      display: inline-flex; align-items: center; justify-content: center; gap: .55rem;
+      padding: .92rem 1.55rem; font-weight: 800; font-size: .96rem;
+      border-radius: 13px; border: 1px solid var(--border-strong);
+      background: var(--surface); color: var(--ink); cursor: pointer;
+      transition: transform .2s cubic-bezier(.22,1,.36,1), box-shadow .25s ease, border-color .2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -10px rgba(7, 38, 28, .22); }
+    .btn:active { transform: translateY(0) scale(.98); }
+    .btn-small { padding: .6rem 1.1rem; font-size: .86rem; border-radius: 10px; }
+
+    .btn-hot {
+      color: #fff; border-color: transparent;
+      background: linear-gradient(135deg, var(--hot), var(--hot-2));
+      box-shadow: 0 14px 28px -10px color-mix(in oklab, var(--hot) 68%, #000), inset 0 1px 0 rgba(255,255,255,.35);
+    }
+    /* Feixe de brilho Shimmer */
+    .btn-hot::before {
+      content: ""; position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.38) 50%, transparent 80%);
+      transform: translateX(-120%);
+      transition: transform .65s cubic-bezier(.22,1,.36,1);
+    }
+    .btn-hot:hover::before { transform: translateX(120%); }
+    .btn-hot:hover {
+      color: #fff;
+      background: linear-gradient(135deg, var(--hot-dark), var(--hot));
+      box-shadow: 0 18px 34px -10px color-mix(in oklab, var(--hot) 85%, #000), inset 0 1px 0 rgba(255,255,255,.4);
+    }
+    .btn-secondary {
+      background: color-mix(in oklab, var(--surface) 82%, transparent);
+      backdrop-filter: blur(8px);
+    }
+    .btn-secondary:hover { border-color: var(--green-500); color: var(--green-800); }
+    .btn .ico { width: 1.05rem; height: 1.05rem; transition: transform .2s ease; }
+    .btn:hover .ico { transform: translateX(3px); }
+    .ico { width: 1em; height: 1em; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Alternador de tema */
+    .theme-btn {
+      width: 2.3rem; height: 2.3rem; display: grid; place-items: center;
+      border: 1px solid var(--border); border-radius: 10px;
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      transition: color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+    .theme-btn:hover { color: var(--green-700); border-color: var(--green-700); transform: rotate(12deg); }
+    .theme-btn svg { width: 1rem; height: 1rem; }
+    .theme-btn .hidden { display: none; }
+
+    /* Selos */
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: .55rem;
+      padding: .4rem .9rem; border-radius: 99px;
+      font-size: .74rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
+      color: var(--green-800);
+      background: color-mix(in oklab, var(--green-500) 13%, var(--surface));
+      border: 1px solid color-mix(in oklab, var(--green-500) 32%, transparent);
+      box-shadow: 0 4px 12px -4px color-mix(in oklab, var(--green-500) 25%, transparent);
+      margin-bottom: 1.2rem;
+    }
+    .eyebrow::before {
+      content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green-500);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--green-500) 20%, transparent);
+      animation: pulse 1.9s ease-out infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--green-500) 60%, transparent); }
+      70%, 100% { box-shadow: 0 0 0 9px transparent; }
+    }
+    .mini-tag {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .3rem .68rem; border-radius: 99px;
+      font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
+    }
+    .mini-tag.hot { color: var(--hot-dark); background: var(--primary-soft); }
+    .mini-tag.sun { color: #92400E; background: var(--gold-soft); }
+    .mini-tag.mint { color: var(--green-800); background: #DCFCE7; }
+
+    /* ===== HERO COM AURORA MESH & GRID PERSPECTIVA ===== */
+    .hero {
+      position: relative;
+      padding: 4.8rem 0 3.8rem;
+      overflow: hidden;
+    }
+    .aurora-bg {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .aurora-orb {
+      position: absolute; border-radius: 50%; filter: blur(85px); opacity: .55;
+      animation: drift 14s ease-in-out infinite alternate;
+    }
+    .orb-1 {
+      width: 520px; height: 520px; top: -140px; right: 4%;
+      background: radial-gradient(circle, color-mix(in oklab, var(--green-500) 42%, transparent), transparent 70%);
+    }
+    .orb-2 {
+      width: 440px; height: 440px; bottom: -120px; left: -6%;
+      background: radial-gradient(circle, color-mix(in oklab, var(--sun) 34%, transparent), transparent 70%);
+      animation-delay: -5s;
+    }
+    .orb-3 {
+      width: 340px; height: 340px; top: 35%; left: 42%;
+      background: radial-gradient(circle, color-mix(in oklab, var(--hot) 16%, transparent), transparent 70%);
+      animation-delay: -9s;
+    }
+    @keyframes drift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(35px, -25px) scale(1.08); }
+    }
+    .hero::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background-image:
+        linear-gradient(to right, color-mix(in oklab, var(--green-900) 6%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in oklab, var(--green-900) 6%, transparent) 1px, transparent 1px);
+      background-size: 44px 44px;
+      -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 35%, transparent 100%);
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 35%, transparent 100%);
+    }
+
+    .hero-grid { position: relative; z-index: 2; display: grid; grid-template-columns: 1.06fr .94fr; gap: 3rem; align-items: center; }
+    .hero h1 { font-size: clamp(2.45rem, 4.6vw, 3.85rem); line-height: 1.05; letter-spacing: -.04em; margin-bottom: 1.2rem; }
+    .hero h1 .hot {
+      background: linear-gradient(100deg, var(--green-800), var(--green-500), #059669);
+      background-size: 200% auto;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: gradientText 6s ease infinite;
+    }
+    @keyframes gradientText {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .lead { font-size: 1.12rem; color: var(--muted); max-width: 54ch; margin-bottom: 1.65rem; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: .85rem; margin-bottom: .95rem; }
+    .micro-trust { font-size: .82rem; font-weight: 700; color: var(--muted); display: flex; align-items: center; gap: .5rem; margin-bottom: 1.55rem; }
+    .micro-trust svg { color: var(--green-500); width: 1rem; height: 1rem; }
+    .hero-highlights { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 1.15rem; color: var(--ink); font-size: .88rem; font-weight: 800; }
+    .hero-highlights li { display: inline-flex; align-items: center; gap: .45rem; }
+    .hero-highlights li::before {
+      content: "✓"; display: grid; place-items: center; width: 19px; height: 19px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500)); color: #fff; font-size: .7rem;
+      box-shadow: 0 4px 10px -2px color-mix(in oklab, var(--green-500) 55%, transparent);
+    }
+
+    /* ===== PALCO 3D INTERATIVO (LAPTOP + CELULAR + BADGES) ===== */
+    .hero-stage {
+      position: relative; min-height: 440px;
+      perspective: 1400px;
+    }
+    .stage-3d {
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transform: rotateY(var(--rx, 0deg)) rotateX(var(--ry, 0deg));
+      transition: transform .18s ease-out;
+    }
+    .laptop {
+      position: relative;
+      background: linear-gradient(160deg, #22352F, var(--night));
+      border: 1px solid #334C44; border-radius: 16px;
+      padding: 10px 10px 0;
+      box-shadow:
+        0 38px 75px -28px rgba(7, 38, 28, .65),
+        inset 0 1px 0 rgba(255,255,255,.15);
+    }
+    .hero-stage .laptop {
+      width: 94%;
+      transform: rotate(-1.4deg) translateZ(10px);
+    }
+    .laptop-screen { overflow: hidden; border-radius: 9px; background: #fff; border: 3px solid #050E0B; }
+    .laptop-screen img { width: 100%; height: auto; display: block; aspect-ratio: 1200 / 760; object-fit: contain; }
+    .laptop-base {
+      height: 13px; margin: 0 -3%;
+      background: linear-gradient(#2B4039, #08120F);
+      border-radius: 0 0 14px 14px;
+      clip-path: polygon(3% 0, 97% 0, 100% 100%, 0 100%);
+    }
+
+    .phone {
+      position: relative; width: 218px;
+      background: linear-gradient(160deg, #1E302A, var(--night));
+      border: 1px solid #354F46; border-radius: 34px; padding: 8px;
+      box-shadow:
+        0 30px 60px -20px rgba(7, 38, 28, .75),
+        inset 0 1px 0 rgba(255,255,255,.18);
+    }
+    .phone::before {
+      content: ""; position: absolute; z-index: 3; top: 15px; left: 50%;
+      width: 56px; height: 5px; transform: translateX(-50%);
+      border-radius: 99px; background: #364E46;
+    }
+    .phone-screen { overflow: hidden; border-radius: 27px; background: #fff; }
+    .phone-qr {
+      position: absolute; z-index: 4; right: -1.1rem; bottom: -2.4rem;
+      transform: rotate(3deg) translateZ(48px);
+    }
+    .qr-screen { padding: 2.3rem 1rem 1.15rem; text-align: center; }
+    .qr-screen .brand { justify-content: center; margin-bottom: .8rem; }
+    .qr-screen .brand-logo { height: 28px; }
+    .qr-screen .brand-name { font-size: 1.3rem; }
+    .qr-screen h3 { font-size: .95rem; margin: 0 0 .25rem; color: #0B1B16; }
+    .qr-screen p { font-size: .72rem; color: #4E635B; margin: 0 0 .85rem; }
+    .qr-frame {
+      position: relative; width: 146px; height: 146px; margin: 0 auto .85rem;
+      padding: 9px; border: 1px solid #D7E3DF; border-radius: 12px; background: #fff;
+      box-shadow: inset 0 0 0 1px rgba(16,185,129,.12);
+    }
+    .qr-frame img { width: 100%; height: 100%; object-fit: contain; }
+    .scan-line {
+      position: absolute; left: 8%; right: 8%; top: 12%; height: 2.5px;
+      border-radius: 99px; background: var(--hot);
+      box-shadow: 0 0 14px var(--hot), 0 0 28px color-mix(in oklab, var(--hot) 75%, transparent);
+      animation: scan 2.5s cubic-bezier(.45,0,.55,1) infinite;
+    }
+    @keyframes scan { 0%, 100% { top: 12%; } 50% { top: 86%; } }
+    .qr-foot {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .35rem .65rem; border-radius: 99px;
+      font-size: .68rem; font-weight: 800; color: var(--green-800); background: #DCFCE7;
+    }
+
+    /* Badges flutuantes com profundidade 3D */
+    .float-badge {
+      position: absolute; z-index: 5;
+      display: flex; align-items: center; gap: .5rem;
+      padding: .6rem .95rem; border-radius: 99px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 36px -10px rgba(7, 38, 28, .35);
+      font-size: .8rem; font-weight: 800;
+      animation: float 4.5s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateZ(65px); }
+      50% { transform: translateY(-7px) translateZ(65px); }
+    }
+    .badge-points {
+      top: 1.8rem; right: -1.4rem;
+      background: color-mix(in oklab, var(--green-900) 92%, transparent);
+      color: #fff; border: 1px solid rgba(255,255,255,.15);
+    }
+    .badge-points b { color: var(--sun-light); font-size: .98rem; }
+    .badge-scan {
+      bottom: 5.2rem; left: -1.8rem;
+      background: linear-gradient(135deg, var(--sun), var(--sun-light));
+      color: var(--sun-ink); border: 1px solid rgba(255,255,255,.45);
+      animation-delay: -2.2s;
+    }
+    .float-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+    /* ===== CARDS COM SPOTLIGHT MAGNÉTICO ===== */
+    .spotlight-card {
+      position: relative;
+      --mx: 50%;
+      --my: 50%;
+    }
+    .spotlight-card::after {
+      content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      opacity: 0; transition: opacity .35s ease;
+      background: radial-gradient(380px circle at var(--mx) var(--my), color-mix(in oklab, var(--green-500) 14%, transparent), transparent 70%);
+    }
+    .spotlight-card:hover::after { opacity: 1; }
+
+    /* Faixa de sinais */
+    .signal-strip { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: .95rem; padding: 0 0 4rem; }
+    .signal {
+      display: flex; align-items: center; gap: .75rem;
+      padding: 1.05rem 1.15rem; border-radius: 16px;
+      background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+      font-size: .88rem; font-weight: 800; color: var(--ink);
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .signal:hover { transform: translateY(-3px); border-color: var(--green-500); box-shadow: var(--shadow); }
+    .signal .tech-icon {
+      flex: 0 0 auto; width: 2.3rem; height: 2.3rem; border-radius: 11px;
+      display: grid; place-items: center; color: #fff;
+      background: linear-gradient(135deg, var(--green-800), var(--green-500));
+    }
+    .signal:nth-child(2) .tech-icon { background: linear-gradient(135deg, var(--hot), var(--hot-2)); }
+    .signal:nth-child(3) .tech-icon { background: linear-gradient(135deg, #D97706, var(--sun)); }
+    .signal:nth-child(4) .tech-icon { background: linear-gradient(135deg, var(--green-900), var(--green-700)); }
+    .signal .tech-icon svg { width: 1.1rem; height: 1.1rem; }
+
+    /* Cabeçalhos de seção */
+    .section-head { max-width: 720px; margin: 0 auto 3rem; text-align: center; }
+    .section-head h2 { font-size: clamp(1.9rem, 3.3vw, 2.65rem); line-height: 1.12; letter-spacing: -.03em; margin-bottom: .8rem; }
+    .section-head p { color: var(--muted); font-size: 1.04rem; margin: 0; }
+
+    /* ===== COMPARATIVO COM BORDA CONIC-GRADIENT ANIMADA ===== */
+    .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; margin-bottom: 1rem; }
+    .vs-card {
+      padding: 2.1rem; border-radius: var(--radius-lg);
+      background: var(--surface); border: 1px solid var(--border);
+    }
+    .vs-card.old {
+      background: color-mix(in oklab, var(--surface) 65%, var(--surface-alt));
+      border-style: dashed;
+      opacity: .9;
+    }
+    .vs-card.new {
+      position: relative;
+      border: 2px solid transparent;
+      background:
+        linear-gradient(180deg, color-mix(in oklab, var(--green-500) 7%, var(--surface)), var(--surface)) padding-box,
+        conic-gradient(from var(--border-angle), var(--green-500), var(--sun), var(--green-700), var(--green-500)) border-box;
+      box-shadow: var(--shadow);
+      animation: spinBorder 5s linear infinite;
+    }
+    @keyframes spinBorder {
+      to { --border-angle: 1turn; }
+    }
+    .vs-card h3 { font-size: 1.25rem; margin-bottom: 1.15rem; display: flex; align-items: center; gap: .6rem; }
+    .vs-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .9rem; font-size: .95rem; }
+    .vs-list li { display: flex; align-items: flex-start; gap: .65rem; }
+    .vs-card.old .vs-list li { color: var(--muted); }
+    .vs-card.old .vs-list li::before { content: "✕"; color: #DC2626; font-weight: 800; }
+    .vs-card.new .vs-list li { font-weight: 600; color: var(--ink); }
+    .vs-card.new .vs-list li::before { content: "✓"; color: var(--green-500); font-weight: 900; }
+
+    /* Passos */
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.35rem; }
+    .step-card {
+      position: relative; overflow: hidden;
+      padding: 1.65rem; border-radius: var(--radius-lg);
+      background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+      transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease;
+    }
+    .step-card::before {
+      content: ""; position: absolute; inset: 0 0 auto; height: 4px;
+      background: linear-gradient(90deg, var(--green-700), var(--green-500), var(--sun));
+    }
+    .step-card:hover { transform: translateY(-6px); border-color: var(--green-500); box-shadow: var(--shadow); }
+    .step-top { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: 1rem; }
+    .step-num {
+      width: 2.45rem; height: 2.45rem; display: grid; place-items: center; border-radius: 13px;
+      font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--green-800), var(--green-500));
+      box-shadow: 0 8px 18px -6px color-mix(in oklab, var(--green-500) 60%, transparent);
+    }
+    .step-visual {
+      height: 220px; margin-bottom: 1.2rem; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+      background: radial-gradient(circle at 70% 20%, color-mix(in oklab, var(--green-500) 15%, transparent), transparent 60%), var(--surface-alt);
+      border: 1px solid var(--border);
+    }
+    .mini-phone {
+      position: relative; width: 106px; height: 172px; flex: 0 0 auto;
+      padding: 5px; border-radius: 19px;
+      background: linear-gradient(160deg, #1E2D28, var(--night));
+      border: 1px solid #2F463E;
+      box-shadow: 0 16px 30px -16px rgba(9, 44, 33, .7);
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    .step-card:hover .mini-phone { transform: scale(1.06) translateY(-4px); }
+    .mini-phone::before {
+      content: ""; position: absolute; z-index: 2; top: 9px; left: 50%;
+      width: 28px; height: 3px; transform: translateX(-50%);
+      border-radius: 99px; background: #374F47;
+    }
+    .mini-screen {
+      width: 100%; height: 100%; border-radius: 14px; overflow: hidden;
+      background: #fff; display: flex; align-items: center; justify-content: center;
+    }
+    .mini-phone.qr-phone .mini-screen { padding: 8px; }
+    .mini-phone img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+    .step-card h3 { font-size: 1.15rem; margin-bottom: .5rem; }
+    .step-card p { color: var(--muted); font-size: .93rem; margin: 0; }
+
+    /* Demonstração */
+    .demo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.2rem; align-items: start; }
+    .demo-card { min-width: 0; }
+    .demo-card .laptop { transition: transform .35s cubic-bezier(.22,1,.36,1); }
+    .demo-card:hover .laptop { transform: translateY(-6px); }
+    .demo-card:nth-child(2) .laptop { transform: translateY(1.6rem); }
+    .demo-card:nth-child(2):hover .laptop { transform: translateY(1.1rem); }
+    .demo-caption {
+      display: flex; align-items: flex-start; gap: .85rem;
+      padding: 1.2rem 1.3rem; margin-top: 1.3rem;
+      border-radius: 16px; background: var(--surface); border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .demo-caption .tech-icon {
+      flex: 0 0 auto; width: 2.3rem; height: 2.3rem; border-radius: 11px;
+      display: grid; place-items: center; color: #fff;
+      background: linear-gradient(135deg, var(--green-800), var(--green-500));
+    }
+    .demo-card:nth-child(2) .demo-caption .tech-icon { background: linear-gradient(135deg, var(--hot), var(--hot-2)); }
+    .demo-caption h3 { font-size: 1.02rem; margin: 0 0 .25rem; }
+    .demo-caption p { margin: 0; color: var(--muted); font-size: .88rem; }
+
+    .demo-phone-row { display: flex; justify-content: center; gap: 1.8rem; margin-top: 3.8rem; flex-wrap: wrap; }
+    .demo-phone-row .phone { width: 192px; transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+    .demo-phone-row .phone:hover { transform: translateY(-8px) scale(1.03); }
+    .demo-phone-row .phone-shot { width: 100%; height: auto; display: block; object-fit: contain; }
+    .demo-phone-label { margin-top: .8rem; text-align: center; font-size: .84rem; font-weight: 800; color: var(--ink); }
+
+    /* ===== FAIXA DE DADOS + HEATMAP COM TOOLTIPS CSS ===== */
+    .data-band {
+      position: relative;
+      display: grid; grid-template-columns: 1.05fr .95fr; gap: 2.4rem; align-items: center;
+      padding: 2.8rem; border-radius: 28px; color: #fff;
+      background:
+        radial-gradient(620px 340px at 100% 0, color-mix(in oklab, var(--green-500) 32%, transparent), transparent 65%),
+        linear-gradient(135deg, var(--green-900), var(--green-800));
+      box-shadow: 0 28px 64px -32px rgba(7, 38, 28, .9);
+    }
+    .data-band h2 { color: #fff; font-size: clamp(1.85rem, 3vw, 2.55rem); margin-bottom: .8rem; }
+    .data-band p { color: rgba(255,255,255,.86); }
+    .data-list { list-style: none; margin: 1.35rem 0 0; padding: 0; display: grid; gap: .7rem; }
+    .data-list li { display: flex; gap: .65rem; align-items: flex-start; font-size: .95rem; font-weight: 600; }
+    .data-list li::before { content: "→"; color: var(--sun-light); font-weight: 800; }
+
+    .heat-card {
+      padding: 1.45rem; border-radius: 20px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(12px);
+    }
+    .heat-card-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-bottom: 1.05rem; font-size: .88rem; }
+    .heat-card-head b { font-size: .98rem; }
+    .heat-card-head span { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--sun-light); font-weight: 800; }
+    .mini-heat { display: grid; grid-template-columns: 32px repeat(5, 1fr); gap: 6px; }
+    .mini-heat > span, .mini-heat > b { font-size: .68rem; color: rgba(255,255,255,.78); align-self: center; text-align: center; }
+    .mini-heat i {
+      position: relative; display: block; height: 29px; border-radius: 7px; background: var(--h0);
+      cursor: pointer; transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
+    }
+    .mini-heat i:hover {
+      transform: scale(1.16);
+      z-index: 10;
+      box-shadow: 0 0 0 2px #fff, 0 8px 16px rgba(0,0,0,.4);
+    }
+    /* Tooltip puro em CSS */
+    .mini-heat i[data-tip]::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(4px);
+      white-space: nowrap; padding: .32rem .6rem; border-radius: 7px;
+      background: #050E0B; color: #fff; font-style: normal; font-size: .7rem; font-weight: 700;
+      border: 1px solid rgba(255,255,255,.2);
+      opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease;
+    }
+    .mini-heat i[data-tip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .mini-heat { --h0: rgba(255,255,255,.09); --h1: rgba(110,231,183,.32); --h2: rgba(110,231,183,.6); --h3: var(--mint); --h4: var(--sun-light); }
+    .mini-heat .h0 { background: var(--h0); } .mini-heat .h1 { background: var(--h1); }
+    .mini-heat .h2 { background: var(--h2); } .mini-heat .h3 { background: var(--h3); }
+    .mini-heat .h4 { background: var(--h4); }
+    .heat-note { margin: 1.05rem 0 0; font-size: .82rem; color: rgba(255,255,255,.92); line-height: 1.48; }
+    .heat-note b { color: var(--sun-light); }
+
+    /* Segmentos */
+    .niches-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.3rem; }
+    .niche-card {
+      padding: 1.7rem; border-radius: 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .niche-card:hover { transform: translateY(-4px); border-color: var(--green-500); box-shadow: var(--shadow); }
+    .niche-card .niche-badge {
+      display: inline-block; font-size: .75rem; font-weight: 800;
+      color: var(--green-800); background: var(--surface-alt);
+      padding: .32rem .75rem; border-radius: 8px; margin-bottom: .85rem;
+    }
+    .niche-card h3 { font-size: 1.12rem; margin-bottom: .45rem; }
+    .niche-card p { font-size: .9rem; color: var(--muted); margin: 0; }
+
+    /* ===== FAQ INTERATIVO ===== */
+    .faq-list { max-width: 780px; margin: 0 auto; display: grid; gap: .9rem; }
+    .faq-item {
+      border-radius: 17px; background: var(--surface); border: 1px solid var(--border);
+      padding: 1.25rem 1.45rem;
+      transition: border-color .25s ease, box-shadow .25s ease;
+    }
+    .faq-item[open] {
+      border-color: var(--green-500);
+      box-shadow: 0 12px 28px -14px rgba(7, 38, 28, .15);
+    }
+    .faq-item summary {
+      font-weight: 800; font-size: 1rem; color: var(--ink); cursor: pointer;
+      list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: "+"; width: 28px; height: 28px; flex: 0 0 auto;
+      display: grid; place-items: center; border-radius: 50%;
+      background: var(--surface-alt); font-size: 1.2rem; color: var(--green-700); font-weight: 800;
+      transition: transform .28s cubic-bezier(.34,1.56,.64,1), background .2s ease, color .2s ease;
+    }
+    .faq-item[open] summary::after {
+      transform: rotate(45deg);
+      background: var(--green-500);
+      color: #fff;
+    }
+    .faq-item p {
+      margin: .9rem 0 0; font-size: .94rem; color: var(--muted);
+      animation: fadeSlide .28s ease;
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== CTA FINAL COM EFEITO MESH ===== */
+    .cta-inner {
+      position: relative; overflow: hidden;
+      display: grid; grid-template-columns: 1.25fr .75fr; gap: 2rem; align-items: center;
+      padding: 3.4rem; border-radius: 28px;
+      background:
+        radial-gradient(500px 260px at 85% 15%, rgba(16,185,129,.35), transparent 70%),
+        radial-gradient(420px 240px at 10% 90%, rgba(245,158,11,.22), transparent 70%),
+        linear-gradient(135deg, var(--green-900) 0%, #0C4533 60%, #13684D 100%);
+      color: #fff; box-shadow: var(--shadow);
+    }
+    .cta-inner::before {
+      content: ""; position: absolute; inset: 0 0 auto; height: 5px;
+      background: linear-gradient(90deg, var(--green-500), var(--sun-light), var(--hot), var(--green-500));
+      background-size: 200% 100%;
+      animation: flowBar 5s linear infinite;
+    }
+    @keyframes flowBar { to { background-position: 200% 0; } }
+    .cta h2 { color: #fff; font-size: clamp(1.85rem, 3.2vw, 2.5rem); margin-bottom: .75rem; }
+    .cta p { color: rgba(255,255,255,.86); font-size: 1.04rem; margin: 0; }
+    .cta-actions { display: flex; flex-direction: column; gap: .8rem; }
+    .cta .btn-ghost {
+      background: rgba(255,255,255,.1); color: #fff;
+      border-color: rgba(255,255,255,.3); backdrop-filter: blur(8px);
+    }
+    .cta .btn-ghost:hover { background: rgba(255,255,255,.18); border-color: #fff; }
+
+    /* Footer */
+    .site-footer { padding: 2.5rem 0; border-top: 1px solid var(--border); font-size: .88rem; color: var(--muted); }
+    .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .footer-inner a { color: var(--green-800); font-weight: 700; }
+
+    /* Revelação escalonada (Stagger Reveal) */
+    .js .reveal {
+      opacity: 0;
+      transform: translateY(20px) scale(.985);
+      transition:
+        opacity .65s cubic-bezier(.22,1,.36,1) var(--delay, 0s),
+        transform .65s cubic-bezier(.22,1,.36,1) var(--delay, 0s);
+    }
+    .js .reveal.in { opacity: 1; transform: none; }
+
+    /* Tema escuro */
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #060F0C; --surface: #0D1A15; --surface-alt: #11211B;
+      --ink: #ECF5F1; --text: #D7E5DF; --muted: #8CA39A;
+      --border: #1C3028; --border-strong: #2B473C;
+      --primary-soft: #2E1510; --gold-soft: #2B210B;
+      --shadow: 0 20px 44px rgba(0,0,0,.5);
+    }
+    html[data-theme="dark"] .brand-name { color: #ECF5F1; }
+    html[data-theme="dark"] .eyebrow { color: var(--mint); }
+    html[data-theme="dark"] .mini-tag.mint { color: var(--mint); background: #102D22; }
+    html[data-theme="dark"] .mini-tag.sun { color: var(--sun-light); }
+    html[data-theme="dark"] .mini-tag.hot { color: #FF9C80; }
+    html[data-theme="dark"] .hero::before {
+      background-image:
+        linear-gradient(to right, rgba(236,245,241,.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(236,245,241,.04) 1px, transparent 1px);
+    }
+
+    /* Responsivo */
+    @media (max-width: 1100px) {
+      .signal-strip { grid-template-columns: repeat(2, 1fr); }
+      .hero-stage { min-height: 400px; }
+      .hero-stage .laptop { width: 100%; }
+      .phone-qr { right: 0; width: 200px; }
+      .badge-points { right: 0; }
+      .badge-scan { left: 0; }
+    }
+    @media (max-width: 900px) {
+      .hero-grid, .demo-grid, .data-band, .vs-grid, .steps-grid, .niches-grid, .cta-inner { grid-template-columns: 1fr; }
+      .hero { padding-top: 3.5rem; }
+      .hero-stage { min-height: 0; display: grid; gap: 2.5rem; justify-items: center; }
+      .hero-stage .laptop { width: 100%; transform: none; }
+      .phone-qr { position: relative; right: auto; bottom: auto; transform: rotate(2deg); }
+      .float-badge { display: none; }
+      .demo-card:nth-child(2) .laptop, .demo-card:nth-child(2):hover .laptop { transform: none; }
+    }
+    @media (max-width: 640px) {
+      .signal-strip { grid-template-columns: 1fr; }
+      .hero-actions .btn { width: 100%; }
+      .data-band, .cta-inner { padding: 1.75rem; }
+      .demo-phone-row .phone { width: 150px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .js .reveal { opacity: 1 !important; transform: none !important; }
+    }
+  </style>
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <!-- Barra de progresso de leitura -->
+  <div class="scroll-progress" aria-hidden="true"></div>
+
+  <!-- Sprite de ícones -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="5" rx="1"/><path d="M12 8v13M5 13v7h14v-7M12 8c-2-4-6-4-6-1.5S10 8 12 8zm0 0c2-4 6-4 6-1.5S14 8 12 8z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18M6 16l4-5 4 3 5-7"/><path d="M15 7h4v4"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+  </defs></svg>
+
+  <header class="site-header" id="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="Senfy início">
+        <img class="brand-logo" src="assets/suricato.png" alt="" aria-hidden="true">
+        <span class="brand-name">Senfy</span>
+      </a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Abrir menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav id="site-nav" class="site-nav" aria-label="Navegação principal">
+        <a href="#comparativo">Por que mudar</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#demonstracao">Painel</a>
+        <a href="#dados">Inteligência</a>
+        <a href="#faq">Dúvidas</a>
+        <button class="theme-btn" id="theme-toggle" type="button" aria-label="Ativar tema escuro">
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+          <svg class="sun hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <a href="checkout.html" class="btn btn-small btn-hot">Simular como cliente</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <!-- 1. TOPO DO FUNIL -->
+    <section class="hero">
+      <div class="aurora-bg" aria-hidden="true">
+        <div class="aurora-orb orb-1"></div>
+        <div class="aurora-orb orb-2"></div>
+        <div class="aurora-orb orb-3"></div>
+      </div>
+
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Fidelidade sem atrito no balcão</p>
+          <h1>
+            Faça seus clientes voltarem mais vezes — <span class="hot">sem obrigar ninguém a baixar um app.</span>
+          </h1>
+          <p class="lead">Seu cliente aponta a câmera para o QR Code, registra a compra em 15 segundos e ganha pontos na hora. Você constrói uma base própria de clientes recorrentes e descobre exatamente o que faz sua loja vender mais.</p>
+          <div class="hero-actions">
+            <a href="checkout.html" class="btn btn-hot">Testar experiência do cliente <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a href="#demonstracao" class="btn btn-secondary">Ver painel do lojista</a>
+          </div>
+          <p class="micro-trust"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg> Teste interativo gratuito · Sem cadastro · Funciona em qualquer celular</p>
+          <ul class="hero-highlights" aria-label="Diferenciais principais">
+            <li>Zero download para o cliente</li>
+            <li>Não trava a fila do caixa</li>
+            <li>Implantação em 5 minutos</li>
+          </ul>
+        </div>
+
+        <div class="hero-visual reveal" style="--delay:.12s">
+          <div class="hero-stage" id="hero-stage" aria-label="Demonstração: laptop com o painel e celular com o QR Code">
+            <div class="stage-3d">
+              <div class="laptop">
+                <div class="laptop-screen">
+                  <img src="assets/screen-dashboard-top.png" alt="Painel Senfy com vendas, resgates e mapa de calor" width="1200" height="760" fetchpriority="high">
+                </div>
+                <div class="laptop-base" aria-hidden="true"></div>
+              </div>
+
+              <div class="float-badge badge-points" aria-hidden="true"><span class="dot"></span> +55 <b>pts</b> creditados</div>
+              <div class="float-badge badge-scan" aria-hidden="true"><span class="dot"></span> 15s no balcão</div>
+
+              <div class="phone phone-qr">
+                <div class="phone-screen qr-screen">
+                  <div class="brand" aria-label="Senfy">
+                    <img class="brand-logo" src="assets/suricato.png" alt="" aria-hidden="true">
+                    <span class="brand-name">Senfy</span>
+                  </div>
+                  <h3>Pontue sua compra</h3>
+                  <p>Aponte a câmera para o QR Code</p>
+                  <div class="qr-frame">
+                    <img src="assets/qr-senfy.png" alt="QR Code ilustrativo da Senfy" width="500" height="500">
+                    <span class="scan-line" aria-hidden="true"></span>
+                  </div>
+                  <span class="qr-foot"><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg> Direto no navegador</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="container">
+      <div class="signal-strip reveal" aria-label="Benefícios rápidos">
+        <div class="signal spotlight-card"><span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-qr"/></svg></span> Sem app e sem senha</div>
+        <div class="signal spotlight-card"><span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-bolt"/></svg></span> Registro em 15 segundos</div>
+        <div class="signal spotlight-card"><span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-gift"/></svg></span> Recompensa visível na hora</div>
+        <div class="signal spotlight-card"><span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-chart"/></svg></span> Dados reais de recompra</div>
+      </div>
+    </div>
+
+    <!-- 2. COMPARATIVO ANTES VS DEPOIS -->
+    <section class="section alt" id="comparativo">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">O fim do cartãozinho perdido</p>
+          <h2>Por que os programas de fidelidade tradicionais falham?</h2>
+          <p>Ninguém quer encher a memória do celular com mais um aplicativo nem guardar cartão de papel na carteira. Quando é difícil pontuar, o cliente desiste.</p>
+        </div>
+
+        <div class="vs-grid reveal">
+          <div class="vs-card old">
+            <h3>Jeito antigo (Cartão de papel ou App pesado)</h3>
+            <ul class="vs-list">
+              <li>O cliente esquece ou perde o cartãozinho carimbado e perde a motivação.</li>
+              <li>Baixar um app e criar senha no caixa gera fila e rejeição imediata.</li>
+              <li>Você não sabe quem são seus melhores clientes nem há quanto tempo sumiram.</li>
+              <li>Promoções feitas no "achismo", dando desconto para quem já ia comprar.</li>
+            </ul>
+          </div>
+          <div class="vs-card new spotlight-card">
+            <h3>Com a Senfy no seu balcão</h3>
+            <ul class="vs-list">
+              <li>Basta apontar a câmera: abre direto no navegador em 1 segundo.</li>
+              <li>Cliente vê os pontos subindo na hora e sabe quanto falta para o próximo prêmio.</li>
+              <li>Você captura nome, WhatsApp e histórico de compras automaticamente.</li>
+              <li>Campanhas cirúrgicas nos dias e horários de menor movimento da loja.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. COMO FUNCIONA -->
+    <section class="section" id="como-funciona">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Simples na rotina</p>
+          <h2>Três passos. Menos de 15 segundos. Zero atrito.</h2>
+          <p>Projetado para não atrapalhar sua equipe no horário de pico: o próprio cliente faz o registro enquanto paga.</p>
+        </div>
+        <div class="steps-grid">
+          <article class="step-card spotlight-card reveal">
+            <div class="step-top"><span class="step-num">1</span><span class="mini-tag hot">No balcão</span></div>
+            <div class="step-visual">
+              <div class="mini-phone qr-phone"><div class="mini-screen"><img src="assets/qr-senfy.png" alt="QR Code da Senfy dentro do celular" width="500" height="500" loading="lazy" decoding="async"></div></div>
+            </div>
+            <h3>Cliente aponta a câmera</h3>
+            <p>Deixe o display com o QR Code no caixa ou na mesa. O cliente escaneia com a câmera nativa do celular, sem baixar nada.</p>
+          </article>
+          <article class="step-card spotlight-card reveal" style="--delay:.08s">
+            <div class="step-top"><span class="step-num">2</span><span class="mini-tag sun">15 segundos</span></div>
+            <div class="step-visual">
+              <div class="mini-phone"><div class="mini-screen"><img class="step-shot" src="assets/screen-checkout-form.png" alt="Formulário rápido dentro do celular" loading="lazy" decoding="async"></div></div>
+            </div>
+            <h3>Digita o básico</h3>
+            <p>Apenas nome, telefone e valor gasto. O sistema aplica a regra da sua loja e calcula os pontos automaticamente.</p>
+          </article>
+          <article class="step-card spotlight-card reveal" style="--delay:.16s">
+            <div class="step-top"><span class="step-num">3</span><span class="mini-tag mint">Retenção</span></div>
+            <div class="step-visual">
+              <div class="mini-phone"><div class="mini-screen"><img class="step-shot" src="assets/screen-checkout.png" alt="Resultado com pontos dentro do celular" loading="lazy" decoding="async"></div></div>
+            </div>
+            <h3>Ganha pontos na hora</h3>
+            <p>O saldo aparece imediatamente na tela junto com os prêmios disponíveis — criando um motivo real para voltar logo.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. DEMONSTRAÇÃO DO PRODUTO -->
+    <section class="section alt" id="demonstracao">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Controle total</p>
+          <h2>Leve para o cliente. Completo para a sua gestão.</h2>
+          <p>Enquanto seu cliente tem uma experiência rápida no celular, você acompanha o crescimento da recorrência em tempo real.</p>
+        </div>
+
+        <div class="demo-grid">
+          <article class="demo-card reveal">
+            <div class="laptop">
+              <div class="laptop-screen">
+                <img src="assets/screen-dashboard-top.png" alt="Tela Resumo do dashboard Senfy" width="1200" height="760" loading="lazy" decoding="async">
+              </div>
+              <div class="laptop-base" aria-hidden="true"></div>
+            </div>
+            <div class="demo-caption spotlight-card">
+              <span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-chart"/></svg></span>
+              <div><h3>Visão clara de vendas e retorno</h3><p>Acompanhe faturamento registrado, taxa de clientes recorrentes e resgates sem precisar de planilhas.</p></div>
+            </div>
+          </article>
+
+          <article class="demo-card reveal" style="--delay:.1s">
+            <div class="laptop">
+              <div class="laptop-screen">
+                <img src="assets/screen-rules.png" alt="Tela de regras e prêmios do dashboard Senfy" width="1200" height="760" loading="lazy" decoding="async">
+              </div>
+              <div class="laptop-base" aria-hidden="true"></div>
+            </div>
+            <div class="demo-caption spotlight-card">
+              <span class="tech-icon" aria-hidden="true"><svg class="ico"><use href="#i-gift"/></svg></span>
+              <div><h3>Regras flexíveis que protegem sua margem</h3><p>Defina quantos pontos cada real vale e crie recompensas atrativas que aumentam o ticket médio.</p></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="demo-phone-row reveal" aria-label="Telas do cliente no celular">
+          <div>
+            <div class="phone"><div class="phone-screen"><img class="phone-shot" src="assets/screen-checkout-form.png" alt="Tela de registro de compra no celular" loading="lazy" decoding="async"></div></div>
+            <p class="demo-phone-label">1. Cadastro relâmpago (1x só)</p>
+          </div>
+          <div>
+            <div class="phone"><div class="phone-screen"><img class="phone-shot" src="assets/screen-checkout.png" alt="Tela de pontos ganhos no celular" loading="lazy" decoding="async"></div></div>
+            <p class="demo-phone-label">2. Saldo e catálogo de prêmios</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. INTELIGÊNCIA DE DADOS + SEGMENTOS -->
+    <section class="section" id="dados">
+      <div class="container">
+        <div class="data-band reveal">
+          <div>
+            <p class="eyebrow" style="color:var(--sun-light);background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)">Inteligência de vendas</p>
+            <h2>Pare de adivinhar. Tome decisões baseadas nos hábitos da sua base.</h2>
+            <p>Cada QR Code lido alimenta o mapa de comportamento da sua loja. Passe o cursor sobre os blocos ao lado para simular os insights automáticos.</p>
+            <ul class="data-list">
+              <li>Identifique clientes VIPs e clientes que estão sumindo</li>
+              <li>Mapeie os dias e horários de pico e de movimento fraco</li>
+              <li>Saiba quais prêmios realmente motivam a recompra</li>
+            </ul>
+          </div>
+          <div class="heat-card" aria-label="Exemplo interativo de mapa de movimento por dia e horário">
+            <div class="heat-card-head"><b>Mapa de calor da loja</b><span>Passe o mouse nos blocos</span></div>
+            <div class="mini-heat" role="img" aria-label="Mapa com maior movimento de segunda a sexta e menor movimento no sábado">
+              <span></span><span>7h</span><span>10h</span><span>13h</span><span>15h</span><span>18h</span>
+              <b>Seg</b><i class="h1" data-tip="Seg 7h: Fluxo leve"></i><i class="h3" data-tip="Seg 10h: Movimento alto"></i><i class="h4" data-tip="Seg 13h: Horário de pico"></i><i class="h3" data-tip="Seg 15h: Movimento alto"></i><i class="h2" data-tip="Seg 18h: Fluxo moderado"></i>
+              <b>Ter</b><i class="h1" data-tip="Ter 7h: Fluxo leve"></i><i class="h2" data-tip="Ter 10h: Fluxo moderado"></i><i class="h4" data-tip="Ter 13h: Horário de pico"></i><i class="h4" data-tip="Ter 15h: Horário de pico"></i><i class="h2" data-tip="Ter 18h: Fluxo moderado"></i>
+              <b>Qua</b><i class="h2" data-tip="Qua 7h: Fluxo moderado"></i><i class="h3" data-tip="Qua 10h: Movimento alto"></i><i class="h3" data-tip="Qua 13h: Movimento alto"></i><i class="h4" data-tip="Qua 15h: Horário de pico"></i><i class="h2" data-tip="Qua 18h: Fluxo moderado"></i>
+              <b>Qui</b><i class="h1" data-tip="Qui 7h: Fluxo leve"></i><i class="h2" data-tip="Qui 10h: Fluxo moderado"></i><i class="h3" data-tip="Qui 13h: Movimento alto"></i><i class="h4" data-tip="Qui 15h: Horário de pico"></i><i class="h3" data-tip="Qui 18h: Movimento alto"></i>
+              <b>Sex</b><i class="h2" data-tip="Sex 7h: Fluxo moderado"></i><i class="h3" data-tip="Sex 10h: Movimento alto"></i><i class="h4" data-tip="Sex 13h: Horário de pico"></i><i class="h4" data-tip="Sex 15h: Horário de pico"></i><i class="h3" data-tip="Sex 18h: Movimento alto"></i>
+              <b>Sáb</b><i class="h0" data-tip="Sáb 7h: Oportunidade de campanha!"></i><i class="h1" data-tip="Sáb 10h: Fluxo leve"></i><i class="h2" data-tip="Sáb 13h: Fluxo moderado"></i><i class="h1" data-tip="Sáb 15h: Fluxo leve"></i><i class="h0" data-tip="Sáb 18h: Baixo movimento"></i>
+            </div>
+            <p class="heat-note">Oportunidade detectada: <b>sábado às 7h</b> tem baixo fluxo. Crie pontuação em dobro nesse horário para atrair movimento.</p>
+          </div>
+        </div>
+
+        <div class="section-head reveal" style="margin-top:4.5rem;margin-bottom:2rem">
+          <h3>Feito para negócios onde a recorrência faz a diferença</h3>
+        </div>
+        <div class="niches-grid reveal">
+          <div class="niche-card spotlight-card">
+            <span class="niche-badge">Alimentação & Cafés</span>
+            <h3>Cafeterias, Padarias e Hamburguerias</h3>
+            <p>Transforme o café da manhã ou o almoço da semana em hábito. Ofereça um café, sobremesa ou combo na 5ª visita.</p>
+          </div>
+          <div class="niche-card spotlight-card">
+            <span class="niche-badge">Beleza & Bem-estar</span>
+            <h3>Barbearias, Salões e Estética</h3>
+            <p>Reduza o intervalo entre cortes e procedimentos premiando quem mantém a agenda em dia com você.</p>
+          </div>
+          <div class="niche-card spotlight-card">
+            <span class="niche-badge">Varejo & Serviços</span>
+            <h3>Lojas de Roupas, Pet Shops e Conveniência</h3>
+            <p>Aumente o ticket médio criando metas de pontos e traga o cliente de volta antes que ele compre no concorrente.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. QUEBRA DE OBJEÇÕES (FAQ) -->
+    <section class="section alt" id="faq">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Perguntas frequentes</p>
+          <h2>Tudo o que você precisa saber antes de começar</h2>
+        </div>
+        <div class="faq-list reveal">
+          <details class="faq-item" open>
+            <summary>O cliente precisa mesmo baixar algum aplicativo?</summary>
+            <p>Não. O QR Code abre uma página leve direto no navegador do celular (Safari ou Chrome). Na primeira compra ele leva 15 segundos; nas próximas, o navegador já lembra os dados e leva menos de 5 segundos.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Preciso integrar com meu sistema de caixa (PDV)?</summary>
+            <p>Não precisa de integração técnica. Você pode começar hoje mesmo apenas imprimindo o QR Code da sua loja e colocando no balcão. O sistema funciona de forma 100% independente.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Como evito que um cliente registre compras falsas?</summary>
+            <p>O painel da Senfy permite validação rápida de valor, limites diários por telefone e conferência instantânea no momento do resgate do prêmio no caixa.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Em quanto tempo consigo colocar para rodar na minha loja?</summary>
+            <p>Em menos de 5 minutos. Você cria sua conta, define quantos pontos cada real vale, cadastra seu primeiro prêmio e baixa o QR Code pronto para imprimir.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. FUNDO DO FUNIL -->
+    <section class="section cta" id="contato">
+      <div class="container cta-inner">
+        <div class="reveal">
+          <p class="eyebrow" style="color:var(--sun-light);background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)">Pronto para testar?</p>
+          <h2>Experimente na prática agora — sem baixar nada.</h2>
+          <p>Simule a tela que o seu cliente vê no balcão em 15 segundos ou acesse o painel para configurar o programa de fidelidade da sua loja.</p>
+        </div>
+        <div class="cta-actions reveal" style="--delay:.1s">
+          <a class="btn btn-hot" href="checkout.html">Simular experiência do cliente <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn-ghost" href="login.html">Criar conta / Acessar painel</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p><strong>Senfy</strong> — Fidelidade rápida por QR Code, sem download, com dados que viram estratégia.</p>
+      <p>&copy; <span id="year"></span> Senfy. Todos os direitos reservados. · <a href="login.html">Acessar plataforma</a></p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+      /* 1. Barra de progresso de leitura + sombra no header */
+      const header = document.getElementById('site-header');
+      const onScroll = () => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+        root.style.setProperty('--scroll', progress.toFixed(4));
+        if (header) header.classList.toggle('scrolled', window.scrollY > 16);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      /* 2. Efeito Spotlight magnético nos cards */
+      if (!reduce) {
+        document.querySelectorAll('.spotlight-card').forEach((card) => {
+          card.addEventListener('pointermove', (e) => {
+            const rect = card.getBoundingClientRect();
+            card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+            card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+          });
+        });
+
+        /* 3. Paralaxe 3D no palco do Hero */
+        const stage = document.getElementById('hero-stage');
+        if (stage) {
+          stage.addEventListener('pointermove', (e) => {
+            const rect = stage.getBoundingClientRect();
+            const nx = (e.clientX - rect.left) / rect.width - 0.5;
+            const ny = (e.clientY - rect.top) / rect.height - 0.5;
+            stage.style.setProperty('--rx', `${(nx * 9).toFixed(2)}deg`);
+            stage.style.setProperty('--ry', `${(-ny * 7).toFixed(2)}deg`);
+          });
+          stage.addEventListener('pointerleave', () => {
+            stage.style.setProperty('--rx', '0deg');
+            stage.style.setProperty('--ry', '0deg');
+          });
+        }
+      }
+
+      /* 4. Alternador de tema */
+      root.dataset.theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const themeBtn = document.getElementById('theme-toggle');
+      const syncTheme = () => {
+        if (!themeBtn) return;
+        const dark = root.dataset.theme === 'dark';
+        themeBtn.setAttribute('aria-label', dark ? 'Ativar tema claro' : 'Ativar tema escuro');
+        themeBtn.querySelector('.moon').classList.toggle('hidden', dark);
+        themeBtn.querySelector('.sun').classList.toggle('hidden', !dark);
+      };
+      syncTheme();
+      if (themeBtn) themeBtn.addEventListener('click', () => {
+        root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        syncTheme();
+      });
+
+      /* 5. Revelação escalonada no scroll */
+      const reveals = Array.from(document.querySelectorAll('.reveal'));
+      if (reduce || !('IntersectionObserver' in window)) {
+        reveals.forEach((el) => el.classList.add('in'));
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('in');
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px' });
+      reveals.forEach((el) => observer.observe(el));
+    })();
+  </script>
+</body>
+</html>

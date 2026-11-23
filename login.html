@@ -3,47 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — Senfy</title>
+  <title>Acessar — Senfy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hammersmith+One&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="auth-page">
   <div class="auth-wrap">
     <div class="auth-card">
-      <a class="brand" href="index.html" aria-label="Senfy início" style="margin-bottom:1rem;">
-        <img src="assets/logo.png" alt="" class="brand-logo" onerror="this.style.display='none'">
-        <span class="brand-mark">S</span>
-        <span>Senfy</span>
+      <a class="brand auth-brand" href="index.html" aria-label="Senfy início">
+        <img class="brand-logo" src="assets/suricato.png" alt="" aria-hidden="true">
+        <span class="brand-name">Senfy</span>
       </a>
       <div class="auth-head">
-        <h1 style="font-size:1.8rem;">Acesse sua conta</h1>
-        <p>Entre para acompanhar clientes, regras, prêmios e ações do seu programa de fidelidade.</p>
+        <p class="eyebrow" id="auth-eyebrow">Acesso</p>
+        <h1 id="auth-title">Acesse sua conta</h1>
+        <p id="auth-subtitle">Entre para acompanhar clientes, regras, prêmios e ações do seu programa de fidelidade.</p>
       </div>
-      <form action="dashboard.html" method="get">
+
+      <div class="auth-tabs" role="tablist" aria-label="Modo de acesso">
+        <button class="auth-tab is-active" type="button" role="tab" aria-selected="true" data-auth-mode="login">Entrar</button>
+        <button class="auth-tab" type="button" role="tab" aria-selected="false" data-auth-mode="signup">Criar conta</button>
+      </div>
+
+      <form id="auth-form" novalidate>
+        <div class="field" data-auth-signup hidden>
+          <label for="company-name">Nome da empresa
+            <input class="input" id="company-name" name="company-name" type="text" placeholder="Ex.: Café Central" autocomplete="organization">
+          </label>
+        </div>
         <div class="field">
           <label for="email">E-mail
             <input class="input" id="email" name="email" type="email" placeholder="voce@empresa.com" autocomplete="email" required>
           </label>
         </div>
         <div class="field">
-          <label for="senha">Senha
-            <input class="input" id="senha" name="senha" type="password" placeholder="Sua senha" autocomplete="current-password" required>
+          <label for="password">Senha
+            <input class="input" id="password" name="password" type="password" placeholder="Mínimo 6 caracteres" autocomplete="current-password" minlength="6" required>
           </label>
         </div>
-        <div class="auth-meta">
-          <label style="display:flex;align-items:center;gap:0.45rem;font-weight:500;color:var(--muted);">
-            <input type="checkbox" name="lembrar"> Lembrar de mim
+        <div class="field" data-auth-signup hidden>
+          <label for="country">País
+            <select class="input" id="country" name="country">
+              <option value="BR" selected>Brasil (BRL)</option>
+              <option value="PT">Portugal (EUR)</option>
+            </select>
           </label>
-          <a href="#" onclick="return false;" style="color:var(--primary);">Esqueci a senha</a>
         </div>
-        <button class="btn btn-block" type="submit">Entrar</button>
+
+        <p class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
+        <button class="btn btn-block" id="auth-submit" type="submit">Entrar</button>
       </form>
-      <p class="auth-links">Ainda não tem conta? <a href="index.html#contato">Fale com a Senfy</a></p>
+
+      <p class="auth-links" id="auth-links">Ainda não tem conta? <button class="auth-link-btn" type="button" data-auth-switch="signup">Criar conta</button></p>
     </div>
-    <p class="muted small" style="text-align:center;margin-top:1rem;">Ambiente de demonstração — autenticação será integrada em versões futuras.</p>
   </div>
-  <script src="script.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="auth.js"></script>
 </body>
 </html>

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Registre sua compra e veja quantos pontos você ganhou no programa de fidelidade Senfy.">
+  <title>Registrar compra — Senfy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hammersmith+One&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style id="checkout-extras">
+    body.checkout-body {
+      min-height: 100vh;
+      background:
+        radial-gradient(900px 420px at 100% -10%, rgba(47,125,91,.14), transparent 65%),
+        radial-gradient(700px 380px at 0 100%, rgba(11,61,46,.08), transparent 60%),
+        var(--bg);
+      display: grid;
+      place-items: center;
+      padding: 1rem .85rem 2rem;
+    }
+    .checkout-wrap { width: 100%; max-width: 460px; }
+    .checkout-head { text-align: center; margin-bottom: 1.1rem; }
+    .checkout-head .brand { justify-content: center; }
+    .checkout-head h1 { font-size: clamp(1.5rem, 5vw, 2rem); margin: 1rem 0 .35rem; letter-spacing: -.03em; }
+    .checkout-head p { margin: 0; color: var(--muted); font-size: .94rem; }
+
+    .checkout-card {
+      position: relative; overflow: hidden;
+      padding: 1.2rem;
+      border: 1px solid color-mix(in oklab, var(--primary) 22%, var(--border));
+      border-radius: 18px;
+      background: linear-gradient(160deg, var(--surface), color-mix(in oklab, var(--primary) 5%, var(--surface)));
+      box-shadow: var(--shadow);
+    }
+    .checkout-card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--green-900), var(--green-500) 60%, transparent);
+    }
+    .checkout-card > * { position: relative; z-index: 1; }
+    .checkout-card .field { margin-bottom: 1rem; }
+    .checkout-card .input { font-size: 16px; min-height: 3.1rem; }
+    .checkout-hint { margin: -.25rem 0 1rem; font-size: .8rem; color: var(--muted); }
+    .checkout-summary {
+      display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+      padding: .8rem 1rem; margin-bottom: 1.1rem;
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--primary) 9%, var(--surface));
+      border: 1px solid color-mix(in oklab, var(--primary) 25%, var(--border));
+    }
+    .checkout-summary span { color: var(--muted); font-size: .82rem; font-weight: 700; }
+    .checkout-summary strong { color: var(--primary); font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+    .checkout-card .btn-block { min-height: 3.2rem; font-size: 1rem; }
+    .checkout-error {
+      margin: .9rem 0 0; padding: .7rem .9rem; border-radius: 10px;
+      font-size: .85rem; font-weight: 700;
+      color: #b45309; background: #fffbeb; border: 1px solid #fde68b;
+    }
+    html[data-theme="dark"] .checkout-error { color: #E2B552; background: #2A2312; border-color: #5A4820; }
+    .checkout-foot { margin-top: 1.2rem; text-align: center; font-size: .8rem; color: var(--muted); }
+    .checkout-foot a { color: var(--primary); font-weight: 700; text-decoration: none; }
+    .checkout-foot a:hover { text-decoration: underline; }
+
+    .result-head { text-align: center; margin-bottom: 1rem; }
+    .result-badge {
+      width: 52px; height: 52px; margin: 0 auto .65rem;
+      display: grid; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--primary);
+      box-shadow: 0 0 0 6px color-mix(in oklab, var(--primary) 16%, transparent),
+                  0 0 22px color-mix(in oklab, var(--primary) 40%, transparent);
+    }
+    .result-badge svg { width: 25px; height: 25px; }
+    .result-head h2 { margin: 0 0 .25rem; font-size: 1.3rem; }
+    .result-head p { margin: 0; color: var(--muted); font-size: .88rem; }
+    .result-head .done-message { font-size: .95rem; font-weight: 700; color: var(--text); line-height: 1.5; }
+
+    .result-hero {
+      text-align: center; padding: 1.25rem 1rem 1.15rem; margin-bottom: .9rem;
+      border-radius: 14px;
+      background: linear-gradient(160deg, var(--green-900), var(--green-700));
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(11,61,46,.2);
+    }
+    .result-hero > span { display: block; font-size: .8rem; font-weight: 700; opacity: .82; }
+    .result-hero .points {
+      display: flex; align-items: baseline; justify-content: center; gap: .35rem;
+      margin-top: .1rem;
+    }
+    .result-hero .points strong {
+      font-size: clamp(3.6rem, 17vw, 5rem); line-height: 1;
+      font-weight: 800; letter-spacing: -.055em;
+      font-variant-numeric: tabular-nums;
+      color: #fff;
+      text-shadow: 0 0 26px rgba(255,255,255,.2);
+    }
+    .result-hero .points em {
+      font-style: normal; font-size: 1rem; font-weight: 700;
+      opacity: .72; letter-spacing: .06em;
+    }
+
+    .total-line {
+      display: flex; align-items: baseline; justify-content: center; gap: .45rem;
+      margin: 0 0 .9rem; font-size: .88rem; color: var(--muted); font-weight: 600;
+    }
+    .total-line strong { font-size: 1.35rem; color: var(--primary); font-variant-numeric: tabular-nums; }
+
+    .progress-card {
+      padding: 1rem; margin-bottom: .9rem;
+      border: 1px solid var(--border); border-radius: 14px;
+      background: var(--surface-alt);
+    }
+    .progress-top {
+      display: flex; align-items: baseline; justify-content: space-between; gap: .6rem;
+      margin-bottom: .65rem;
+    }
+    .progress-top span { font-size: .82rem; font-weight: 800; color: var(--text); }
+    .progress-top strong { font-size: .8rem; color: var(--primary); white-space: nowrap; }
+    .progress-track {
+      height: 13px; border-radius: 99px; overflow: hidden;
+      background: color-mix(in oklab, var(--primary) 15%, var(--surface));
+      box-shadow: inset 0 1px 3px rgba(15,23,42,.12);
+    }
+    .progress-fill {
+      height: 100%; width: 0; border-radius: inherit;
+      background: linear-gradient(90deg, var(--green-500), var(--primary));
+      box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 45%, transparent);
+      transition: width .6s cubic-bezier(.2,.8,.2,1);
+    }
+    .progress-legend {
+      display: flex; justify-content: space-between; margin-top: .45rem;
+      font-size: .72rem; font-weight: 700; color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .prize-ready {
+      display: block; margin: .15rem 0 .6rem; text-align: center;
+      font-size: .8rem; font-weight: 800; color: var(--primary);
+    }
+    .result-actions { display: grid; gap: .6rem; margin-top: .9rem; }
+    .redeem-code {
+      margin: .8rem 0 0; text-align: center;
+      font-size: .84rem; color: var(--muted);
+    }
+    .redeem-code strong { color: var(--text); letter-spacing: .06em; }
+    @media (prefers-reduced-motion: reduce) {
+      .checkout-card, .checkout-card * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body class="checkout-body">
+  <main class="checkout-wrap">
+    <header class="checkout-head">
+      <a class="brand" href="index.html" aria-label="Senfy início">
+        <img class="brand-logo" src="assets/suricato.png" alt="" aria-hidden="true">
+        <span class="brand-name">Senfy</span>
+      </a>
+      <h1>Registre sua compra</h1>
+      <p>Preencha os dados do pagamento para receber seus pontos.</p>
+    </header>
+
+    <form id="checkout-form" class="checkout-card" novalidate>
+      <div class="field">
+        <label for="checkout-name">Nome
+          <input class="input" id="checkout-name" type="text" placeholder="Seu nome completo" autocomplete="name" required>
+        </label>
+      </div>
+      <div class="field">
+        <label for="checkout-phone">Telefone
+          <input class="input" id="checkout-phone" type="tel" inputmode="tel" placeholder="(11) 99999-9999" autocomplete="tel" required>
+        </label>
+        <small class="checkout-hint">Usamos o telefone para identificar seu cadastro.</small>
+      </div>
+      <div class="field">
+        <label for="checkout-value">Valor da compra (R$)
+          <input class="input" id="checkout-value" type="number" min="0.01" step="0.01" placeholder="Ex.: 120,00" required>
+        </label>
+      </div>
+      <div class="checkout-summary">
+        <span>Pontos que você vai ganhar</span>
+        <strong id="checkout-preview">0 pts</strong>
+      </div>
+      <button class="btn btn-block" type="submit">Enviar e ver meus pontos</button>
+      <p class="checkout-error" id="checkout-error" role="alert" hidden></p>
+    </form>
+
+    <section id="checkout-result" class="checkout-card hidden" aria-live="polite">
+      <div class="result-head">
+        <div class="result-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>
+        </div>
+        <h2>Compra registrada!</h2>
+        <p id="result-client">Obrigado, cliente.</p>
+      </div>
+      <div class="result-hero">
+        <span>Você ganhou nesta compra</span>
+        <div class="points"><strong id="result-earned">0</strong><em>pts</em></div>
+      </div>
+      <p class="total-line">Você tem <strong id="result-total">0</strong> pontos no total</p>
+
+      <div class="progress-card">
+        <div class="progress-top">
+          <span id="result-prize">Próximo prêmio</span>
+          <strong id="result-missing">0 pts</strong>
+        </div>
+        <div class="progress-track" id="progress-track" role="progressbar" aria-label="Progresso até o próximo prêmio" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-legend">
+          <span id="progress-current">0 pts</span>
+          <span id="progress-goal">0 pts</span>
+        </div>
+      </div>
+
+      <strong class="prize-ready hidden" id="prize-ready">Prêmio disponível para resgate!</strong>
+
+      <div class="result-actions" id="normal-actions">
+        <button class="btn btn-block" type="button" id="checkout-understood">Entendido</button>
+      </div>
+      <div class="result-actions hidden" id="prize-actions">
+        <button class="btn btn-block" type="button" id="checkout-redeem">Resgatar prêmio</button>
+        <button class="btn btn-secondary btn-block" type="button" id="checkout-keep">Seguir acumulando</button>
+      </div>
+    </section>
+
+    <section id="checkout-redeemed" class="checkout-card hidden" aria-live="polite">
+      <div class="result-head">
+        <div class="result-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>
+        </div>
+        <h2>Prêmio resgatado!</h2>
+        <p id="redeemed-prize">Seu prêmio está disponível.</p>
+      </div>
+      <p class="redeem-code">Código do resgate: <strong id="redeem-code"></strong></p>
+      <div class="result-actions">
+        <button class="btn btn-block" type="button" id="redeem-done">Concluir</button>
+      </div>
+    </section>
+
+    <section id="checkout-done" class="checkout-card hidden" aria-live="polite">
+      <div class="result-head">
+        <div class="result-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+            <path d="M17 17h1"/>
+          </svg>
+        </div>
+        <h2>Tudo certo!</h2>
+        <p class="done-message">Leia o QR Code para inserir novas compras</p>
+      </div>
+    </section>
+
+    <p class="checkout-foot">Programa de fidelidade Senfy · <a href="index.html">Voltar ao site</a></p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>

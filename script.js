@@ -134,6 +134,8 @@
     .join(' ');
   window.Senfy = window.Senfy || {};
   window.Senfy.formatCustomerName = formatCustomerName;
+  const sb = window.senfySupabase || null;
+  const getStoreId = () => window.SenfyStore?.id || localStorage.getItem('senfy:active-store-id') || null;
 
   // Resumo: métricas e mapa de calor por período
   const periodLabels = {
@@ -501,9 +503,38 @@
     if (window.Senfy && typeof window.Senfy.onSalesRendered === 'function') window.Senfy.onSalesRendered(sorted);
   };
 
+  const loadSalesFromSupabase = async () => {
+    if (!sb) return;
+    try {
+      if (window.SenfyStore?.ready) await window.SenfyStore.ready;
+      const storeId = getStoreId();
+      let q = sb.from('sales').select('*').order('purchased_at', { ascending: false }).limit(500);
+      if (storeId) q = q.eq('store_id', storeId);
+      const { data, error } = await q;
+      if (error) throw error;
+      if (Array.isArray(data)) {
+        if (data.length || storeId) {
+          sales = data.map((s) => ({
+            id: s.id,
+            customer: formatCustomerName(s.customer_name || 'Cliente'),
+            customerPhone: s.customer_phone || '',
+            date: s.purchased_at ? new Date(s.purchased_at).toISOString().slice(0, 16) : '',
+            value: Number(s.value || 0),
+            points: Number(s.points || 0)
+          }));
+          renderSales();
+        }
+      }
+    } catch (err) {
+      /* mantém dados locais */
+    }
+  };
+  window.Senfy.reloadSales = loadSalesFromSupabase;
+
   if (saleForm && salesTableBody) {
     resetSaleForm();
     renderSales();
+    loadSalesFromSupabase();
 
     saleValueInput.addEventListener('input', updateSalePoints);
     if (saleCustomerInput) {
@@ -512,7 +543,7 @@
       });
     }
 
-    saleForm.addEventListener('submit', (event) => {
+    saleForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const id = saleIdInput.value;
       const payload = {
@@ -526,10 +557,38 @@
         return;
       }
 
-      if (id) {
-        sales = sales.map((sale) => (sale.id === id ? { ...sale, ...payload } : sale));
+      if (sb) {
+        try {
+          const storeId = getStoreId();
+          if (id) {
+            let uq = sb.from('sales').update({
+              customer_name: payload.customer,
+              value: payload.value,
+              points: payload.points,
+              purchased_at: new Date(payload.date).toISOString()
+            }).eq('id', id);
+            if (storeId) uq = uq.eq('store_id', storeId);
+            const { error } = await uq;
+            if (error) throw error;
+            sales = sales.map((sale) => (sale.id === id ? { ...sale, ...payload } : sale));
+          } else {
+            const { data, error } = await sb.from('sales').insert({
+              store_id: storeId || null,
+              customer_name: payload.customer,
+              value: payload.value,
+              points: payload.points,
+              purchased_at: new Date(payload.date).toISOString()
+            }).select('*').single();
+            if (error) throw error;
+            sales.push({ id: data.id, ...payload });
+          }
+        } catch (err) {
+          if (id) sales = sales.map((sale) => (sale.id === id ? { ...sale, ...payload } : sale));
+          else sales.push({ id: uid(), ...payload });
+        }
       } else {
-        sales.push({ id: uid(), ...payload });
+        if (id) sales = sales.map((sale) => (sale.id === id ? { ...sale, ...payload } : sale));
+        else sales.push({ id: uid(), ...payload });
       }
       renderSales();
       resetSaleForm();
@@ -537,7 +596,7 @@
 
     saleCancel.addEventListener('click', resetSaleForm);
 
-    salesTableBody.addEventListener('click', (event) => {
+    salesTableBody.addEventListener('click', async (event) => {
       const btn = event.target.closest('button[data-action]');
       if (!btn) return;
       const { action, id } = btn.dataset;
@@ -560,6 +619,14 @@
       if (action === 'delete-sale') {
         const ok = window.confirm(`Excluir a venda de ${sale.customer} (${formatCurrency(sale.value)})?`);
         if (!ok) return;
+        if (sb) {
+          try {
+            const storeId = getStoreId();
+            let dq = sb.from('sales').delete().eq('id', id);
+            if (storeId) dq = dq.eq('store_id', storeId);
+            await dq;
+          } catch (err) { /* segue com estado local */ }
+        }
         sales = sales.filter((item) => item.id !== id);
         if (saleIdInput.value === id) resetSaleForm();
         renderSales();
@@ -742,12 +809,53 @@
     ruleMaxInput.focus();
   };
 
+  const loadRulesFromSupabase = async () => {
+    if (!sb) return;
+    try {
+      if (window.SenfyStore?.ready) await window.SenfyStore.ready;
+      const storeId = getStoreId();
+      let q = sb.from('rules').select('*').order('max_value', { ascending: true });
+      if (storeId) q = q.eq('store_id', storeId);
+      const { data, error } = await q;
+      if (error) throw error;
+      if (Array.isArray(data) && (data.length || storeId)) {
+        rules = data.map((r) => ({ id: r.id, maxValue: Number(r.max_value), points: Number(r.points), description: r.description || '' }));
+        renderRules();
+        updateSalePoints();
+      }
+    } catch (err) { /* mantém local */ }
+  };
+
+  const loadPrizesFromSupabase = async () => {
+    if (!sb) return;
+    try {
+      if (window.SenfyStore?.ready) await window.SenfyStore.ready;
+      const storeId = getStoreId();
+      let q = sb.from('prizes').select('*').order('points', { ascending: true });
+      if (storeId) q = q.eq('store_id', storeId);
+      const { data, error } = await q;
+      if (error) throw error;
+      if (Array.isArray(data) && (data.length || storeId)) {
+        prizes = data.map((p) => ({
+          id: p.id,
+          description: p.description || '',
+          comment: p.comment || '',
+          start: p.start_date || '',
+          end: p.end_date || '',
+          points: Number(p.points || 0)
+        }));
+        renderPrizes();
+      }
+    } catch (err) { /* mantém local */ }
+  };
+
   if (ruleForm && rulesGrid) {
     renderRules();
+    loadRulesFromSupabase();
 
     ruleNewBtn?.addEventListener('click', openRuleModal);
 
-    ruleForm.addEventListener('submit', (event) => {
+    ruleForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const id = ruleIdInput.value;
       const maxValue = parseFloat(ruleMaxInput.value);
@@ -755,10 +863,28 @@
       const description = ruleDescriptionInput.value.trim() || `Compras até ${formatCurrency(maxValue)}`;
       if (Number.isNaN(maxValue) || Number.isNaN(points)) return;
 
-      if (id) {
-        rules = rules.map((r) => (r.id === id ? { ...r, maxValue, points, description } : r));
+      if (sb) {
+        try {
+          const storeId = getStoreId();
+          const row = { max_value: maxValue, points, description, active: true, ...(storeId ? { store_id: storeId } : {}) };
+          if (id) {
+            let uq = sb.from('rules').update(row).eq('id', id);
+            if (storeId) uq = uq.eq('store_id', storeId);
+            const { error } = await uq;
+            if (error) throw error;
+            rules = rules.map((r) => (r.id === id ? { ...r, maxValue, points, description } : r));
+          } else {
+            const { data, error } = await sb.from('rules').insert(row).select('*').single();
+            if (error) throw error;
+            rules.push({ id: data.id, maxValue, points, description });
+          }
+        } catch (err) {
+          if (id) rules = rules.map((r) => (r.id === id ? { ...r, maxValue, points, description } : r));
+          else rules.push({ id: uid(), maxValue, points, description });
+        }
       } else {
-        rules.push({ id: uid(), maxValue, points, description });
+        if (id) rules = rules.map((r) => (r.id === id ? { ...r, maxValue, points, description } : r));
+        else rules.push({ id: uid(), maxValue, points, description });
       }
       renderRules();
       resetRuleForm();
@@ -772,7 +898,7 @@
       closeModal();
     });
 
-    rulesGrid.addEventListener('click', (event) => {
+    rulesGrid.addEventListener('click', async (event) => {
       const btn = event.target.closest('button[data-action]');
       if (!btn) return;
       const { action, id } = btn.dataset;
@@ -797,6 +923,7 @@
       if (action === 'delete-rule') {
         const ok = window.confirm(`Excluir a regra "Até ${formatCurrency(rule.maxValue)}"?`);
         if (!ok) return;
+        if (sb) { try { const storeId = getStoreId(); let dq = sb.from('rules').delete().eq('id', id); if (storeId) dq = dq.eq('store_id', storeId); await dq; } catch (err) { /* local */ } }
         rules = rules.filter((r) => r.id !== id);
         if (ruleIdInput.value === id) resetRuleForm();
         renderRules();
@@ -889,10 +1016,11 @@
 
   if (prizeForm && prizesGrid) {
     renderPrizes();
+    loadPrizesFromSupabase();
 
     prizeNewBtn?.addEventListener('click', openPrizeModal);
 
-    prizeForm.addEventListener('submit', (event) => {
+    prizeForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const id = prizeIdInput.value;
       const payload = {
@@ -904,10 +1032,36 @@
       };
       if (!payload.description || Number.isNaN(payload.points)) return;
 
-      if (id) {
-        prizes = prizes.map((p) => (p.id === id ? { ...p, ...payload } : p));
+      if (sb) {
+        try {
+          const storeId = getStoreId();
+          const row = {
+            description: payload.description,
+            comment: payload.comment,
+            start_date: payload.start || null,
+            end_date: payload.end || null,
+            points: payload.points,
+            active: true,
+            ...(storeId ? { store_id: storeId } : {})
+          };
+          if (id) {
+            let uq = sb.from('prizes').update(row).eq('id', id);
+            if (storeId) uq = uq.eq('store_id', storeId);
+            const { error } = await uq;
+            if (error) throw error;
+            prizes = prizes.map((p) => (p.id === id ? { ...p, ...payload } : p));
+          } else {
+            const { data, error } = await sb.from('prizes').insert(row).select('*').single();
+            if (error) throw error;
+            prizes.push({ id: data.id, ...payload });
+          }
+        } catch (err) {
+          if (id) prizes = prizes.map((p) => (p.id === id ? { ...p, ...payload } : p));
+          else prizes.push({ id: uid(), ...payload });
+        }
       } else {
-        prizes.push({ id: uid(), ...payload });
+        if (id) prizes = prizes.map((p) => (p.id === id ? { ...p, ...payload } : p));
+        else prizes.push({ id: uid(), ...payload });
       }
       renderPrizes();
       resetPrizeForm();
@@ -920,7 +1074,7 @@
       closeModal();
     });
 
-    prizesGrid.addEventListener('click', (event) => {
+    prizesGrid.addEventListener('click', async (event) => {
       const btn = event.target.closest('button[data-action]');
       if (!btn) return;
       const { action, id } = btn.dataset;
@@ -947,6 +1101,7 @@
       if (action === 'delete-prize') {
         const ok = window.confirm(`Excluir o prêmio "${prize.description}"?`);
         if (!ok) return;
+        if (sb) { try { const storeId = getStoreId(); let dq = sb.from('prizes').delete().eq('id', id); if (storeId) dq = dq.eq('store_id', storeId); await dq; } catch (err) { /* local */ } }
         prizes = prizes.filter((p) => p.id !== id);
         if (prizeIdInput.value === id) resetPrizeForm();
         renderPrizes();
