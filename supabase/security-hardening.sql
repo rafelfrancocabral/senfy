@@ -30,10 +30,15 @@ drop policy if exists "anon insert prizes" on public.prizes;
 drop policy if exists "anon update prizes" on public.prizes;
 drop policy if exists "anon delete prizes" on public.prizes;
 
-drop policy if exists "anon read settings" on public.settings;
-drop policy if exists "anon insert settings" on public.settings;
-drop policy if exists "anon update settings" on public.settings;
-drop policy if exists "anon delete settings" on public.settings;
+do $$
+begin
+  if to_regclass('public.settings') is not null then
+    execute 'drop policy if exists "anon read settings" on public.settings';
+    execute 'drop policy if exists "anon insert settings" on public.settings';
+    execute 'drop policy if exists "anon update settings" on public.settings';
+    execute 'drop policy if exists "anon delete settings" on public.settings';
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- 2) GARANTIR RLS ATIVO
@@ -42,7 +47,7 @@ alter table public.customers enable row level security;
 alter table public.sales enable row level security;
 alter table public.rules enable row level security;
 alter table public.prizes enable row level security;
-alter table public.settings enable row level security;
+alter table if exists public.settings enable row level security;
 
 -- Tabelas multi-tenant (ajuste se nomes diferirem)
 alter table if exists public.stores enable row level security;
@@ -150,16 +155,21 @@ create policy "owner delete prizes" on public.prizes
   for delete to authenticated
   using (public.is_store_owner(store_id));
 
--- SETTINGS (se usar store_id; caso contrário, restrinja por key/owner separadamente)
-drop policy if exists "owner select settings" on public.settings;
-drop policy if exists "owner insert settings" on public.settings;
-drop policy if exists "owner update settings" on public.settings;
-drop policy if exists "owner delete settings" on public.settings;
--- Se settings tiver store_id, descomente:
--- create policy "owner select settings" on public.settings for select to authenticated using (public.is_store_owner(store_id));
--- create policy "owner insert settings" on public.settings for insert to authenticated with check (public.is_store_owner(store_id));
--- create policy "owner update settings" on public.settings for update to authenticated using (public.is_store_owner(store_id)) with check (public.is_store_owner(store_id));
--- create policy "owner delete settings" on public.settings for delete to authenticated using (public.is_store_owner(store_id));
+-- SETTINGS (se existir; se usar store_id, ajuste as policies abaixo)
+do $$
+begin
+  if to_regclass('public.settings') is not null then
+    execute 'drop policy if exists "owner select settings" on public.settings';
+    execute 'drop policy if exists "owner insert settings" on public.settings';
+    execute 'drop policy if exists "owner update settings" on public.settings';
+    execute 'drop policy if exists "owner delete settings" on public.settings';
+    -- Se settings tiver store_id, descomente e ajuste:
+    -- execute $p$create policy "owner select settings" on public.settings for select to authenticated using (public.is_store_owner(store_id))$p$;
+    -- execute $p$create policy "owner insert settings" on public.settings for insert to authenticated with check (public.is_store_owner(store_id))$p$;
+    -- execute $p$create policy "owner update settings" on public.settings for update to authenticated using (public.is_store_owner(store_id)) with check (public.is_store_owner(store_id))$p$;
+    -- execute $p$create policy "owner delete settings" on public.settings for delete to authenticated using (public.is_store_owner(store_id))$p$;
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- 5) STORES: dono gerencia; público só lê dados mínimos da loja ativa via VIEW/RPC
