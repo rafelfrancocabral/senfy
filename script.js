@@ -461,7 +461,10 @@
   const editIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
   const trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
 
-  const normalizeSaleCustomer = (value) => stripAccents(formatCustomerName(value)).toLowerCase();
+  const normalizeSaleCustomer = (value) => formatCustomerName(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
   const getSalesCountByCustomer = (name) => {
     const key = normalizeSaleCustomer(name);
     if (!key) return 0;
