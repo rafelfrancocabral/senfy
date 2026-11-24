@@ -513,6 +513,16 @@
     html[data-theme="dark"] .badge-scan { color: var(--sun-ink); }
     html[data-theme="dark"] .data-band { background: linear-gradient(135deg, #123524, #0B3D2E); }
     html[data-theme="dark"] .qr-screen { background: #fff; color: var(--ink); }
+    html[data-theme="dark"] .signal,
+    html[data-theme="dark"] .vs-card.new .vs-list li,
+    html[data-theme="dark"] .nf-bridge,
+    html[data-theme="dark"] .nf-result,
+    html[data-theme="dark"] .faq-item summary { color: var(--text); }
+    html[data-theme="dark"] .vs-card.new .vs-list li::before { color: var(--mint); }
+    html[data-theme="dark"] .nf-mq span { color: color-mix(in oklab, var(--text) 26%, transparent); }
+    html[data-theme="dark"] .nf-mq span:hover { color: var(--mint); }
+    html[data-theme="dark"] .niche-badge { color: var(--sun); background: #2A2312; }
+    html[data-theme="dark"] .faq-item:not([open]) summary::after { color: var(--sun); }
 
     /* Comparativo: antes x depois */
     .vs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
